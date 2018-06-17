@@ -119,7 +119,6 @@ If you Wish to build
 ## Credits
 
 | **Contributor** |
-<br/>
 | [NewtonMunene](https://github.com/newtonmunene99) |
 
 ## License
