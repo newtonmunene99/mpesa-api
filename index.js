@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { init } from './api/mpesa';
+import { init } from './api/start';
 import { keys, routes } from './api/utils';
 
 export class mpesa {
