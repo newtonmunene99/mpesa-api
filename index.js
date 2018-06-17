@@ -10,7 +10,7 @@ export class mpesa {
      * @description Use this API to simplify Mpesa Transactions.
      * @see {@link https://developer.safaricom.co.ke/apis }
      * @param  {object} credentials An Object containing key,secret,securitycredential and certificatepath as the properties.
-     * @param  {string} environment                        A string. Either production or sandbox. Case Sensitive.
+     * @param  {string} environment A string. Either production or sandbox. Case Sensitive.
      */
     constructor(credentials, environment) {
         const {
