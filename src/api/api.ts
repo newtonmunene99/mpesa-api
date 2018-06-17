@@ -1,14 +1,14 @@
-import axios from 'axios';
-import crypto from 'crypto';
-import path from 'path';
-import fs from 'fs';
-import { routes } from './utils';
-import constants from 'constants';
+import Axios from 'axios';
+import * as crypto from 'crypto';
+import * as path from 'path';
+import * as fs from 'fs';
+import * as constants from 'constants';
+import { routes } from './helpers';
 
-export var init = {
+export var api = {
     oauth: (key, secret, environment) => {
         return new Promise((resolve, reject) => {
-            axios({
+            Axios({
                 method: 'get',
                 url: '' + routes.base + '.' + environment + routes.oauth,
                 headers: {
@@ -38,11 +38,13 @@ export var init = {
                 certpath = String(fs.readFileSync(certificatepath));
             }
             var encryption = crypto
-                .publicEncrypt({
-                    key: certpath,
-                    padding: constants.RSA_PKCS1_PADDING,
+                .publicEncrypt(
+                    {
+                        key: certpath,
+                        padding: constants.RSA_PKCS1_PADDING
+                    },
                     buffer
-                })
+                )
                 .toString('base64');
             resolve(encryption);
         });

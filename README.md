@@ -61,8 +61,6 @@ const environment = 'production';
 
 ## Methods and Api Calls
 
-Docs Coming Soon
-
 #### Business to Business
 
 Docs Coming Soon
@@ -87,6 +85,7 @@ Docs Coming Soon
 
 -   [x] Basic Documentation
 -   [x] Deploy to Npm
+-   [x] Migrate to Typescript
 -   [ ] Detailed Documentation
 -   [ ] Better Support for es5
 -   [ ] Unit tests
@@ -102,8 +101,7 @@ If you Wish to build
 2.  CD into repo
 3.  run `npm install` to install dependencies
 4.  run `npm run build` to build
-5.  run `npm run start` to run package
-6.  `npm run dev` has some issues with nodemon and babel, please refrain for now. Or fix it if you can.
+5.  run `npm run start` to run package in development mode
 
 ## Contributing
 

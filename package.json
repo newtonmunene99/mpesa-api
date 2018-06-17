@@ -2,11 +2,12 @@
     "name": "mpesa-api",
     "version": "1.0.0",
     "description": "An NPM Module built with NodeJs to help you with M-Pesa Daraja API calls.",
-    "main": "index.js",
+    "main": "lib/index",
+    "types": "lib/index",
+    "homepage": "https://github.com/newtonmunene99/mpesa-api/",
     "scripts": {
-        "build": "rimraf dist/ && babel ./ --out-dir dist/ --ignore ./node_modules,./.babelrc,./package.json,./npm-debug.log --copy-files",
-        "dev": "npm run build && nodemon dist/index.js",
-        "start": "npm run build && node dist/index.js"
+        "start": "nodemon --exec ./node_modules/.bin/ts-node -- ./src/index",
+        "build": "tsc"
     },
     "keywords": [
         "mpesa",
@@ -24,12 +25,21 @@
         "request": "^2.87.0"
     },
     "devDependencies": {
-        "babel-cli": "^6.26.0",
-        "babel-preset-env": "^1.7.0",
-        "babel-register": "^6.26.0",
-        "nodemon": "^1.17.5",
+        "@types/mocha": "^5.2.2",
+        "@types/node": "^10.3.3",
         "eslint": "^4.19.1",
-        "jest": "^23.1.0",
-        "rimraf": "^2.6.2"
+        "eslint-config-google": "^0.9.1",
+        "mocha": "^5.2.0",
+        "nodemon": "^1.17.5",
+        "ts-node": "^6.1.1",
+        "typescript": "^2.9.2",
+        "typescript-eslint-parser": "^16.0.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/newtonmunene99/mpesa-api.git"
+    },
+    "bugs": {
+        "url": "https://github.com/newtonmunene99/mpesa-api/issues"
     }
 }
