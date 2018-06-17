@@ -4,7 +4,6 @@
     "description": "An NPM Module built with NodeJs to help you with M-Pesa Daraja API calls.",
     "main": "index.js",
     "scripts": {
-        "lint": "eslint src",
         "build": "rimraf dist/ && babel ./ --out-dir dist/ --ignore ./node_modules,./.babelrc,./package.json,./npm-debug.log --copy-files",
         "dev": "npm run build && nodemon dist/index.js",
         "start": "npm run build && node dist/index.js"

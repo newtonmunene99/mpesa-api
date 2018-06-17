@@ -1,5 +1,9 @@
 # Mpesa-Api
 
+:zap: :bomb: :fire: :fire: :bomb: :zap:
+
+**An NPM Module built with NodeJs to help you with M-Pesa Daraja API calls.**
+
 ## Prerequisites
 
 1.  Node 6+.
@@ -55,6 +59,30 @@ const environment = 'sandbox';
 const environment = 'production';
 ```
 
+## Methods and Api Calls
+
+Docs Coming Soon
+
+#### Business to Business
+
+Docs Coming Soon
+
+#### b2c
+
+Docs Coming Soon
+
+#### Account Balance
+
+Docs Coming Soon
+
+#### Lipa na mpesa online
+
+Docs Coming Soon
+
+#### Lipa na mpesa online query
+
+Docs Coming Soon
+
 ## RoadMap
 
 -   [x] Basic Documentation
@@ -66,12 +94,27 @@ const environment = 'production';
 -   [ ] Reduce functions
 -   [ ] Validators for inputs
 
+## Build
+
+If you Wish to build
+
+1.  Clone this repo
+2.  CD into repo
+3.  run `npm install` to install dependencies
+4.  run `npm run build` to build
+5.  run `npm run start` to run package
+6.  `npm run dev` has some issues with nodemon and babel, please refrain for now. Or fix it if you can.
+
 ## Contributing
 
 1.  Create your feature branch: `git checkout -b my-new-feature`
 2.  Commit your changes: `git commit -m 'Add some feature'`
 3.  Push to the branch: `git push origin my-new-feature`
 4.  Submit a pull request.
+
+## Disclaimer
+
+**Please note that the certificate included is not for production use and should not be used for whatever reason other than testing. Obtain your own from Safaricom. I would also like to point out that it does not belong to me or to my organization and I am not liable for any actions taken using it.**
 
 ## Credits
 
