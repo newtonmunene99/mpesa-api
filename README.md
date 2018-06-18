@@ -32,8 +32,11 @@ You Will need a few things before development.
 ```javascript
 // import package
 import { mpesa } from 'mpesa-api';
+//OR
+const mpesa = require('mpesa-api').mpesa;
+
 // create a new instance of the api
-const mpesa = new mpesa(credentials, environment);
+const Mpesa = new mpesa(credentials, environment);
 ```
 
 A moment to explain the above. credentials should be an object containing key,secret,securitycredential and certificatepath as the properties.
@@ -65,23 +68,320 @@ const environment = 'production';
 
 #### Business to Business
 
-Docs Coming Soon
+This API enables Business to Business (B2B) transactions between a business and another business. Use of this API requires a valid and verified B2B M-Pesa short code for the business initiating the transaction and the both businesses involved in the transaction.
 
-#### b2c
+```javascript
+Mpesa.b2b(
+    'Initiator Name',
+    'Amount',
+    'Party A',
+    'Party B',
+    'Account Reference',
+    'Queue Timeout URL',
+    'Result URL',
+    'Command ID' /* OPTIONAL, SEE OPTIONS */,
+    'Sender Identifier Type' /* OPTIONAL */,
+    'Reciever Identifier Type' /* OPTIONAL */,
+    'Remarks' /* OPTIONAL */
+)
+    .then(response => {
+        //Do something with the response
+        //eg
+        console.log(response);
+    })
+    .catch(error => {
+        //Do something with the error;
+        //eg
+        console.error(error);
+    });
+```
 
-Docs Coming Soon
+1.  Initiator - This is the credential/username used to authenticate the transaction request.
+2.  CommandID - Unique command for each transaction type, default is `MerchantToMerchantTransfer` possible values are: `BusinessPayBill`, `MerchantToMerchantTransfer`, `MerchantTransferFromMerchantToWorking`, `MerchantServicesMMFAccountTransfer`, `AgencyFloatAdvance`
+3.  Amount - The amount being transacted.
+4.  PartyA - Organization’s short code initiating the transaction.
+5.  SenderIdentifier - Type of organization sending the transaction. Deault is 4
+6.  PartyB - Organization’s short code receiving the funds being transacted.
+7.  RecieverIdentifierType - Type of organization receiving the funds being transacted. Default is 4
+8.  Remarks - Comments that are sent along with the transaction.
+9.  QueueTimeOutURL - The path that stores information of time out transactions.it should be properly validated to make sure that it contains the port, URI and domain name or publicly available IP.
+10. ResultURL - The path that receives results from M-Pesa it should be properly validated to make sure that it contains the port, URI and domain name or publicly available IP.
+11. AccountReference - Account Reference mandatory for “BusinessPaybill” CommandID.
+
+#### Business to Customer (B2C)
+
+This API enables Business to Customer (B2C) transactions between a company and customers who are the end-users of its products or services. Use of this API requires a valid and verified B2C M-Pesa Short code.
+
+```javascript
+Mpesa.b2c(
+    'Initiator Name',
+    'Amount',
+    'Party A',
+    'Party B',
+    'Queue Timeout URL',
+    'Result URL',
+    'Command ID' /* OPTIONAL */,
+    'Occasion' /* OPTIONAL */,
+    'Remarks' /* OPTIONAL */
+)
+    .then(response => {
+        //Do something with the response
+        //eg
+        console.log(response);
+    })
+    .catch(error => {
+        //Do something with the error;
+        //eg
+        console.error(error);
+    });
+```
+
+1.  InitiatorName - This is the credential/username used to authenticate the transaction request.
+2.  CommandID - Unique command for each transaction type e.g. SalaryPayment, BusinessPayment, PromotionPayment
+3.  Amount - The amount being transacted
+4.  PartyA - Organization’s shortcode initiating the transaction.
+5.  PartyB - Phone number receiving the transaction
+6.  Remarks - Comments that are sent along with the transaction.
+7.  QueueTimeOutURL - The timeout end-point that receives a timeout response.
+8.  ResultURL - The end-point that receives the response of the transaction
+9.  Occasion - Optional
+
+#### C2B
+
+This API enables Paybill and Buy Goods merchants to integrate to M-Pesa and receive real time payments notifications.
+
+##### Register
+
+The C2B Register URL API registers the 3rd party’s confirmation and validation URLs to M-Pesa ; which then maps these URLs to the 3rd party shortcode. Whenever M-Pesa receives a transaction on the shortcode, M-Pesa triggers a validation request against the validation URL and the 3rd party system responds to M-Pesa with a validation response (either a success or an error code). The response expected is the success code the 3rd party
+
+M-Pesa completes or cancels the transaction depending on the validation response it receives from the 3rd party system. A confirmation request of the transaction is then sent by M-Pesa through the confirmation URL back to the 3rd party which then should respond with a success acknowledging the confirmation.
+
+```javascript
+Mpesa.c2bregister(
+    'Short Code',
+    'Confirmation URL',
+    'Validation URL',
+    'Response Type' /* OPTIONAL */
+)
+    .then(response => {
+        //Do something with the response
+        //eg
+        console.log(response);
+    })
+    .catch(error => {
+        //Do something with the error;
+        //eg
+        console.error(error);
+    });
+```
+
+1.  ShortCode - The short code of the organization.
+2.  ResponseType - Default response type for timeout.
+3.  ConfirmationURL- Confirmation URL for the client.
+4.  ValidationURL - Validation URL for the client.
+
+##### Simulate
+
+```javascript
+Mpesa.c2bsimulate(
+    'Short Code',
+    'Amount',
+    'Msisdn',
+    'Command ID' /* OPTIONAL */,
+    'Bill Reference Number' /* OPTIONAL */
+)
+    .then(response => {
+        //Do something with the response
+        //eg
+        console.log(response);
+    })
+    .catch(error => {
+        //Do something with the error;
+        //eg
+        console.error(error);
+    });
+```
+
+1.  ShortCode - 6 digit M-Pesa Till Number or PayBill Number
+2.  CommandID - Unique command for each transaction type. Default is `CustomerPayBillOnline`
+3.  Amount - The amount been transacted.
+4.  MSISDN - MSISDN (phone number) sending the transaction, start with country code without the plus(+) sign.
+5.  BillRefNumber - Bill Reference Number (Optional).
 
 #### Account Balance
 
-Docs Coming Soon
+The Account Balance API requests for the account balance of a shortcode.
+
+```javascript
+Mpesa.accountBalance(
+    'Initiator Name',
+    'Party A',
+    'Identifier Type',
+    'Queue Timeout URL',
+    'Result URL',
+    'Command ID' /* OPTIONAL */,
+    'Remarks' /* OPTIONAL */
+)
+    .then(response => {
+        //Do something with the response
+        //eg
+        console.log(response);
+    })
+    .catch(error => {
+        //Do something with the error;
+        //eg
+        console.error(error);
+    });
+```
+
+1.  Initiator - This is the credential/username used to authenticate the transaction request.
+2.  CommandID - A unique command passed to the M-Pesa system. Default is `AccountBalance`
+3.  PartyB - The shortcode of the organisation receiving the transaction.
+4.  ReceiverIdentifierType - Type of the organisation receiving the transaction.
+5.  Remarks - Comments that are sent along with the transaction.
+6.  QueueTimeOutURL - The timeout end-point that receives a timeout message.
+7.  ResultURL - The end-point that receives a successful transaction.
+
+#### Transaction Status
+
+Transaction Status API checks the status of a B2B, B2C and C2B APIs transactions.
+
+```javascript
+Mpesa.transactionStatus(
+    'Initiator',
+    'Transaction ID',
+    'Party A',
+    'Identifier Type',
+    'Result URL',
+    'Queue Timeout URL',
+    'Command ID' /* OPTIONAL */,
+    'Remarks' /* OPTIONAL */,
+    'Occasion' /* OPTIONAL */
+)
+    .then(response => {
+        //Do something with the response
+        //eg
+        console.log(response);
+    })
+    .catch(error => {
+        //Do something with the error;
+        //eg
+        console.error(error);
+    });
+```
+
+1.  Initiator - The name of Initiator to initiating the request.
+2.  CommandID - Unique command for each transaction type, possible values are: `TransactionStatusQuery`.
+3.  TransactionID - Organization Receiving the funds.
+4.  Party A - Organization /MSISDN sending the transaction.
+5.  IdentifierType - Type of organization receiving the transaction.
+6.  ResultURL - The path that stores information of transaction.
+7.  QueueTimeOutURL - The path that stores information of time out transaction.
+8.  Remarks - Comments that are sent along with the transaction.
+9.  Occasion - Optional.
 
 #### Lipa na mpesa online
 
-Docs Coming Soon
+Lipa na M-Pesa Online Payment API is used to initiate a M-Pesa transaction on behalf of a customer using STK Push. This is the same technique mySafaricom App uses whenever the app is used to make payments.
+
+```javascript
+Mpesa.lipanampesa(
+    'Business Short Code',
+    'Amount',
+    'Party A',
+    'Phone Number',
+    'CallBack URL',
+    'Account Reference',
+    'Lipa Na Mpesa Pass Key',
+    'Transaction Type' /* OPTIONAL */,
+    'Transaction Description' /* OPTIONAL */
+)
+    .then(response => {
+        //Do something with the response
+        //eg
+        console.log(response);
+    })
+    .catch(error => {
+        //Do something with the error;
+        //eg
+        console.error(error);
+    });
+```
+
+1.  BusinessShortCode - The organization shortcode used to receive the transaction.
+2.  Amount - The amount to be transacted.
+3.  PartyA - The MSISDN sending the funds.
+4.  PartyB - The organization shortcode receiving the funds. Default is the BusinessShorCode.
+5.  PhoneNumber - The MSISDN sending the funds.
+6.  CallBackURL - The url to where responses from M-Pesa will be sent to.
+7.  AccountReference - Used with M-Pesa PayBills.
+8.  TransactionDesc - A description of the transaction.
+9.  passKey - Lipa Na Mpesa Pass Key.
+10. Transaction Type - Default is `CustomerPayBillOnline`
 
 #### Lipa na mpesa online query
 
-Docs Coming Soon
+```javascript
+Mpesa.lipanampesaquery(
+    'Business Short Code',
+    'Checkout Request ID',
+    'Lipa Na Mpesa Pass Key'
+)
+    .then(response => {
+        //Do something with the response
+        //eg
+        console.log(response);
+    })
+    .catch(error => {
+        //Do something with the error;
+        //eg
+        console.error(error);
+    });
+```
+
+1.  BusinessShortCode - Business Short Code
+2.  CheckoutRequestID - Checkout RequestID
+3.  Lipa Na Mpesa Pass Key
+
+#### Reversal
+
+Reverses a B2B, B2C or C2B M-Pesa transaction.
+
+```javascript
+Mpesa.reversal(
+    'Initiator',
+    'Transaction ID',
+    'Amount',
+    'Reciever Party',
+    'Result URL',
+    'Queue Timeout URL',
+    'Command ID' /* OPTIONAL */,
+    'Reciever Identifier Type' /* OPTIONAL */,
+    'Remarks' /* OPTIONAL */,
+    'Ocassion' /* OPTIONAL */
+)
+    .then(response => {
+        //Do something with the response
+        //eg
+        console.log(response);
+    })
+    .catch(error => {
+        //Do something with the error;
+        //eg
+        console.error(error);
+    });
+```
+
+1.  Initiator - This is the credential/username used to authenticate the transaction request.
+2.  TransactionID - Organization Receiving the funds.
+3.  Amount - The Amount To Be Reversed
+4.  PartyA - Organization/MSISDN sending the transaction.
+5.  RecieverIdentifierType - Type of organization receiving the transaction. Default is `11`
+6.  ResultURL - The path that stores information of transaction.
+7.  QueueTimeOutURL - The path that stores information of time out transaction.
+8.  Remarks - Comments that are sent along with the transaction.
+9.  Occasion - Optional.
+10. Command ID - Default is `TransactionReversal`
 
 ## RoadMap
 

@@ -27,7 +27,7 @@ export class mpesa {
     securitycredential: any;
     certificatepath: any;
     environment: string;
-    constructor(credentials, environment) {
+    constructor(credentials: any, environment: string) {
         this.key = credentials.key;
         this.secret = credentials.secret;
         this.securitycredential = credentials.securitycredential;
@@ -80,7 +80,7 @@ export class mpesa {
      * @see {@link https://developer.safaricom.co.ke/docs?javascript#b2c-api }
      * @param  {string} InitiatorName This is the credential/username used to authenticate the transaction request.
      * @param  {string} CommandID  Unique command for each transaction type e.g. SalaryPayment, BusinessPayment, PromotionPayment.
-     * @param  {string} Amount The amount being transacted
+     * @param  {number} Amount The amount being transacted
      * @param  {string} PartyA Organization’s shortcode initiating the transaction.
      * @param  {string} PartyB Phone number receiving the transaction
      * @param  {string} Remarks Comments that are sent along with the transaction.
@@ -89,15 +89,15 @@ export class mpesa {
      *  @param  {string} Occasion Optional
      */
     b2c(
-        InitiatorName,
-        CommandID,
-        Amount,
-        PartyA,
-        PartyB,
-        Remarks,
-        QueueTimeOutURL,
-        ResultURL,
-        Occasion
+        InitiatorName: string,
+        Amount: number,
+        PartyA: string,
+        PartyB: string,
+        QueueTimeOutURL: string,
+        ResultURL: string,
+        CommandID: string = 'BusinessPayment',
+        Occasion: string = 'Business To Customer Request',
+        Remarks: string = 'Business To Customer Request'
     ) {
         return new Promise((resolve, reject) => {
             const data = {
@@ -136,29 +136,29 @@ export class mpesa {
      * @see {@link https://developer.safaricom.co.ke/docs?javascript#b2b-api }
      * @param  {string} InitiatorName This is the credential/username used to authenticate the transaction request.
      * @param  {string} CommandID  Unique command for each transaction type, possible values are: BusinessPayBill, MerchantToMerchantTransfer, MerchantTransferFromMerchantToWorking, MerchantServicesMMFAccountTransfer, AgencyFloatAdvance.
-     * @param  {string} Amount The amount being transacted
+     * @param  {number} Amount The amount being transacted
      * @param  {string} PartyA Organization’s shortcode initiating the transaction.
      * @param  {string} PartyB Organization’s short code receiving the funds being transacted.
-     *  @param  {string} SenderIdentifierType Type of organization sending the transaction.
-     *  @param  {string} RecieverIdentifierType Type of organization receiving the funds being transacted.
+     *  @param  {number} SenderIdentifierType Type of organization sending the transaction.
+     *  @param  {number} RecieverIdentifierType Type of organization receiving the funds being transacted.
      * @param  {string} Remarks Comments that are sent along with the transaction.
      *  @param  {string} QueueTimeOutURL The path that stores information of time out transactions.it should be properly validated to make sure that it contains the port, URI and domain name or publicly available IP.
      * @param  {string} ResultURL  The path that receives results from M-Pesa it should be properly validated to make sure that it contains the port, URI and domain name or publicly available IP.
-     *  @param  {string} AccountReference Account Reference mandatory for “BusinessPaybill” CommandID.
-     * @returns {Promise}
+     *  @param  {any} AccountReference Account Reference mandatory for “BusinessPaybill” CommandID.
+     * @returns {Promise} Promise
      */
     b2b(
-        InitiatorName,
-        CommandID,
-        SenderIdentifierType,
-        RecieverIdentifierType,
-        Amount,
-        PartyA,
-        PartyB,
-        AccountReference,
-        Remarks,
-        QueueTimeOutURL,
-        ResultURL
+        InitiatorName: string,
+        Amount: number,
+        PartyA: string,
+        PartyB: string,
+        AccountReference: any,
+        QueueTimeOutURL: string,
+        ResultURL: string,
+        CommandID: string = 'MerchantToMerchantTransfer',
+        SenderIdentifierType: number = 4,
+        RecieverIdentifierType: number = 4,
+        Remarks: string = 'Business To Business Request'
     ) {
         return new Promise((resolve, reject) => {
             const data = {
@@ -207,7 +207,12 @@ export class mpesa {
      * @param  {string} ShortCode The short code of the organization.
      * @returns {Promise}
      */
-    c2bregister(ShortCode, ResponseType, ConfirmationURL, ValidationURL) {
+    c2bregister(
+        ShortCode: string,
+        ConfirmationURL: string,
+        ValidationURL: string,
+        ResponseType: string = 'Completed'
+    ) {
         return new Promise((resolve, reject) => {
             const data = {
                 ShortCode: ShortCode,
@@ -238,13 +243,19 @@ export class mpesa {
      * @description C2B Simulate
      * @see {@link https://developer.safaricom.co.ke/docs?javascript#c2b-api }
      * @param  {string} CommandID Unique command for each transaction type.
-     * @param  {string} Amount The amount been transacted.
+     * @param  {number} Amount The amount been transacted.
      * @param  {string} Msisdn MSISDN (phone number) sending the transaction, start with country code without the plus(+) sign.
-     * @param  {string} BillRefNumber Bill Reference Number (Optional).
+     * @param  {any} BillRefNumber Bill Reference Number (Optional).
      * @param  {string} ShortCode 6 digit M-Pesa Till Number or PayBill Number
-     * @returns {Promise}
+     * @returns {Promise} Promise
      */
-    c2bsimulate(ShortCode, CommandID, Amount, Msisdn, BillRefNumber) {
+    c2bsimulate(
+        ShortCode: string,
+        Amount: number,
+        Msisdn: string,
+        CommandID: string = 'CustomerPayBillOnline',
+        BillRefNumber: any = null
+    ) {
         return new Promise((resolve, reject) => {
             const data = {
                 ShortCode: ShortCode,
@@ -286,17 +297,18 @@ export class mpesa {
      * @returns {Promise}
      */
     accountBalance(
-        Initiator,
-        CommandID,
-        PartyA,
-        IdentifierType,
-        Remarks,
-        QueueTimeOutURL,
-        ResultURL
+        Initiator: string,
+        PartyA: string,
+        IdentifierType: any,
+        QueueTimeOutURL: string,
+        ResultURL: string,
+        CommandID: string = 'AccountBalance',
+        Remarks: string = 'Check Account Balance'
     ) {
         return new Promise((resolve, reject) => {
             const data = {
                 Initiator: Initiator,
+                SecurityCredential: this.securitycredential,
                 CommandID: CommandID,
                 PartyA: PartyA,
                 IdentifierType: IdentifierType,
@@ -321,15 +333,15 @@ export class mpesa {
     }
 
     transactionStatus(
-        Initiator,
-        CommandID,
-        TransactionID,
-        PartyA,
-        IdentifierType,
-        ResultURL,
-        QueueTimeOutURL,
-        Remarks,
-        Occasion
+        Initiator: string,
+        TransactionID: string,
+        PartyA: string,
+        IdentifierType: any,
+        ResultURL: string,
+        QueueTimeOutURL: string,
+        CommandID: string = 'TransactionStatusQuery',
+        Remarks: string = 'Transaction Reversal',
+        Occasion: string = 'TransactionReversal'
     ) {
         return new Promise((resolve, reject) => {
             const data = {
@@ -360,22 +372,40 @@ export class mpesa {
         });
     }
 
+    /**
+     * Reversal Request
+     * @name ReversalRequest
+     * @description Transaction Reversal API reverses a M-Pesa transaction.
+     * @function
+     * @see {@link https://developer.safaricom.co.ke/reversal/apis/post/request| Reversal Request}
+     * @param  {[type]} Initiator                 The name of Initiator to initiating the request
+     * @param  {string} TransactionID                     The transaction id for reversal eg QLXXXX1234
+     * @param  {String} CommandID Takes only 'TransactionReversal' Command id
+     * @param  {string} QueueTimeOutURL                       The path that stores information of time out transaction
+     * @param  {string} ReceiverParty                  Organization receiving the transaction
+     *  @param  {number} RecieverIdentifierType         Type of organization receiving the transaction
+     * @param  {string} ResultURL                         The path that stores information of transaction
+     * @param  {String} Remarks             Comments that are sent along with the transaction.
+     * @param  {String} Occasion          Optional Parameter
+     * @return {Promise} Promise
+     */
     reversal(
-        Initiator,
-        TransactionID,
-        Amount,
-        ReceiverParty,
-        RecieverIdentifierType,
-        ResultURL,
-        QueueTimeOutURL,
-        Remarks,
-        Occasion
+        Initiator: string,
+        TransactionID: string,
+        Amount: number,
+        ReceiverParty: string,
+        ResultURL: string,
+        QueueTimeOutURL: string,
+        CommandID: string = 'TransactionReversal',
+        RecieverIdentifierType: number = 11,
+        Remarks: string = 'Remarks',
+        Occasion: string = 'Reversal'
     ) {
         return new Promise((resolve, reject) => {
             const data = {
                 Initiator: Initiator,
                 SecurityCredential: this.securitycredential,
-                CommandID: 'TransactionReversal',
+                CommandID: CommandID,
                 TransactionID: TransactionID,
                 Amount: Amount,
                 ReceiverParty: ReceiverParty,
@@ -408,38 +438,45 @@ export class mpesa {
      * @description Lipa na M-Pesa Online Payment API is used to initiate a M-Pesa transaction on behalf of a customer using STK Push. This is the same technique mySafaricom App uses whenever the app is used to make payments.
      * @see {@link https://developer.safaricom.co.ke/docs?javascript#lipa-na-m-pesa-online-payment }
      * @param  {string} BusinessShortCode The organization shortcode used to receive the transaction.
-     * @param  {string} Password The password for encrypting the request. This is generated by base64 encoding BusinessShortcode, Passkey and Timestamp.
-     * @param  {string} Timestamp The timestamp of the transaction in the format yyyymmddhhiiss.
-     * @param  {string} Amount The amount to be transacted.
+     * @param  {number} Amount The amount to be transacted.
      * @param  {string} PartyA The MSISDN sending the funds.
      * @param  {string} PartyB The organization shortcode receiving the funds
      * @param  {string} PhoneNumber The MSISDN sending the funds.
      * @param  {string} CallBackURL The url to where responses from M-Pesa will be sent to.
      * @param  {string} AccountReference Used with M-Pesa PayBills.
      * @param  {string} TransactionDesc A description of the transaction.
+     * @param {any} passKey Lipa Na Mpesa Pass Key
      * @returns {Promise}
      */
     lipanampesa(
-        BusinessShortCode,
-        Password,
-        Timestamp,
-        Amount,
-        PartyA,
-        PartyB,
-        PhoneNumber,
-        CallBackURL,
-        AccountReference,
-        TransactionDesc
+        BusinessShortCode: string,
+        Amount: number,
+        PartyA: string,
+        PhoneNumber: string,
+        CallBackURL: string,
+        AccountReference: string,
+        passKey: any,
+        TransactionType: string = 'CustomerPayBillOnline',
+        TransactionDesc: string = 'Lipa Na Mpesa Online'
     ) {
         return new Promise((resolve, reject) => {
+            const Timestamp = new Date()
+                .toISOString()
+                .replace(/[^0-9]/g, '')
+                .slice(0, -3);
+            const Password = Buffer.from([
+                BusinessShortCode,
+                passKey,
+                Timestamp
+            ]).toString('base64');
             const data = {
                 BusinessShortCode: BusinessShortCode,
                 Password: Password,
                 Timestamp: Timestamp,
-                TransactionType: 'CustomerPayBillOnline',
+                TransactionType: TransactionType,
                 Amount: Amount,
                 PartyA: PartyA,
-                PartyB: PartyB,
+                PartyB: BusinessShortCode,
                 PhoneNumber: PhoneNumber,
                 CallBackURL: CallBackURL,
                 AccountReference: AccountReference,
@@ -468,18 +505,25 @@ export class mpesa {
      * @description Lipa na M-Pesa Online Payment API is used to initiate a M-Pesa transaction on behalf of a customer using STK Push. This is the same technique mySafaricom App uses whenever the app is used to make payments.
      * @see {@link https://developer.safaricom.co.ke/docs?javascript#lipa-na-m-pesa-online-query-request }
      * @param  {string} BusinessShortCode The organization shortcode used to receive the transaction.
-     * @param  {string} Password The password for encrypting the request. This is generated by base64 encoding BusinessShortcode, Passkey and Timestamp.
-     * @param  {string} Timestamp The timestamp of the transaction in the format yyyymmddhhiiss.
      * @param  {string} CheckoutRequestID The Checkout Request ID.
+     * @param {any} passKey Lipa Na Mpesa Pass Key
      * @returns {Promise}
      */
     lipanampesaquery(
-        BusinessShortCode,
-        Password,
-        Timestamp,
-        CheckoutRequestID
+        BusinessShortCode: string,
+        CheckoutRequestID: string,
+        passKey: any
     ) {
         return new Promise((resolve, reject) => {
+            const Timestamp = new Date()
+                .toISOString()
+                .replace(/[^0-9]/g, '')
+                .slice(0, -3);
+            const Password = Buffer.from([
+                BusinessShortCode,
+                passKey,
+                Timestamp
+            ]).toString('base64');
             const data = {
                 BusinessShortCode: BusinessShortCode,
                 Password: Password,
