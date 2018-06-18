@@ -1,8 +1,6 @@
 export declare const routes: {
-    base: {
-        production: string;
-        sandbox: string;
-    };
+    production: string;
+    sandbox: string;
     oauth: string;
     b2c: string;
     b2b: string;

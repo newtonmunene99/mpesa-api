@@ -4,7 +4,9 @@
 
 :zap: :bomb: :fire: :fire: :bomb: :zap:
 
-**An NPM Module built with NodeJs to help you with M-Pesa Daraja API calls.**
+An NPM Module built with NodeJs to help you with M-Pesa Daraja API calls.
+
+**STILL FIXING A FEW ERRORS AND BUGS. WILL PUBLISH TO NPM AS SOON AS EVERYTHING IS OKAY**
 
 ## Prerequisites
 
@@ -21,7 +23,7 @@ npm i mpesa-api
 
 ## Requisites
 
-You Will need a few things before development.
+You Will need a few things from Safaricom before development.
 
 1.  Consumer_Key
 2.  Consumer_Secret

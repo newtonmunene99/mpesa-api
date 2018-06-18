@@ -13,6 +13,7 @@ export declare class mpesa {
     securitycredential: any;
     certificatepath: any;
     environment: string;
+    baseURL: any;
     constructor(credentials: any, environment: string);
     secure(): void;
     initiate(): Promise<{}>;

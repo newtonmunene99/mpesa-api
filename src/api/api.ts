@@ -8,9 +8,17 @@ import { routes } from './helpers';
 export var api = {
     oauth: (key, secret, environment) => {
         return new Promise((resolve, reject) => {
+            var baseURL: any;
+            if (environment == 'sandbox') {
+                baseURL = routes.sandbox;
+            } else if (environment == 'production') {
+                baseURL = routes.production;
+            } else {
+                baseURL = null;
+            }
             Axios({
                 method: 'get',
-                url: '' + routes.base + '.' + environment + routes.oauth,
+                url: baseURL + routes.oauth,
                 headers: {
                     Authorization:
                         'Basic ' +
@@ -32,7 +40,7 @@ export var api = {
             var certpath;
             if (!certificatepath) {
                 certpath = String(
-                    fs.readFileSync(path.resolve('keys/sandbox-cert.cer'))
+                    fs.readFileSync(path.resolve('../keys/sandbox-cert.cer'))
                 );
             } else {
                 certpath = String(fs.readFileSync(certificatepath));

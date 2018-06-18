@@ -27,12 +27,20 @@ export class mpesa {
     securitycredential: any;
     certificatepath: any;
     environment: string;
+    baseURL: any;
     constructor(credentials: any, environment: string) {
         this.key = credentials.key;
         this.secret = credentials.secret;
         this.securitycredential = credentials.securitycredential;
         this.certificatepath = credentials.certificatepath;
         this.environment = environment;
+        if (environment == 'sandbox') {
+            this.baseURL = routes.sandbox;
+        } else if (environment == 'production') {
+            this.baseURL = routes.production;
+        } else {
+            this.baseURL = null;
+        }
         this.secure();
     }
 
@@ -58,7 +66,7 @@ export class mpesa {
                 .then(res => {
                     resolve(
                         axios.create({
-                            baseURL: routes.base + this.environment,
+                            baseURL: this.baseURL,
                             headers: {
                                 Authorization: 'Bearer ' + res,
                                 'Content-Type': 'application/json'
