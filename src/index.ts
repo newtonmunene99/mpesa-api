@@ -10,6 +10,17 @@ YP  YP  YP ~Y8888P' VP   V8P Y88888P VP   V8P Y88888P
 import axios from 'axios';
 import { api } from './api/api';
 import { routes } from './api/helpers';
+import {
+    b2binterface,
+    b2cinterface,
+    c2bregisterinterface,
+    c2bsimulateinterface,
+    transactionstatusinterface,
+    accountbalanceinterface,
+    stkpushinterface,
+    stkqueryinterface,
+    reversalinterface
+} from './api/interfaces';
 import { AxiosInstance } from 'axios';
 
 export class mpesa {
@@ -96,33 +107,23 @@ export class mpesa {
      * @param  {string} ResultURL  The end-point that receives the response of the transaction
      *  @param  {string} Occasion Optional
      */
-    b2c(
-        InitiatorName: string,
-        Amount: number,
-        PartyA: string,
-        PartyB: string,
-        QueueTimeOutURL: string,
-        ResultURL: string,
-        CommandID: string = 'BusinessPayment',
-        Occasion: string = 'Business To Customer Request',
-        Remarks: string = 'Business To Customer Request'
-    ) {
+    b2c(data: b2cinterface) {
         return new Promise((resolve, reject) => {
-            const data = {
-                InitiatorName: InitiatorName,
+            const body = {
+                InitiatorName: data.InitiatorName,
                 SecurityCredential: this.securitycredential,
-                CommandID: CommandID,
-                Amount: Amount,
-                PartyA: PartyA,
-                PartyB: PartyB,
-                Remarks: Remarks,
-                QueueTimeOutURL: QueueTimeOutURL,
-                ResultURL: ResultURL,
-                Occasion: Occasion
+                CommandID: data.CommandID || 'BusinessPayment',
+                Amount: data.Amount,
+                PartyA: data.PartyA,
+                PartyB: data.PartyB,
+                Remarks: data.Remarks || 'Business To Customer Request',
+                QueueTimeOutURL: data.QueueTimeOutURL,
+                ResultURL: data.ResultURL,
+                Occasion: data.Occasion || 'Business To Customer Request'
             };
             this.initiate()
                 .then((res: AxiosInstance) => {
-                    res.post(routes.b2c, data)
+                    res.post(routes.b2c, body)
                         .then(res => {
                             resolve(res);
                         })
@@ -155,37 +156,25 @@ export class mpesa {
      *  @param  {any} AccountReference Account Reference mandatory for “BusinessPaybill” CommandID.
      * @returns {Promise} Promise
      */
-    b2b(
-        InitiatorName: string,
-        Amount: number,
-        PartyA: string,
-        PartyB: string,
-        AccountReference: any,
-        QueueTimeOutURL: string,
-        ResultURL: string,
-        CommandID: string = 'MerchantToMerchantTransfer',
-        SenderIdentifierType: number = 4,
-        RecieverIdentifierType: number = 4,
-        Remarks: string = 'Business To Business Request'
-    ) {
+    b2b(data: b2binterface) {
         return new Promise((resolve, reject) => {
-            const data = {
-                InitiatorName: InitiatorName,
+            const body = {
+                InitiatorName: data.InitiatorName,
                 SecurityCredential: this.securitycredential,
-                CommandID: CommandID,
-                SenderIdentifierType: SenderIdentifierType,
-                RecieverIdentifierType: RecieverIdentifierType,
-                Amount: Amount,
-                PartyA: PartyA,
-                PartyB: PartyB,
-                AccountReference: AccountReference,
-                Remarks: Remarks,
-                QueueTimeOutURL: QueueTimeOutURL,
-                ResultURL: ResultURL
+                CommandID: data.CommandID || 'MerchantToMerchantTransfer',
+                SenderIdentifierType: data.SenderIdentifierType || 4,
+                RecieverIdentifierType: data.RecieverIdentifierType || 4,
+                Amount: data.Amount,
+                PartyA: data.PartyA,
+                PartyB: data.PartyB,
+                AccountReference: data.AccountReference,
+                Remarks: data.Remarks || 'Business To Business Request',
+                QueueTimeOutURL: data.QueueTimeOutURL,
+                ResultURL: data.ResultURL
             };
             this.initiate()
                 .then((res: AxiosInstance) => {
-                    res.post(routes.b2b, data)
+                    res.post(routes.b2b, body)
                         .then(res => {
                             resolve(res);
                         })
@@ -215,22 +204,17 @@ export class mpesa {
      * @param  {string} ShortCode The short code of the organization.
      * @returns {Promise}
      */
-    c2bregister(
-        ShortCode: string,
-        ConfirmationURL: string,
-        ValidationURL: string,
-        ResponseType: string = 'Completed'
-    ) {
+    c2bregister(data: c2bregisterinterface) {
         return new Promise((resolve, reject) => {
-            const data = {
-                ShortCode: ShortCode,
-                ResponseType: ResponseType,
-                ConfirmationURL: ConfirmationURL,
-                ValidationURL: ValidationURL
+            const body = {
+                ShortCode: data.ShortCode,
+                ResponseType: data.ResponseType || 'Completed',
+                ConfirmationURL: data.ConfirmationURL,
+                ValidationURL: data.ValidationURL
             };
             this.initiate()
                 .then((res: AxiosInstance) => {
-                    res.post(routes.c2bregister, data)
+                    res.post(routes.c2bregister, body)
                         .then(res => {
                             resolve(res);
                         })
@@ -253,28 +237,23 @@ export class mpesa {
      * @param  {string} CommandID Unique command for each transaction type.
      * @param  {number} Amount The amount been transacted.
      * @param  {string} Msisdn MSISDN (phone number) sending the transaction, start with country code without the plus(+) sign.
-     * @param  {any} BillRefNumber Bill Reference Number (Optional).
+     * @param  {any} BillRefNumber Bill Reference Number.
      * @param  {string} ShortCode 6 digit M-Pesa Till Number or PayBill Number
      * @returns {Promise} Promise
      */
-    c2bsimulate(
-        ShortCode: string,
-        Amount: number,
-        Msisdn: string,
-        CommandID: string = 'CustomerPayBillOnline',
-        BillRefNumber: any = null
-    ) {
+    c2bsimulate(data: c2bsimulateinterface) {
         return new Promise((resolve, reject) => {
-            const data = {
-                ShortCode: ShortCode,
-                CommandID: CommandID,
-                Amount: Amount,
-                Msisdn: Msisdn,
-                BillRefNumber: BillRefNumber
+            const body = {
+                ShortCode: data.ShortCode,
+                CommandID: data.CommandID || 'CustomerPayBillOnline',
+                Amount: data.Amount,
+                Msisdn: data.Msisdn,
+                BillRefNumber: data.BillRefNumber
             };
+            console.log('msisdn is ' + data.Msisdn);
             this.initiate()
                 .then((res: AxiosInstance) => {
-                    res.post(routes.c2bsimulate, data)
+                    res.post(routes.c2bsimulate, body)
                         .then(res => {
                             resolve(res);
                         })
@@ -304,29 +283,21 @@ export class mpesa {
      * @param  {string} ResultURL The end-point that receives a successful transaction.
      * @returns {Promise}
      */
-    accountBalance(
-        Initiator: string,
-        PartyA: string,
-        IdentifierType: any,
-        QueueTimeOutURL: string,
-        ResultURL: string,
-        CommandID: string = 'AccountBalance',
-        Remarks: string = 'Check Account Balance'
-    ) {
+    accountBalance(data: accountbalanceinterface) {
         return new Promise((resolve, reject) => {
-            const data = {
-                Initiator: Initiator,
+            const body = {
+                Initiator: data.Initiator,
                 SecurityCredential: this.securitycredential,
-                CommandID: CommandID,
-                PartyA: PartyA,
-                IdentifierType: IdentifierType,
-                Remarks: Remarks,
-                QueueTimeOutURL: QueueTimeOutURL,
-                ResultURL: ResultURL
+                CommandID: data.CommandID || 'AccountBalance',
+                PartyA: data.PartyA,
+                IdentifierType: data.IdentifierType,
+                Remarks: data.Remarks || 'Check Account Balance',
+                QueueTimeOutURL: data.QueueTimeOutURL,
+                ResultURL: data.ResultURL
             };
             this.initiate()
                 .then((res: AxiosInstance) => {
-                    res.post(routes.accountbalance, data)
+                    res.post(routes.accountbalance, body)
                         .then(res => {
                             resolve(res);
                         })
@@ -340,33 +311,23 @@ export class mpesa {
         });
     }
 
-    transactionStatus(
-        Initiator: string,
-        TransactionID: string,
-        PartyA: string,
-        IdentifierType: any,
-        ResultURL: string,
-        QueueTimeOutURL: string,
-        CommandID: string = 'TransactionStatusQuery',
-        Remarks: string = 'Transaction Reversal',
-        Occasion: string = 'TransactionReversal'
-    ) {
+    transactionStatus(data: transactionstatusinterface) {
         return new Promise((resolve, reject) => {
-            const data = {
-                Initiator: Initiator,
+            const body = {
+                Initiator: data.Initiator,
                 SecurityCredential: this.securitycredential,
-                CommandID: CommandID,
-                TransactionID: TransactionID,
-                PartyA: PartyA,
-                IdentifierType: IdentifierType,
-                ResultURL: ResultURL,
-                QueueTimeOutURL: QueueTimeOutURL,
-                Remarks: Remarks,
-                Occasion: Occasion
+                CommandID: data.CommandID || 'TransactionStatusQuery',
+                TransactionID: data.TransactionID,
+                PartyA: data.PartyA,
+                IdentifierType: data.IdentifierType,
+                ResultURL: data.ResultURL,
+                QueueTimeOutURL: data.QueueTimeOutURL,
+                Remarks: data.Remarks || 'Transaction Reversal',
+                Occasion: data.Occasion || 'TransactionReversal'
             };
             this.initiate()
                 .then((res: AxiosInstance) => {
-                    res.post(routes.transactionstatus, data)
+                    res.post(routes.transactionstatus, body)
                         .then(res => {
                             resolve(res);
                         })
@@ -397,35 +358,24 @@ export class mpesa {
      * @param  {String} Occasion          Optional Parameter
      * @return {Promise} Promise
      */
-    reversal(
-        Initiator: string,
-        TransactionID: string,
-        Amount: number,
-        ReceiverParty: string,
-        ResultURL: string,
-        QueueTimeOutURL: string,
-        CommandID: string = 'TransactionReversal',
-        RecieverIdentifierType: number = 11,
-        Remarks: string = 'Remarks',
-        Occasion: string = 'Reversal'
-    ) {
+    reversal(data: reversalinterface) {
         return new Promise((resolve, reject) => {
-            const data = {
-                Initiator: Initiator,
+            const body = {
+                Initiator: data.Initiator,
                 SecurityCredential: this.securitycredential,
-                CommandID: CommandID,
-                TransactionID: TransactionID,
-                Amount: Amount,
-                ReceiverParty: ReceiverParty,
-                RecieverIdentifierType: RecieverIdentifierType,
-                ResultURL: ResultURL,
-                QueueTimeOutURL: QueueTimeOutURL,
-                Remarks: Remarks,
-                Occasion: Occasion
+                CommandID: data.CommandID || 'TransactionReversal',
+                TransactionID: data.TransactionID,
+                Amount: data.Amount,
+                ReceiverParty: data.ReceiverParty,
+                RecieverIdentifierType: data.RecieverIdentifierType || 11,
+                ResultURL: data.ResultURL,
+                QueueTimeOutURL: data.QueueTimeOutURL,
+                Remarks: data.Remarks || 'Money Reversal',
+                Occasion: data.Occasion || 'Reversal'
             };
             this.initiate()
                 .then((res: AxiosInstance) => {
-                    res.post(routes.reversal, data)
+                    res.post(routes.reversal, body)
                         .then(res => {
                             resolve(res);
                         })
@@ -456,43 +406,34 @@ export class mpesa {
      * @param {any} passKey Lipa Na Mpesa Pass Key
      * @returns {Promise}
      */
-    lipanampesa(
-        BusinessShortCode: string,
-        Amount: number,
-        PartyA: string,
-        PhoneNumber: string,
-        CallBackURL: string,
-        AccountReference: string,
-        passKey: any,
-        TransactionType: string = 'CustomerPayBillOnline',
-        TransactionDesc: string = 'Lipa Na Mpesa Online'
-    ) {
+    lipanampesa(data: stkpushinterface) {
         return new Promise((resolve, reject) => {
             const Timestamp = new Date()
                 .toISOString()
                 .replace(/[^0-9]/g, '')
                 .slice(0, -3);
             const Password = Buffer.from([
-                BusinessShortCode,
-                passKey,
+                data.BusinessShortCode,
+                data.passKey,
                 Timestamp
             ]).toString('base64');
-            const data = {
-                BusinessShortCode: BusinessShortCode,
+            const body = {
+                BusinessShortCode: data.BusinessShortCode,
                 Password: Password,
                 Timestamp: Timestamp,
-                TransactionType: TransactionType,
-                Amount: Amount,
-                PartyA: PartyA,
-                PartyB: BusinessShortCode,
-                PhoneNumber: PhoneNumber,
-                CallBackURL: CallBackURL,
-                AccountReference: AccountReference,
-                TransactionDesc: TransactionDesc
+                TransactionType:
+                    data.TransactionType || 'CustomerPayBillOnline',
+                Amount: data.Amount,
+                PartyA: data.PartyA,
+                PartyB: data.BusinessShortCode,
+                PhoneNumber: data.PhoneNumber,
+                CallBackURL: data.CallBackURL,
+                AccountReference: data.AccountReference,
+                TransactionDesc: data.TransactionDesc || 'Lipa Na Mpesa Online'
             };
             this.initiate()
                 .then((res: AxiosInstance) => {
-                    res.post(routes.stkpush, data)
+                    res.post(routes.stkpush, body)
                         .then(res => {
                             resolve(res);
                         })
@@ -517,30 +458,26 @@ export class mpesa {
      * @param {any} passKey Lipa Na Mpesa Pass Key
      * @returns {Promise}
      */
-    lipanampesaquery(
-        BusinessShortCode: string,
-        CheckoutRequestID: string,
-        passKey: any
-    ) {
+    lipanampesaquery(data: stkqueryinterface) {
         return new Promise((resolve, reject) => {
             const Timestamp = new Date()
                 .toISOString()
                 .replace(/[^0-9]/g, '')
                 .slice(0, -3);
             const Password = Buffer.from([
-                BusinessShortCode,
-                passKey,
+                data.BusinessShortCode,
+                data.passKey,
                 Timestamp
             ]).toString('base64');
-            const data = {
-                BusinessShortCode: BusinessShortCode,
+            const body = {
+                BusinessShortCode: data.BusinessShortCode,
                 Password: Password,
                 Timestamp: Timestamp,
-                CheckoutRequestID: CheckoutRequestID
+                CheckoutRequestID: data.CheckoutRequestID
             };
             this.initiate()
                 .then((res: AxiosInstance) => {
-                    res.post(routes.stkquery, data)
+                    res.post(routes.stkquery, body)
                         .then(res => {
                             resolve(res);
                         })

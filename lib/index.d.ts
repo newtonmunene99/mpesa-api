@@ -1,3 +1,4 @@
+import { b2binterface, b2cinterface, c2bregisterinterface, c2bsimulateinterface, transactionstatusinterface, accountbalanceinterface, stkpushinterface, stkqueryinterface, reversalinterface } from './api/interfaces';
 export declare class mpesa {
     /**
      * Safaricom Mpesa API
@@ -33,7 +34,7 @@ export declare class mpesa {
      * @param  {string} ResultURL  The end-point that receives the response of the transaction
      *  @param  {string} Occasion Optional
      */
-    b2c(InitiatorName: string, Amount: number, PartyA: string, PartyB: string, QueueTimeOutURL: string, ResultURL: string, CommandID?: string, Occasion?: string, Remarks?: string): Promise<{}>;
+    b2c(data: b2cinterface): Promise<{}>;
     /**
      * Business to Business(B2B)
      * @name B2B
@@ -53,7 +54,7 @@ export declare class mpesa {
      *  @param  {any} AccountReference Account Reference mandatory for “BusinessPaybill” CommandID.
      * @returns {Promise} Promise
      */
-    b2b(InitiatorName: string, Amount: number, PartyA: string, PartyB: string, AccountReference: any, QueueTimeOutURL: string, ResultURL: string, CommandID?: string, SenderIdentifierType?: number, RecieverIdentifierType?: number, Remarks?: string): Promise<{}>;
+    b2b(data: b2binterface): Promise<{}>;
     /**
      * C2B Register
      * @name C2BRegister
@@ -70,7 +71,7 @@ export declare class mpesa {
      * @param  {string} ShortCode The short code of the organization.
      * @returns {Promise}
      */
-    c2bregister(ShortCode: string, ConfirmationURL: string, ValidationURL: string, ResponseType?: string): Promise<{}>;
+    c2bregister(data: c2bregisterinterface): Promise<{}>;
     /**
      * C2B Simulate
      * @name C2BSimulate
@@ -80,11 +81,11 @@ export declare class mpesa {
      * @param  {string} CommandID Unique command for each transaction type.
      * @param  {number} Amount The amount been transacted.
      * @param  {string} Msisdn MSISDN (phone number) sending the transaction, start with country code without the plus(+) sign.
-     * @param  {any} BillRefNumber Bill Reference Number (Optional).
+     * @param  {any} BillRefNumber Bill Reference Number.
      * @param  {string} ShortCode 6 digit M-Pesa Till Number or PayBill Number
      * @returns {Promise} Promise
      */
-    c2bsimulate(ShortCode: string, Amount: number, Msisdn: string, CommandID?: string, BillRefNumber?: any): Promise<{}>;
+    c2bsimulate(data: c2bsimulateinterface): Promise<{}>;
     /**
      * Account Balance
      * @name AccountBalance
@@ -101,8 +102,8 @@ export declare class mpesa {
      * @param  {string} ResultURL The end-point that receives a successful transaction.
      * @returns {Promise}
      */
-    accountBalance(Initiator: string, PartyA: string, IdentifierType: any, QueueTimeOutURL: string, ResultURL: string, CommandID?: string, Remarks?: string): Promise<{}>;
-    transactionStatus(Initiator: string, TransactionID: string, PartyA: string, IdentifierType: any, ResultURL: string, QueueTimeOutURL: string, CommandID?: string, Remarks?: string, Occasion?: string): Promise<{}>;
+    accountBalance(data: accountbalanceinterface): Promise<{}>;
+    transactionStatus(data: transactionstatusinterface): Promise<{}>;
     /**
      * Reversal Request
      * @name ReversalRequest
@@ -120,7 +121,7 @@ export declare class mpesa {
      * @param  {String} Occasion          Optional Parameter
      * @return {Promise} Promise
      */
-    reversal(Initiator: string, TransactionID: string, Amount: number, ReceiverParty: string, ResultURL: string, QueueTimeOutURL: string, CommandID?: string, RecieverIdentifierType?: number, Remarks?: string, Occasion?: string): Promise<{}>;
+    reversal(data: reversalinterface): Promise<{}>;
     /**
      * Lipa na Mpesa Online
      * @name Stkpush
@@ -138,7 +139,7 @@ export declare class mpesa {
      * @param {any} passKey Lipa Na Mpesa Pass Key
      * @returns {Promise}
      */
-    lipanampesa(BusinessShortCode: string, Amount: number, PartyA: string, PhoneNumber: string, CallBackURL: string, AccountReference: string, passKey: any, TransactionType?: string, TransactionDesc?: string): Promise<{}>;
+    lipanampesa(data: stkpushinterface): Promise<{}>;
     /**
      * Lipa na Mpesa Online Query Request
      * @name StkPushQueryRequest
@@ -150,5 +151,5 @@ export declare class mpesa {
      * @param {any} passKey Lipa Na Mpesa Pass Key
      * @returns {Promise}
      */
-    lipanampesaquery(BusinessShortCode: string, CheckoutRequestID: string, passKey: any): Promise<{}>;
+    lipanampesaquery(data: stkqueryinterface): Promise<{}>;
 }
