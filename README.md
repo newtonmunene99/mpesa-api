@@ -426,14 +426,15 @@ If you Wish to build
 
 ## Contributing
 
-1.  Create your feature branch: `git checkout -b my-new-feature`
-2.  Commit your changes: `git commit -m 'Add some feature'`
-3.  Push to the branch: `git push origin my-new-feature`
-4.  Submit a pull request.
+1.  Fork the project then clone the forked project
+2.  Create your feature branch: `git checkout -b my-new-feature`
+3.  Commit your changes: `git commit -m 'Add some feature'`
+4.  Push to the branch: `git push origin my-new-feature`
+5.  Submit a pull request.
 
 ## Disclaimer
 
-**Please note that the certificate included is not for production use and should not be used for whatever reason other than testing. Obtain your own from Safaricom. I would also like to point out that it does not belong to me or to my organization and I am not liable for any actions taken using it.**
+**Please note that the Mpesa certificate included is not for production use and should not be used for whatever reason other than testing. Obtain your own from Safaricom. I would also like to point out that it does not belong to me or to my organization and I am not liable for any actions taken using it.**
 
 ## Credits
 
