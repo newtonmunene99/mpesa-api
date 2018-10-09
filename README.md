@@ -1,6 +1,5 @@
 # Mpesa-Api
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/newtonmunene99/mpesa-api.svg)](https://greenkeeper.io/)
 
 :zap: :bomb: :fire: :fire: :bomb: :zap:
 
