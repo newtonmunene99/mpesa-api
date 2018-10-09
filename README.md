@@ -9,13 +9,13 @@ An NPM Module built with NodeJs to help you with M-Pesa Daraja API calls.
 **STILL FIXING A FEW ERRORS AND BUGS. WILL PUBLISH TO NPM AS SOON AS EVERYTHING IS OKAY**
 Ready Methods
 
--   [x] C2BSIMULATE
--   [ ] B2B
--   [ ] C2B
--   [ ] B2C
--   [ ] TRANSACTION STATUS
--   [ ] ACCOUNT BALANCE
--   [ ] REVERSAL
+- [x] C2BSIMULATE
+- [ ] B2B
+- [ ] C2B
+- [ ] B2C
+- [ ] TRANSACTION STATUS
+- [ ] ACCOUNT BALANCE
+- [ ] REVERSAL
 
 ## Prerequisites
 
@@ -38,27 +38,27 @@ You Will need a few things from Safaricom before development.
 2.  Consumer Secret
 3.  Test Credentials for Development/Sanbox environment
 
--   Login or Register as a Safaricom developer [here](https://developer.safaricom.co.ke/login-register) if you haven't.
--   Add a new App [here](https://developer.safaricom.co.ke/user/me/apps)
--   You will be issued with a Consumer Key and Consumer Secret. You will use these to initiate an Mpesa Instance.
--   Obtain Test Credentials [here](https://developer.safaricom.co.ke/test_credentials).
-    -   The Test Credentials Obtained Are only valid in Sandbox/Development environment. Take note of them.
-    -   To run in Production Environment you will need real Credentials.
-        -   To go Live and be issued with real credentials,please refer to [this guide](https://developer.safaricom.co.ke/docs?javascript#going-live)
+- Login or Register as a Safaricom developer [here](https://developer.safaricom.co.ke/login-register) if you haven't.
+- Add a new App [here](https://developer.safaricom.co.ke/user/me/apps)
+- You will be issued with a Consumer Key and Consumer Secret. You will use these to initiate an Mpesa Instance.
+- Obtain Test Credentials [here](https://developer.safaricom.co.ke/test_credentials).
+  - The Test Credentials Obtained Are only valid in Sandbox/Development environment. Take note of them.
+  - To run in Production Environment you will need real Credentials.
+    - To go Live and be issued with real credentials,please refer to [this guide](https://developer.safaricom.co.ke/docs?javascript#going-live)
 
 ## Getting Started
 
 ```javascript
 // import package
-import { mpesa } from 'mpesa-api';
+import { mpesa } from "mpesa-api";
 //OR
-const mpesa = require('mpesa-api').mpesa;
+const mpesa = require("mpesa-api").mpesa;
 
 // create a new instance of the api
 const Mpesa = new mpesa(credentials, environment);
 ```
 
-A moment to explain the above. credentials should be an object containing key,secret,securitycredential and certificatepath as the properties.
+A moment to explain the above. `credentials` should be an object containing key,secret,securitycredential and certificatepath as the properties.
 
 ```javascript
 //example
@@ -78,9 +78,9 @@ const credentials = {
 Environment should be a string. It can be either 'production' or 'sandbox'
 
 ```javascript
-const environment = 'sandbox';
+const environment = "sandbox";
 //or
-const environment = 'production';
+const environment = "production";
 ```
 
 ## Methods and Api Calls
@@ -91,28 +91,28 @@ This API enables Business to Business (B2B) transactions between a business and 
 
 ```javascript
 Mpesa.b2b({
-    InitiatorName: 'Initiator Name',
-    Amount: 1000 /* 1000 is an example amount */,
-    PartyA: 'Party A',
-    PartyB: 'Party B',
-    AccountReference: 'Account Reference',
-    QueueTimeOutURL: 'Queue Timeout URL',
-    ResultURL: 'Result URL',
-    CommandID: 'Command ID' /* OPTIONAL */,
-    SenderIdentifierType: 4 /* OPTIONAL */,
-    RecieverIdentifierType: 4 /* OPTIONAL */,
-    Remarks: 'Remarks' /* OPTIONAL */
+	InitiatorName: "Initiator Name",
+	Amount: 1000 /* 1000 is an example amount */,
+	PartyA: "Party A",
+	PartyB: "Party B",
+	AccountReference: "Account Reference",
+	QueueTimeOutURL: "Queue Timeout URL",
+	ResultURL: "Result URL",
+	CommandID: "Command ID" /* OPTIONAL */,
+	SenderIdentifierType: 4 /* OPTIONAL */,
+	RecieverIdentifierType: 4 /* OPTIONAL */,
+	Remarks: "Remarks" /* OPTIONAL */
 })
-    .then(response => {
-        //Do something with the response
-        //eg
-        console.log(response);
-    })
-    .catch(error => {
-        //Do something with the error;
-        //eg
-        console.error(error);
-    });
+	.then(response => {
+		//Do something with the response
+		//eg
+		console.log(response);
+	})
+	.catch(error => {
+		//Do something with the error;
+		//eg
+		console.error(error);
+	});
 ```
 
 1.  Initiator - This is the credential/username used to authenticate the transaction request.
@@ -133,26 +133,26 @@ This API enables Business to Customer (B2C) transactions between a company and c
 
 ```javascript
 Mpesa.b2c({
-    InitiatorName: 'Initiator Name',
-    Amount: 1000 /* 1000 is an example amount */,
-    PartyA: 'Party A',
-    PartyB: 'Party B',
-    QueueTimeOutURL: 'Queue Timeout URL',
-    ResultURL: 'Result URL',
-    CommandID: 'Command ID' /* OPTIONAL */,
-    Occasion: 'Occasion' /* OPTIONAL */,
-    Remarks: 'Remarks' /* OPTIONAL */
+	InitiatorName: "Initiator Name",
+	Amount: 1000 /* 1000 is an example amount */,
+	PartyA: "Party A",
+	PartyB: "Party B",
+	QueueTimeOutURL: "Queue Timeout URL",
+	ResultURL: "Result URL",
+	CommandID: "Command ID" /* OPTIONAL */,
+	Occasion: "Occasion" /* OPTIONAL */,
+	Remarks: "Remarks" /* OPTIONAL */
 })
-    .then(response => {
-        //Do something with the response
-        //eg
-        console.log(response);
-    })
-    .catch(error => {
-        //Do something with the error;
-        //eg
-        console.error(error);
-    });
+	.then(response => {
+		//Do something with the response
+		//eg
+		console.log(response);
+	})
+	.catch(error => {
+		//Do something with the error;
+		//eg
+		console.error(error);
+	});
 ```
 
 1.  InitiatorName - This is the credential/username used to authenticate the transaction request.
@@ -177,21 +177,21 @@ M-Pesa completes or cancels the transaction depending on the validation response
 
 ```javascript
 Mpesa.c2bregister({
-    ShortCode: 'Short Code',
-    ConfirmationURL: 'Confirmation URL',
-    ValidationURL: 'Validation URL',
-    ResponseType: 'Response Type' /* OPTIONAL */
+	ShortCode: "Short Code",
+	ConfirmationURL: "Confirmation URL",
+	ValidationURL: "Validation URL",
+	ResponseType: "Response Type" /* OPTIONAL */
 })
-    .then(response => {
-        //Do something with the response
-        //eg
-        console.log(response);
-    })
-    .catch(error => {
-        //Do something with the error;
-        //eg
-        console.error(error);
-    });
+	.then(response => {
+		//Do something with the response
+		//eg
+		console.log(response);
+	})
+	.catch(error => {
+		//Do something with the error;
+		//eg
+		console.error(error);
+	});
 ```
 
 1.  ShortCode - The short code of the organization.
@@ -203,22 +203,22 @@ Mpesa.c2bregister({
 
 ```javascript
 Mpesa.c2bsimulate({
-    ShortCode: 123456,
-    Amount: 1000 /* 1000 is an example amount */,
-    Msisdn: 254792123456,
-    CommandID: 'Command ID' /* OPTIONAL */,
-    BillRefNumber: 'Bill Reference Number' /* OPTIONAL */
+	ShortCode: 123456,
+	Amount: 1000 /* 1000 is an example amount */,
+	Msisdn: 254792123456,
+	CommandID: "Command ID" /* OPTIONAL */,
+	BillRefNumber: "Bill Reference Number" /* OPTIONAL */
 })
-    .then(response => {
-        //Do something with the response
-        //eg
-        console.log(response);
-    })
-    .catch(error => {
-        //Do something with the error;
-        //eg
-        console.error(error);
-    });
+	.then(response => {
+		//Do something with the response
+		//eg
+		console.log(response);
+	})
+	.catch(error => {
+		//Do something with the error;
+		//eg
+		console.error(error);
+	});
 ```
 
 1.  ShortCode - 6 digit M-Pesa Till Number or PayBill Number
@@ -233,24 +233,24 @@ The Account Balance API requests for the account balance of a shortcode.
 
 ```javascript
 Mpesa.accountBalance({
-    Initiator: 'Initiator Name',
-    PartyA: 'Party A',
-    IdentifierType: 'Identifier Type',
-    QueueTimeOutURL: 'Queue Timeout URL',
-    ResultURL: 'Result URL',
-    CommandID: 'Command ID' /* OPTIONAL */,
-    Remarks: 'Remarks' /* OPTIONAL */
+	Initiator: "Initiator Name",
+	PartyA: "Party A",
+	IdentifierType: "Identifier Type",
+	QueueTimeOutURL: "Queue Timeout URL",
+	ResultURL: "Result URL",
+	CommandID: "Command ID" /* OPTIONAL */,
+	Remarks: "Remarks" /* OPTIONAL */
 })
-    .then(response => {
-        //Do something with the response
-        //eg
-        console.log(response);
-    })
-    .catch(error => {
-        //Do something with the error;
-        //eg
-        console.error(error);
-    });
+	.then(response => {
+		//Do something with the response
+		//eg
+		console.log(response);
+	})
+	.catch(error => {
+		//Do something with the error;
+		//eg
+		console.error(error);
+	});
 ```
 
 1.  Initiator - This is the credential/username used to authenticate the transaction request.
@@ -267,26 +267,26 @@ Transaction Status API checks the status of a B2B, B2C and C2B APIs transactions
 
 ```javascript
 Mpesa.transactionStatus({
-    Initiator: 'Initiator',
-    TransactionID: 'Transaction ID',
-    PartyA: 'Party A',
-    IdentifierType: 'Identifier Type',
-    ResultURL: 'Result URL',
-    QueueTimeOutURL: 'Queue Timeout URL',
-    CommandID: 'Command ID' /* OPTIONAL */,
-    Remarks: 'Remarks' /* OPTIONAL */,
-    Occasion: 'Occasion' /* OPTIONAL */
+	Initiator: "Initiator",
+	TransactionID: "Transaction ID",
+	PartyA: "Party A",
+	IdentifierType: "Identifier Type",
+	ResultURL: "Result URL",
+	QueueTimeOutURL: "Queue Timeout URL",
+	CommandID: "Command ID" /* OPTIONAL */,
+	Remarks: "Remarks" /* OPTIONAL */,
+	Occasion: "Occasion" /* OPTIONAL */
 })
-    .then(response => {
-        //Do something with the response
-        //eg
-        console.log(response);
-    })
-    .catch(error => {
-        //Do something with the error;
-        //eg
-        console.error(error);
-    });
+	.then(response => {
+		//Do something with the response
+		//eg
+		console.log(response);
+	})
+	.catch(error => {
+		//Do something with the error;
+		//eg
+		console.error(error);
+	});
 ```
 
 1.  Initiator - The name of Initiator to initiating the request.
@@ -305,26 +305,26 @@ Lipa na M-Pesa Online Payment API is used to initiate a M-Pesa transaction on be
 
 ```javascript
 Mpesa.lipanampesa({
-    BusinessShortCode: 123456,
-    Amount: 1000 /* 1000 is an example amount */,
-    PartyA: 'Party A',
-    PhoneNumber: 'Phone Number',
-    CallBackURL: 'CallBack URL',
-    AccountReference: 'Account Reference',
-    passKey: 'Lipa Na Mpesa Pass Key',
-    TransactionType: 'Transaction Type' /* OPTIONAL */,
-    TransactionDesc: 'Transaction Description' /* OPTIONAL */
+	BusinessShortCode: 123456,
+	Amount: 1000 /* 1000 is an example amount */,
+	PartyA: "Party A",
+	PhoneNumber: "Phone Number",
+	CallBackURL: "CallBack URL",
+	AccountReference: "Account Reference",
+	passKey: "Lipa Na Mpesa Pass Key",
+	TransactionType: "Transaction Type" /* OPTIONAL */,
+	TransactionDesc: "Transaction Description" /* OPTIONAL */
 })
-    .then(response => {
-        //Do something with the response
-        //eg
-        console.log(response);
-    })
-    .catch(error => {
-        //Do something with the error;
-        //eg
-        console.error(error);
-    });
+	.then(response => {
+		//Do something with the response
+		//eg
+		console.log(response);
+	})
+	.catch(error => {
+		//Do something with the error;
+		//eg
+		console.error(error);
+	});
 ```
 
 1.  BusinessShortCode - The organization shortcode used to receive the transaction.
@@ -342,20 +342,20 @@ Mpesa.lipanampesa({
 
 ```javascript
 Mpesa.lipanampesaquery({
-    BusinessShortCode: 123456,
-    CheckoutRequestID: 'Checkout Request ID',
-    passKey: 'Lipa Na Mpesa Pass Key'
+	BusinessShortCode: 123456,
+	CheckoutRequestID: "Checkout Request ID",
+	passKey: "Lipa Na Mpesa Pass Key"
 })
-    .then(response => {
-        //Do something with the response
-        //eg
-        console.log(response);
-    })
-    .catch(error => {
-        //Do something with the error;
-        //eg
-        console.error(error);
-    });
+	.then(response => {
+		//Do something with the response
+		//eg
+		console.log(response);
+	})
+	.catch(error => {
+		//Do something with the error;
+		//eg
+		console.error(error);
+	});
 ```
 
 1.  BusinessShortCode - Business Short Code
@@ -368,27 +368,27 @@ Reverses a B2B, B2C or C2B M-Pesa transaction.
 
 ```javascript
 Mpesa.reversal({
-    Initiator: 'Initiator',
-    TransactionID: 'Transaction ID',
-    Amount: 1000 /* 1000 is an example amount */,
-    ReceiverParty: 'Reciever Party',
-    ResultURL: 'Result URL',
-    QueueTimeOutURL: 'Queue Timeout URL',
-    CommandID: 'Command ID' /* OPTIONAL */,
-    RecieverIdentifierType: 11 /* OPTIONAL */,
-    Remarks: 'Remarks' /* OPTIONAL */,
-    Occasion: 'Ocassion' /* OPTIONAL */
+	Initiator: "Initiator",
+	TransactionID: "Transaction ID",
+	Amount: 1000 /* 1000 is an example amount */,
+	ReceiverParty: "Reciever Party",
+	ResultURL: "Result URL",
+	QueueTimeOutURL: "Queue Timeout URL",
+	CommandID: "Command ID" /* OPTIONAL */,
+	RecieverIdentifierType: 11 /* OPTIONAL */,
+	Remarks: "Remarks" /* OPTIONAL */,
+	Occasion: "Ocassion" /* OPTIONAL */
 })
-    .then(response => {
-        //Do something with the response
-        //eg
-        console.log(response);
-    })
-    .catch(error => {
-        //Do something with the error;
-        //eg
-        console.error(error);
-    });
+	.then(response => {
+		//Do something with the response
+		//eg
+		console.log(response);
+	})
+	.catch(error => {
+		//Do something with the error;
+		//eg
+		console.error(error);
+	});
 ```
 
 1.  Initiator - This is the credential/username used to authenticate the transaction request.
@@ -404,15 +404,15 @@ Mpesa.reversal({
 
 ## RoadMap
 
--   [x] Basic Documentation
--   [x] Deploy to Npm
--   [x] Migrate to Typescript
--   [ ] Detailed Documentation
--   [ ] Better Support for es5
--   [ ] Unit tests
--   [ ] E2E Integration Tests
--   [ ] Reduce functions
--   [ ] Validators for inputs
+- [x] Basic Documentation
+- [ ] Deploy to Npm
+- [x] Migrate to Typescript
+- [ ] Detailed Documentation
+- [ ] Better Support for es5
+- [ ] Unit tests
+- [ ] E2E Integration Tests
+- [ ] Reduce functions
+- [ ] Validators for inputs
 
 ## Build
 
@@ -431,10 +431,6 @@ If you Wish to build
 3.  Commit your changes: `git commit -m 'Add some feature'`
 4.  Push to the branch: `git push origin my-new-feature`
 5.  Submit a pull request.
-
-## Disclaimer
-
-**Please note that the Mpesa certificate included is not for production use and should not be used for whatever reason other than testing. Obtain your own from Safaricom. I would also like to point out that it does not belong to me or to my organization and I am not liable for any actions taken using it.**
 
 ## Credits
 
