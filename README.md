@@ -1,6 +1,5 @@
 # Mpesa-Api
 
-
 :zap: :bomb: :fire: :fire: :bomb: :zap:
 
 An NPM Module built with NodeJs to help you with M-Pesa Daraja API calls.
@@ -421,7 +420,7 @@ If you Wish to build
 2.  CD into repo
 3.  run `npm install` to install dependencies
 4.  run `npm run build` to build
-5.  run `npm run start` to run package in development mode
+5.  run `npm run start:dev` to run package in development mode
 
 ## Contributing
 

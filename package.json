@@ -1,45 +1,46 @@
 {
-    "name": "mpesa-api",
-    "version": "1.0.0",
-    "description": "An NPM Module built with NodeJs to help you with M-Pesa Daraja API calls.",
-    "main": "lib/index",
-    "types": "lib/index",
-    "homepage": "https://github.com/newtonmunene99/mpesa-api/",
-    "scripts": {
-        "start": "nodemon --exec ./node_modules/.bin/ts-node -- ./src/index",
-        "build": "tsc"
-    },
-    "keywords": [
-        "mpesa",
-        "nodejs",
-        "node",
-        "mobile money",
-        "money"
-    ],
-    "author": "Newton Munene <newtonmunene99@gmail.com>",
-    "license": "MIT",
-    "dependencies": {
-        "axios": "^0.18.0",
-        "constants": "0.0.2",
-        "crypto": "^1.0.1",
-        "request": "^2.87.0"
-    },
-    "devDependencies": {
-        "@types/mocha": "^5.2.2",
-        "@types/node": "^10.3.3",
-        "eslint": "^4.19.1",
-        "eslint-config-google": "^0.9.1",
-        "mocha": "^5.2.0",
-        "nodemon": "^1.17.5",
-        "ts-node": "^6.1.1",
-        "typescript": "^2.9.2",
-        "typescript-eslint-parser": "^16.0.0"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/newtonmunene99/mpesa-api.git"
-    },
-    "bugs": {
-        "url": "https://github.com/newtonmunene99/mpesa-api/issues"
-    }
+	"name": "mpesa-api",
+	"version": "1.0.0",
+	"description": "An NPM Module built with NodeJs to help you with M-Pesa Daraja API calls.",
+	"main": "lib/index",
+	"types": "lib/index",
+	"homepage": "https://github.com/newtonmunene99/mpesa-api/",
+	"scripts": {
+		"start": "node lib/index.js",
+		"dev": "nodemon --exec ./node_modules/.bin/ts-node -- ./src/index",
+		"build": "tsc"
+	},
+	"keywords": [
+		"mpesa",
+		"nodejs",
+		"node",
+		"mobile money",
+		"money"
+	],
+	"author": "Newton Munene <newtonmunene99@gmail.com>",
+	"license": "MIT",
+	"dependencies": {
+		"axios": "^0.18.0",
+		"constants": "0.0.2",
+		"crypto": "^1.0.1",
+		"request": "^2.87.0"
+	},
+	"devDependencies": {
+		"@types/mocha": "^5.2.2",
+		"@types/node": "^10.3.3",
+		"eslint": "^4.19.1",
+		"eslint-config-google": "^0.9.1",
+		"mocha": "^5.2.0",
+		"nodemon": "^1.18.4",
+		"ts-node": "^6.1.1",
+		"typescript": "^3.1.1",
+		"typescript-eslint-parser": "^20.0.0"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/newtonmunene99/mpesa-api.git"
+	},
+	"bugs": {
+		"url": "https://github.com/newtonmunene99/mpesa-api/issues"
+	}
 }
