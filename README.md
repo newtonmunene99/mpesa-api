@@ -55,7 +55,9 @@ const mpesa = require("mpesa-api").mpesa;
 const Mpesa = new mpesa(credentials, environment);
 ```
 
-A moment to explain the above. `credentials` should be an object containing key,secret,securitycredential and certificatepath as the properties.
+A moment to explain the above. `credentials` should be an object containing key,secret,initiator_password and certificatepath as the properties.
+
+You can get initiator password from Your Portal(production) or from test credentials(Sandbox). It will be the `Security Credential (Shortcode 1)`.
 
 ```javascript
 //example
