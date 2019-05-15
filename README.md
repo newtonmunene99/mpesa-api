@@ -406,14 +406,14 @@ Mpesa.reversal({
 ## RoadMap
 
 - [x] Basic Documentation
-- [ ] Deploy to Npm
+- [x] Deploy to Npm
 - [x] Migrate to Typescript
-- [ ] Detailed Documentation
+- [x] Detailed Documentation
 - [ ] Better Support for es5
 - [ ] Unit tests
 - [ ] E2E Integration Tests
-- [ ] Reduce functions
-- [ ] Validators for inputs
+- [x] Reduce functions
+- [x] Validators for inputs
 
 ## Build
 
