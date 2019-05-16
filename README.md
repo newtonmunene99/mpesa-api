@@ -47,12 +47,12 @@ You Will need a few things from Safaricom before development.
 
 ```javascript
 // import package
-import { mpesa } from "mpesa-api";
+import { Mpesa } from "mpesa-api";
 //OR
-const mpesa = require("mpesa-api").mpesa;
+const Mpesa = require("mpesa-api").Mpesa;
 
 // create a new instance of the api
-const Mpesa = new mpesa(credentials, environment);
+const mpesa = new Mpesa(credentials, environment);
 ```
 
 A moment to explain the above. `credentials` should be an object containing key,secret,initiator_password and certificatepath as the properties.
@@ -91,7 +91,7 @@ const environment = "production";
 This API enables Business to Business (B2B) transactions between a business and another business. Use of this API requires a valid and verified B2B M-Pesa short code for the business initiating the transaction and the both businesses involved in the transaction.
 
 ```javascript
-Mpesa.b2b({
+mpesa.b2b({
   InitiatorName: "Initiator Name",
   Amount: 1000 /* 1000 is an example amount */,
   PartyA: "Party A",
@@ -133,7 +133,7 @@ Mpesa.b2b({
 This API enables Business to Customer (B2C) transactions between a company and customers who are the end-users of its products or services. Use of this API requires a valid and verified B2C M-Pesa Short code.
 
 ```javascript
-Mpesa.b2c({
+mpesa.b2c({
   InitiatorName: "Initiator Name",
   Amount: 1000 /* 1000 is an example amount */,
   PartyA: "Party A",
@@ -177,7 +177,7 @@ The C2B Register URL API registers the 3rd party’s confirmation and validation
 M-Pesa completes or cancels the transaction depending on the validation response it receives from the 3rd party system. A confirmation request of the transaction is then sent by M-Pesa through the confirmation URL back to the 3rd party which then should respond with a success acknowledging the confirmation.
 
 ```javascript
-Mpesa.c2bregister({
+mpesa.c2bregister({
   ShortCode: "Short Code",
   ConfirmationURL: "Confirmation URL",
   ValidationURL: "Validation URL",
@@ -203,7 +203,7 @@ Mpesa.c2bregister({
 ##### Simulate
 
 ```javascript
-Mpesa.c2bsimulate({
+mpesa.c2bsimulate({
   ShortCode: 123456,
   Amount: 1000 /* 1000 is an example amount */,
   Msisdn: 254792123456,
@@ -233,7 +233,7 @@ Mpesa.c2bsimulate({
 The Account Balance API requests for the account balance of a shortcode.
 
 ```javascript
-Mpesa.accountBalance({
+mpesa.accountBalance({
   Initiator: "Initiator Name",
   PartyA: "Party A",
   IdentifierType: "Identifier Type",
@@ -267,7 +267,7 @@ Mpesa.accountBalance({
 Transaction Status API checks the status of a B2B, B2C and C2B APIs transactions.
 
 ```javascript
-Mpesa.transactionStatus({
+mpesa.transactionStatus({
   Initiator: "Initiator",
   TransactionID: "Transaction ID",
   PartyA: "Party A",
@@ -305,7 +305,7 @@ Mpesa.transactionStatus({
 Lipa na M-Pesa Online Payment API is used to initiate a M-Pesa transaction on behalf of a customer using STK Push. This is the same technique mySafaricom App uses whenever the app is used to make payments.
 
 ```javascript
-Mpesa.lipanampesa({
+mpesa.lipanampesa({
   BusinessShortCode: 123456,
   Amount: 1000 /* 1000 is an example amount */,
   PartyA: "Party A",
@@ -342,7 +342,7 @@ Mpesa.lipanampesa({
 #### Lipa na mpesa online query
 
 ```javascript
-Mpesa.lipanampesaquery({
+mpesa.lipanampesaquery({
   BusinessShortCode: 123456,
   CheckoutRequestID: "Checkout Request ID",
   passKey: "Lipa Na Mpesa Pass Key"
@@ -368,7 +368,7 @@ Mpesa.lipanampesaquery({
 Reverses a B2B, B2C or C2B M-Pesa transaction.
 
 ```javascript
-Mpesa.reversal({
+mpesa.reversal({
   Initiator: "Initiator",
   TransactionID: "Transaction ID",
   Amount: 1000 /* 1000 is an example amount */,
