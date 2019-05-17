@@ -35,7 +35,6 @@ export class Mpesa {
       credentials.initiator_password,
       credentials.certificatepath
     );
-    console.log(this.securitycredential);
   }
 
   /**
