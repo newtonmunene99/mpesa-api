@@ -57,8 +57,6 @@ const mpesa = new Mpesa(credentials, environment);
 
 A moment to explain the above. `credentials` should be an object containing key,secret,initiator_password and certificatepath as the properties.
 
-You can get initiator password from Your Portal(production) or from test credentials(Sandbox). It will be the `Security Credential (Shortcode 1)`.
-
 ```javascript
 //example
 const credentials = {
@@ -75,6 +73,7 @@ const credentials = {
     certificatepath: null
 };
 ```
+> You can get initiator password from Your Portal(production) or from test credentials(Sandbox). It will be the `Security Credential (Shortcode 1)`.
 
 Environment should be a string. It can be either 'production' or 'sandbox'
 
