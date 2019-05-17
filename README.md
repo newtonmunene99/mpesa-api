@@ -46,13 +46,14 @@ You Will need a few things from Safaricom before development.
 ## Getting Started
 
 ```javascript
-// import package
-import { mpesa } from "mpesa-api";
+// import package.
+import { Mpesa } from "mpesa-api";
+
 //OR
-const mpesa = require("mpesa-api").mpesa;
+const Mpesa = require("mpesa-api").Mpesa;
 
 // create a new instance of the api
-const Mpesa = new mpesa(credentials, environment);
+const mpesa = new Mpesa(credentials, environment);
 ```
 
 A moment to explain the above. `credentials` should be an object containing key,secret,initiator_password and certificatepath as the properties.
