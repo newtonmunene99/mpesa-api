@@ -46,19 +46,16 @@ You Will need a few things from Safaricom before development.
 ## Getting Started
 
 ```javascript
-// import package.
-import { Mpesa } from "mpesa-api";
-
+// import package
+import { Mpesa } from 'mpesa-api';
 //OR
-const Mpesa = require("mpesa-api").Mpesa;
+const Mpesa = require('mpesa-api').Mpesa;
 
 // create a new instance of the api
 const mpesa = new Mpesa(credentials, environment);
 ```
 
 A moment to explain the above. `credentials` should be an object containing key,secret,initiator_password and certificatepath as the properties.
-
-You can get initiator password from Your Portal(production) or from test credentials(Sandbox). It will be the `Security Credential (Shortcode 1)`.
 
 ```javascript
 //example
@@ -68,19 +65,22 @@ const credentials = {
     initiator_password: 'YOUR_INITIATOR_PASSWORD_HERE',
     certificatepath: 'keys/example.cert'
 };
+// For the initiator_password, use the security credential from the test credentials page.link :https://developer.safaricom.co.ke/test_credentials
+
 // certificate path is otional. I've provided ceritificates for sandbox and production by default. If you choose not to include it Pass it as null.
 const credentials = {
     ...,
     certificatepath: null
 };
 ```
+> You can get initiator password from Your Portal(production) or from test credentials(Sandbox). It will be the `Security Credential (Shortcode 1)`.
 
 Environment should be a string. It can be either 'production' or 'sandbox'
 
 ```javascript
-const environment = "sandbox";
+const environment = 'sandbox';
 //or
-const environment = "production";
+const environment = 'production';
 ```
 
 ## Methods and Api Calls
@@ -92,19 +92,20 @@ const environment = "production";
 This API enables Business to Business (B2B) transactions between a business and another business. Use of this API requires a valid and verified B2B M-Pesa short code for the business initiating the transaction and the both businesses involved in the transaction.
 
 ```javascript
-Mpesa.b2b({
-  InitiatorName: "Initiator Name",
-  Amount: 1000 /* 1000 is an example amount */,
-  PartyA: "Party A",
-  PartyB: "Party B",
-  AccountReference: "Account Reference",
-  QueueTimeOutURL: "Queue Timeout URL",
-  ResultURL: "Result URL",
-  CommandID: "Command ID" /* OPTIONAL */,
-  SenderIdentifierType: 4 /* OPTIONAL */,
-  RecieverIdentifierType: 4 /* OPTIONAL */,
-  Remarks: "Remarks" /* OPTIONAL */
-})
+mpesa
+  .b2b({
+    InitiatorName: 'Initiator Name',
+    Amount: 1000 /* 1000 is an example amount */,
+    PartyA: 'Party A',
+    PartyB: 'Party B',
+    AccountReference: 'Account Reference',
+    QueueTimeOutURL: 'Queue Timeout URL',
+    ResultURL: 'Result URL',
+    CommandID: 'Command ID' /* OPTIONAL */,
+    SenderIdentifierType: 4 /* OPTIONAL */,
+    RecieverIdentifierType: 4 /* OPTIONAL */,
+    Remarks: 'Remarks' /* OPTIONAL */
+  })
   .then(response => {
     //Do something with the response
     //eg
@@ -134,17 +135,18 @@ Mpesa.b2b({
 This API enables Business to Customer (B2C) transactions between a company and customers who are the end-users of its products or services. Use of this API requires a valid and verified B2C M-Pesa Short code.
 
 ```javascript
-Mpesa.b2c({
-  InitiatorName: "Initiator Name",
-  Amount: 1000 /* 1000 is an example amount */,
-  PartyA: "Party A",
-  PartyB: "Party B",
-  QueueTimeOutURL: "Queue Timeout URL",
-  ResultURL: "Result URL",
-  CommandID: "Command ID" /* OPTIONAL */,
-  Occasion: "Occasion" /* OPTIONAL */,
-  Remarks: "Remarks" /* OPTIONAL */
-})
+mpesa
+  .b2c({
+    InitiatorName: 'Initiator Name',
+    Amount: 1000 /* 1000 is an example amount */,
+    PartyA: 'Party A',
+    PartyB: 'Party B',
+    QueueTimeOutURL: 'Queue Timeout URL',
+    ResultURL: 'Result URL',
+    CommandID: 'Command ID' /* OPTIONAL */,
+    Occasion: 'Occasion' /* OPTIONAL */,
+    Remarks: 'Remarks' /* OPTIONAL */
+  })
   .then(response => {
     //Do something with the response
     //eg
@@ -178,12 +180,13 @@ The C2B Register URL API registers the 3rd party’s confirmation and validation
 M-Pesa completes or cancels the transaction depending on the validation response it receives from the 3rd party system. A confirmation request of the transaction is then sent by M-Pesa through the confirmation URL back to the 3rd party which then should respond with a success acknowledging the confirmation.
 
 ```javascript
-Mpesa.c2bregister({
-  ShortCode: "Short Code",
-  ConfirmationURL: "Confirmation URL",
-  ValidationURL: "Validation URL",
-  ResponseType: "Response Type"
-})
+mpesa
+  .c2bregister({
+    ShortCode: 'Short Code',
+    ConfirmationURL: 'Confirmation URL',
+    ValidationURL: 'Validation URL',
+    ResponseType: 'Response Type'
+  })
   .then(response => {
     //Do something with the response
     //eg
@@ -204,13 +207,14 @@ Mpesa.c2bregister({
 ##### Simulate
 
 ```javascript
-Mpesa.c2bsimulate({
-  ShortCode: 123456,
-  Amount: 1000 /* 1000 is an example amount */,
-  Msisdn: 254792123456,
-  CommandID: "Command ID" /* OPTIONAL */,
-  BillRefNumber: "Bill Reference Number" /* OPTIONAL */
-})
+mpesa
+  .c2bsimulate({
+    ShortCode: 123456,
+    Amount: 1000 /* 1000 is an example amount */,
+    Msisdn: 254792123456,
+    CommandID: 'Command ID' /* OPTIONAL */,
+    BillRefNumber: 'Bill Reference Number' /* OPTIONAL */
+  })
   .then(response => {
     //Do something with the response
     //eg
@@ -234,15 +238,16 @@ Mpesa.c2bsimulate({
 The Account Balance API requests for the account balance of a shortcode.
 
 ```javascript
-Mpesa.accountBalance({
-  Initiator: "Initiator Name",
-  PartyA: "Party A",
-  IdentifierType: "Identifier Type",
-  QueueTimeOutURL: "Queue Timeout URL",
-  ResultURL: "Result URL",
-  CommandID: "Command ID" /* OPTIONAL */,
-  Remarks: "Remarks" /* OPTIONAL */
-})
+mpesa
+  .accountBalance({
+    Initiator: 'Initiator Name',
+    PartyA: 'Party A',
+    IdentifierType: 'Identifier Type',
+    QueueTimeOutURL: 'Queue Timeout URL',
+    ResultURL: 'Result URL',
+    CommandID: 'Command ID' /* OPTIONAL */,
+    Remarks: 'Remarks' /* OPTIONAL */
+  })
   .then(response => {
     //Do something with the response
     //eg
@@ -268,17 +273,18 @@ Mpesa.accountBalance({
 Transaction Status API checks the status of a B2B, B2C and C2B APIs transactions.
 
 ```javascript
-Mpesa.transactionStatus({
-  Initiator: "Initiator",
-  TransactionID: "Transaction ID",
-  PartyA: "Party A",
-  IdentifierType: "Identifier Type",
-  ResultURL: "Result URL",
-  QueueTimeOutURL: "Queue Timeout URL",
-  CommandID: "Command ID" /* OPTIONAL */,
-  Remarks: "Remarks" /* OPTIONAL */,
-  Occasion: "Occasion" /* OPTIONAL */
-})
+mpesa
+  .transactionStatus({
+    Initiator: 'Initiator',
+    TransactionID: 'Transaction ID',
+    PartyA: 'Party A',
+    IdentifierType: 'Identifier Type',
+    ResultURL: 'Result URL',
+    QueueTimeOutURL: 'Queue Timeout URL',
+    CommandID: 'Command ID' /* OPTIONAL */,
+    Remarks: 'Remarks' /* OPTIONAL */,
+    Occasion: 'Occasion' /* OPTIONAL */
+  })
   .then(response => {
     //Do something with the response
     //eg
@@ -306,17 +312,18 @@ Mpesa.transactionStatus({
 Lipa na M-Pesa Online Payment API is used to initiate a M-Pesa transaction on behalf of a customer using STK Push. This is the same technique mySafaricom App uses whenever the app is used to make payments.
 
 ```javascript
-Mpesa.lipanampesa({
-  BusinessShortCode: 123456,
-  Amount: 1000 /* 1000 is an example amount */,
-  PartyA: "Party A",
-  PhoneNumber: "Phone Number",
-  CallBackURL: "CallBack URL",
-  AccountReference: "Account Reference",
-  passKey: "Lipa Na Mpesa Pass Key",
-  TransactionType: "Transaction Type" /* OPTIONAL */,
-  TransactionDesc: "Transaction Description" /* OPTIONAL */
-})
+mpesa
+  .lipaNaMpesaOnline({
+    BusinessShortCode: 123456,
+    Amount: 1000 /* 1000 is an example amount */,
+    PartyA: 'Party A',
+    PhoneNumber: 'Phone Number',
+    CallBackURL: 'CallBack URL',
+    AccountReference: 'Account Reference',
+    passKey: 'Lipa Na Mpesa Pass Key',
+    TransactionType: 'Transaction Type' /* OPTIONAL */,
+    TransactionDesc: 'Transaction Description' /* OPTIONAL */
+  })
   .then(response => {
     //Do something with the response
     //eg
@@ -343,11 +350,12 @@ Mpesa.lipanampesa({
 #### Lipa na mpesa online query
 
 ```javascript
-Mpesa.lipanampesaquery({
-  BusinessShortCode: 123456,
-  CheckoutRequestID: "Checkout Request ID",
-  passKey: "Lipa Na Mpesa Pass Key"
-})
+mpesa
+  .lipanampesaquery({
+    BusinessShortCode: 123456,
+    CheckoutRequestID: 'Checkout Request ID',
+    passKey: 'Lipa Na Mpesa Pass Key'
+  })
   .then(response => {
     //Do something with the response
     //eg
@@ -369,18 +377,19 @@ Mpesa.lipanampesaquery({
 Reverses a B2B, B2C or C2B M-Pesa transaction.
 
 ```javascript
-Mpesa.reversal({
-  Initiator: "Initiator",
-  TransactionID: "Transaction ID",
-  Amount: 1000 /* 1000 is an example amount */,
-  ReceiverParty: "Reciever Party",
-  ResultURL: "Result URL",
-  QueueTimeOutURL: "Queue Timeout URL",
-  CommandID: "Command ID" /* OPTIONAL */,
-  RecieverIdentifierType: 11 /* OPTIONAL */,
-  Remarks: "Remarks" /* OPTIONAL */,
-  Occasion: "Ocassion" /* OPTIONAL */
-})
+mpesa
+  .reversal({
+    Initiator: 'Initiator',
+    TransactionID: 'Transaction ID',
+    Amount: 1000 /* 1000 is an example amount */,
+    ReceiverParty: 'Reciever Party',
+    ResultURL: 'Result URL',
+    QueueTimeOutURL: 'Queue Timeout URL',
+    CommandID: 'Command ID' /* OPTIONAL */,
+    RecieverIdentifierType: 11 /* OPTIONAL */,
+    Remarks: 'Remarks' /* OPTIONAL */,
+    Occasion: 'Ocassion' /* OPTIONAL */
+  })
   .then(response => {
     //Do something with the response
     //eg
@@ -407,14 +416,14 @@ Mpesa.reversal({
 ## RoadMap
 
 - [x] Basic Documentation
-- [ ] Deploy to Npm
+- [x] Deploy to Npm
 - [x] Migrate to Typescript
-- [ ] Detailed Documentation
+- [x] Detailed Documentation
 - [ ] Better Support for es5
 - [ ] Unit tests
 - [ ] E2E Integration Tests
-- [ ] Reduce functions
-- [ ] Validators for inputs
+- [x] Reduce functions
+- [x] Validators for inputs
 
 ## Build
 
