@@ -11,7 +11,8 @@ import {
   accountbalanceinterface,
   stkpushinterface,
   reversalinterface,
-  credentialsinterface
+  credentialsinterface,
+  stkqueryinterface
 } from "./helpers/interfaces";
 import { routes } from "./helpers/routes";
 
@@ -230,6 +231,54 @@ export class Mpesa {
               TransactionDesc: data.TransactionDesc
                 ? data.TransactionDesc
                 : "Lipa Na Mpesa Online"
+            }
+          })
+            .then(response => {
+              resolve(response.data);
+            })
+            .catch(error => {
+              reject(error);
+            });
+        })
+        .catch(error => {
+          reject(error);
+        });
+    });
+  }
+
+  /**
+   * Lipa na Mpesa Online
+   * @name StkQuery
+   * @function
+   * @description Lipa na M-Pesa Online Query is used to check for Payment status.
+   * @see {@link https://developer.safaricom.co.ke/docs?javascript#lipa-na-m-pesa-online-query-request }
+   * @param  {string} BusinessShortCode The organization shortcode used to receive the transaction.
+   * @param  {number} CheckoutRequestID Check out Request ID.
+   * @param {any} passKey Lipa Na Mpesa Pass Key
+   * @returns {Promise}
+   */
+  lipaNaMpesaQuery(data: stkqueryinterface): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const Timestamp = new Date()
+        .toISOString()
+        .replace(/[^0-9]/g, "")
+        .slice(0, -3);
+      const Password = Buffer.from(
+        data.BusinessShortCode + data.passKey + Timestamp
+      ).toString("base64");
+      this.authenticate()
+        .then(token => {
+          axios({
+            method: "post",
+            url: this.baseURL + routes.stkquery,
+            headers: {
+              Authorization: "Bearer " + token
+            },
+            data: {
+              BusinessShortCode: data.BusinessShortCode,
+              Password: Password,
+              Timestamp: Timestamp,
+              CheckoutRequestID: data.CheckoutRequestID
             }
           })
             .then(response => {

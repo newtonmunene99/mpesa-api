@@ -2,7 +2,7 @@ export interface credentialsinterface {
   client_key: string;
   client_secret: string;
   initiator_password: string;
-  certificatepath?: string;
+  certificatepath?: string | null;
 }
 
 export interface b2cinterface {
