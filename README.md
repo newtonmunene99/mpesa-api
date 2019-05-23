@@ -13,6 +13,7 @@ Ready Methods
 - [ ] TRANSACTION STATUS
 - [x] ACCOUNT BALANCE
 - [ ] REVERSAL
+- [x] LIPA NA MPESA
 
 ## Prerequisites
 
