@@ -351,7 +351,7 @@ mpesa
 
 ```javascript
 mpesa
-  .lipanampesaquery({
+  .lipaNaMpesaQuery({
     BusinessShortCode: 123456,
     CheckoutRequestID: 'Checkout Request ID',
     passKey: 'Lipa Na Mpesa Pass Key'
