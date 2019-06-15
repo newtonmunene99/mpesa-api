@@ -1,5 +1,7 @@
 # Mpesa-Api
 
+[![Build Status](https://travis-ci.org/newtonmunene99/mpesa-api.svg?branch=master)](https://travis-ci.org/newtonmunene99/mpesa-api)
+
 :zap: :bomb: :fire: :fire: :bomb: :zap:
 
 An NPM Module built with NodeJs to help you with M-Pesa Daraja API calls.
