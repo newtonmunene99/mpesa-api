@@ -18,7 +18,7 @@ Ready Methods
 ## Prerequisites
 
 1.  Node 6+.
-2.  NPM(comes with Node).
+2.  NPM(comes with Node) or Yarn.
 
 ## Installation
 
@@ -26,6 +26,10 @@ Mpesa-Api uses Node Package Manager
 
 ```
 npm i mpesa-api
+```
+Or Yarn
+```
+yarn add mpesa-api
 ```
 
 ## Requisites
@@ -420,7 +424,6 @@ mpesa
 - [x] Deploy to Npm
 - [x] Migrate to Typescript
 - [x] Detailed Documentation
-- [ ] Better Support for es5
 - [ ] Unit tests
 - [ ] E2E Integration Tests
 - [x] Reduce functions
