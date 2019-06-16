@@ -9,7 +9,8 @@
     "start": "node lib/index.js",
     "dev": "nodemon --exec ./node_modules/.bin/ts-node -- ./src/index",
     "build": "tsc && npm run copy-keys",
-    "copy-keys": "ncp src/keys lib/keys"
+    "copy-keys": "ncp src/keys lib/keys",
+    "test": "mocha -r ts-node/register src/**/*.spec.ts"
   },
   "keywords": [
     "mpesa",
@@ -21,9 +22,13 @@
   "author": "Newton Munene <newtonmunene99@gmail.com>",
   "license": "MIT",
   "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.7",
     "@types/node": "^11.13.11",
     "@typescript-eslint/parser": "^1.9.0",
+    "chai": "^4.2.0",
     "eslint": "^5.16.0",
+    "mocha": "^6.1.4",
     "ncp": "^2.0.0",
     "nodemon": "^1.19.0",
     "ts-node": "^8.1.0",

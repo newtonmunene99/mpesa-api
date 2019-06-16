@@ -67,7 +67,7 @@ export interface stkpushinterface {
   Amount: number;
   PartyA: string;
   PartyB: string;
-  PhoneNumber: number;
+  PhoneNumber: string;
   CallBackURL: string;
   AccountReference: string;
   passKey: any;

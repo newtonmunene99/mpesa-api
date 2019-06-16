@@ -6,6 +6,8 @@
 
 An NPM Module built with NodeJs to help you with M-Pesa Daraja API calls.
 
+> **Looking for contributors who can help write tests.**
+
 Ready Methods
 
 - [x] C2BSIMULATE
@@ -29,7 +31,9 @@ Mpesa-Api uses Node Package Manager
 ```
 npm i mpesa-api
 ```
+
 Or Yarn
+
 ```
 yarn add mpesa-api
 ```
@@ -54,9 +58,9 @@ You Will need a few things from Safaricom before development.
 
 ```javascript
 // import package
-import { Mpesa } from 'mpesa-api';
+import { Mpesa } from "mpesa-api";
 //OR
-const Mpesa = require('mpesa-api').Mpesa;
+const Mpesa = require("mpesa-api").Mpesa;
 
 // create a new instance of the api
 const mpesa = new Mpesa(credentials, environment);
@@ -80,14 +84,15 @@ const credentials = {
     certificatepath: null
 };
 ```
+
 > You can get initiator password from Your Portal(production) or from test credentials(Sandbox). It will be the `Security Credential (Shortcode 1)`.
 
 Environment should be a string. It can be either 'production' or 'sandbox'
 
 ```javascript
-const environment = 'sandbox';
+const environment = "sandbox";
 //or
-const environment = 'production';
+const environment = "production";
 ```
 
 ## Methods and Api Calls
@@ -101,17 +106,17 @@ This API enables Business to Business (B2B) transactions between a business and 
 ```javascript
 mpesa
   .b2b({
-    InitiatorName: 'Initiator Name',
+    InitiatorName: "Initiator Name",
     Amount: 1000 /* 1000 is an example amount */,
-    PartyA: 'Party A',
-    PartyB: 'Party B',
-    AccountReference: 'Account Reference',
-    QueueTimeOutURL: 'Queue Timeout URL',
-    ResultURL: 'Result URL',
-    CommandID: 'Command ID' /* OPTIONAL */,
+    PartyA: "Party A",
+    PartyB: "Party B",
+    AccountReference: "Account Reference",
+    QueueTimeOutURL: "Queue Timeout URL",
+    ResultURL: "Result URL",
+    CommandID: "Command ID" /* OPTIONAL */,
     SenderIdentifierType: 4 /* OPTIONAL */,
     RecieverIdentifierType: 4 /* OPTIONAL */,
-    Remarks: 'Remarks' /* OPTIONAL */
+    Remarks: "Remarks" /* OPTIONAL */
   })
   .then(response => {
     //Do something with the response
@@ -144,15 +149,15 @@ This API enables Business to Customer (B2C) transactions between a company and c
 ```javascript
 mpesa
   .b2c({
-    InitiatorName: 'Initiator Name',
+    InitiatorName: "Initiator Name",
     Amount: 1000 /* 1000 is an example amount */,
-    PartyA: 'Party A',
-    PartyB: 'Party B',
-    QueueTimeOutURL: 'Queue Timeout URL',
-    ResultURL: 'Result URL',
-    CommandID: 'Command ID' /* OPTIONAL */,
-    Occasion: 'Occasion' /* OPTIONAL */,
-    Remarks: 'Remarks' /* OPTIONAL */
+    PartyA: "Party A",
+    PartyB: "Party B",
+    QueueTimeOutURL: "Queue Timeout URL",
+    ResultURL: "Result URL",
+    CommandID: "Command ID" /* OPTIONAL */,
+    Occasion: "Occasion" /* OPTIONAL */,
+    Remarks: "Remarks" /* OPTIONAL */
   })
   .then(response => {
     //Do something with the response
@@ -189,10 +194,10 @@ M-Pesa completes or cancels the transaction depending on the validation response
 ```javascript
 mpesa
   .c2bregister({
-    ShortCode: 'Short Code',
-    ConfirmationURL: 'Confirmation URL',
-    ValidationURL: 'Validation URL',
-    ResponseType: 'Response Type'
+    ShortCode: "Short Code",
+    ConfirmationURL: "Confirmation URL",
+    ValidationURL: "Validation URL",
+    ResponseType: "Response Type"
   })
   .then(response => {
     //Do something with the response
@@ -219,8 +224,8 @@ mpesa
     ShortCode: 123456,
     Amount: 1000 /* 1000 is an example amount */,
     Msisdn: 254792123456,
-    CommandID: 'Command ID' /* OPTIONAL */,
-    BillRefNumber: 'Bill Reference Number' /* OPTIONAL */
+    CommandID: "Command ID" /* OPTIONAL */,
+    BillRefNumber: "Bill Reference Number" /* OPTIONAL */
   })
   .then(response => {
     //Do something with the response
@@ -247,13 +252,13 @@ The Account Balance API requests for the account balance of a shortcode.
 ```javascript
 mpesa
   .accountBalance({
-    Initiator: 'Initiator Name',
-    PartyA: 'Party A',
-    IdentifierType: 'Identifier Type',
-    QueueTimeOutURL: 'Queue Timeout URL',
-    ResultURL: 'Result URL',
-    CommandID: 'Command ID' /* OPTIONAL */,
-    Remarks: 'Remarks' /* OPTIONAL */
+    Initiator: "Initiator Name",
+    PartyA: "Party A",
+    IdentifierType: "Identifier Type",
+    QueueTimeOutURL: "Queue Timeout URL",
+    ResultURL: "Result URL",
+    CommandID: "Command ID" /* OPTIONAL */,
+    Remarks: "Remarks" /* OPTIONAL */
   })
   .then(response => {
     //Do something with the response
@@ -282,15 +287,15 @@ Transaction Status API checks the status of a B2B, B2C and C2B APIs transactions
 ```javascript
 mpesa
   .transactionStatus({
-    Initiator: 'Initiator',
-    TransactionID: 'Transaction ID',
-    PartyA: 'Party A',
-    IdentifierType: 'Identifier Type',
-    ResultURL: 'Result URL',
-    QueueTimeOutURL: 'Queue Timeout URL',
-    CommandID: 'Command ID' /* OPTIONAL */,
-    Remarks: 'Remarks' /* OPTIONAL */,
-    Occasion: 'Occasion' /* OPTIONAL */
+    Initiator: "Initiator",
+    TransactionID: "Transaction ID",
+    PartyA: "Party A",
+    IdentifierType: "Identifier Type",
+    ResultURL: "Result URL",
+    QueueTimeOutURL: "Queue Timeout URL",
+    CommandID: "Command ID" /* OPTIONAL */,
+    Remarks: "Remarks" /* OPTIONAL */,
+    Occasion: "Occasion" /* OPTIONAL */
   })
   .then(response => {
     //Do something with the response
@@ -323,13 +328,13 @@ mpesa
   .lipaNaMpesaOnline({
     BusinessShortCode: 123456,
     Amount: 1000 /* 1000 is an example amount */,
-    PartyA: 'Party A',
-    PhoneNumber: 'Phone Number',
-    CallBackURL: 'CallBack URL',
-    AccountReference: 'Account Reference',
-    passKey: 'Lipa Na Mpesa Pass Key',
-    TransactionType: 'Transaction Type' /* OPTIONAL */,
-    TransactionDesc: 'Transaction Description' /* OPTIONAL */
+    PartyA: "Party A",
+    PhoneNumber: "Phone Number",
+    CallBackURL: "CallBack URL",
+    AccountReference: "Account Reference",
+    passKey: "Lipa Na Mpesa Pass Key",
+    TransactionType: "Transaction Type" /* OPTIONAL */,
+    TransactionDesc: "Transaction Description" /* OPTIONAL */
   })
   .then(response => {
     //Do something with the response
@@ -360,8 +365,8 @@ mpesa
 mpesa
   .lipaNaMpesaQuery({
     BusinessShortCode: 123456,
-    CheckoutRequestID: 'Checkout Request ID',
-    passKey: 'Lipa Na Mpesa Pass Key'
+    CheckoutRequestID: "Checkout Request ID",
+    passKey: "Lipa Na Mpesa Pass Key"
   })
   .then(response => {
     //Do something with the response
@@ -386,16 +391,16 @@ Reverses a B2B, B2C or C2B M-Pesa transaction.
 ```javascript
 mpesa
   .reversal({
-    Initiator: 'Initiator',
-    TransactionID: 'Transaction ID',
+    Initiator: "Initiator",
+    TransactionID: "Transaction ID",
     Amount: 1000 /* 1000 is an example amount */,
-    ReceiverParty: 'Reciever Party',
-    ResultURL: 'Result URL',
-    QueueTimeOutURL: 'Queue Timeout URL',
-    CommandID: 'Command ID' /* OPTIONAL */,
+    ReceiverParty: "Reciever Party",
+    ResultURL: "Result URL",
+    QueueTimeOutURL: "Queue Timeout URL",
+    CommandID: "Command ID" /* OPTIONAL */,
     RecieverIdentifierType: 11 /* OPTIONAL */,
-    Remarks: 'Remarks' /* OPTIONAL */,
-    Occasion: 'Ocassion' /* OPTIONAL */
+    Remarks: "Remarks" /* OPTIONAL */,
+    Occasion: "Ocassion" /* OPTIONAL */
   })
   .then(response => {
     //Do something with the response
@@ -435,19 +440,20 @@ mpesa
 
 If you Wish to build
 
-1.  Clone this repo
-2.  CD into repo
-3.  run `npm install` to install dependencies
-4.  run `npm run build` to build
-5.  run `npm run start:dev` to run package in development mode
+1. Clone this repo
+2. CD into repo
+3. run `npm install` to install dependencies
+4. run `npm run build` to build
+5. run `npm run start:dev` to run package in development mode
 
 ## Contributing
 
-1.  Fork the project then clone the forked project
-2.  Create your feature branch: `git checkout -b my-new-feature`
-3.  Commit your changes: `git commit -m 'Add some feature'`
-4.  Push to the branch: `git push origin my-new-feature`
-5.  Submit a pull request.
+1. Fork the project then clone the forked project
+2. Create your feature branch: `git checkout -b my-new-feature`
+3. Make your changes and add name to Contributors list below.
+4. Commit your changes: `git commit -m 'Add some feature'`
+5. Push to the branch: `git push origin my-new-feature`
+6. Submit a pull request.
 
 ## Credits
 

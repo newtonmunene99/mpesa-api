@@ -75,7 +75,7 @@ export class Mpesa {
               resolve(response.data);
             })
             .catch(error => {
-              reject(error);
+              reject(error.response);
             });
         })
         .catch(error => {
@@ -119,7 +119,7 @@ export class Mpesa {
               resolve(response.data);
             })
             .catch(error => {
-              reject(error);
+              reject(error.response);
             });
         })
         .catch(error => {
@@ -172,7 +172,7 @@ export class Mpesa {
               resolve(response.data);
             })
             .catch(error => {
-              reject(error);
+              reject(error.response);
             });
         })
         .catch(error => {
@@ -237,7 +237,7 @@ export class Mpesa {
               resolve(response.data);
             })
             .catch(error => {
-              reject(error);
+              reject(error.response);
             });
         })
         .catch(error => {
@@ -285,7 +285,7 @@ export class Mpesa {
               resolve(response.data);
             })
             .catch(error => {
-              reject(error);
+              reject(error.response);
             });
         })
         .catch(error => {
@@ -341,7 +341,7 @@ export class Mpesa {
               resolve(response.data);
             })
             .catch(error => {
-              reject(error);
+              reject(error.response);
             });
         })
         .catch(error => {
@@ -389,7 +389,7 @@ export class Mpesa {
               resolve(response.data);
             })
             .catch(error => {
-              reject(error);
+              reject(error.response);
             });
         })
         .catch(error => {
@@ -415,7 +415,7 @@ export class Mpesa {
           resolve(response.data.access_token);
         })
         .catch(error => {
-          reject(error);
+          reject(error.response);
         });
     });
   }
