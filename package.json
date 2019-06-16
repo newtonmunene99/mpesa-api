@@ -24,15 +24,15 @@
   "devDependencies": {
     "@types/chai": "^4.1.7",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^11.13.11",
-    "@typescript-eslint/parser": "^1.9.0",
+    "@types/node": "^11.13.14",
+    "@typescript-eslint/parser": "^1.10.2",
     "chai": "^4.2.0",
     "eslint": "^5.16.0",
     "mocha": "^6.1.4",
     "ncp": "^2.0.0",
-    "nodemon": "^1.19.0",
-    "ts-node": "^8.1.0",
-    "typescript": "^3.4.5"
+    "nodemon": "^1.19.1",
+    "ts-node": "^8.3.0",
+    "typescript": "^3.5.2"
   },
   "dependencies": {
     "axios": "^0.18.0"

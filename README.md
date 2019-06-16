@@ -66,7 +66,7 @@ const Mpesa = require("mpesa-api").Mpesa;
 const mpesa = new Mpesa(credentials, environment);
 ```
 
-A moment to explain the above. `credentials` should be an object containing key,secret,initiator_password and certificatepath as the properties.
+A moment to explain the above. `credentials` should be an object containing key,secret,initiator_password and certificatepath as the properties/keys.
 
 ```javascript
 //example
