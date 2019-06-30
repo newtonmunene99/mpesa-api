@@ -431,10 +431,9 @@ mpesa
 - [x] Deploy to Npm
 - [x] Migrate to Typescript
 - [x] Detailed Documentation
-- [ ] Unit tests
-- [ ] E2E Integration Tests
-- [x] Reduce functions
+- [ ] Write Tests
 - [x] Validators for inputs
+- [ ] Tree shaking
 
 ## Build
 
