@@ -4,7 +4,7 @@
 
 An NPM Module built with NodeJs to help you with M-Pesa Daraja API calls.
 
-> **Looking for contributors who can help write tests.**
+**Looking for contributors who can help write tests.**
 
 
 |     |Badge|
