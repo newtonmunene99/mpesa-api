@@ -10,7 +10,7 @@ An NPM Module built with NodeJs to help you with M-Pesa Daraja API calls.
 |     |Badge|
 |-----|-----|
 |Travis|[![Build Status](https://travis-ci.org/newtonmunene99/mpesa-api.svg?branch=master)](https://travis-ci.org/newtonmunene99/mpesa-api)|
-|Latest|[![Latest](https://badgen.net/github/release/newtonmunene99/mpesa-api)]()|
+|Latest|[![Latest](https://badgen.net/npm/v/mpesa-api)](https://www.npmjs.com/package/mpesa-api)|
 |Minified|[![Minified Size](https://badgen.net/bundlephobia/min/mpesa-api)](https://bundlephobia.com/result?p=mpesa-api)|
 |MinZip|[![Min](https://badgen.net/bundlephobia/minzip/mpesa-api)](https://bundlephobia.com/result?p=mpesa-api)|
 
