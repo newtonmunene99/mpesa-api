@@ -1,6 +1,6 @@
 {
   "name": "mpesa-api",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "An NPM Module built with NodeJs to help you with M-Pesa Daraja API calls.",
   "main": "lib/index",
   "types": "lib/index",
@@ -21,7 +21,9 @@
   ],
   "author": "Newton Munene <newtonmunene99@gmail.com>",
   "license": "MIT",
-  "publishConfig": { "registry": "https://npm.pkg.github.com/" },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
   "devDependencies": {
     "@types/chai": "^4.2.4",
     "@types/mocha": "^5.2.7",
