@@ -22,7 +22,7 @@
   "author": "Newton Munene <newtonmunene99@gmail.com>",
   "license": "MIT",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
+    "registry": "https://npm.pkg.github.com/@newtonmunene99"
   },
   "devDependencies": {
     "@types/chai": "^4.2.4",
