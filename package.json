@@ -21,6 +21,7 @@
   ],
   "author": "Newton Munene <newtonmunene99@gmail.com>",
   "license": "MIT",
+  "publishConfig": { "registry": "https://npm.pkg.github.com/" },
   "devDependencies": {
     "@types/chai": "^4.2.4",
     "@types/mocha": "^5.2.7",
