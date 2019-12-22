@@ -4,6 +4,8 @@
 
 An NPM Module built with NodeJs to help you with M-Pesa Daraja API calls.
 
+Please note that this module is intended for use in a node environment on the backend and will raise a few issues if used on the client side/browser environment. This is mainly due to the file system.
+
 **Looking for contributors who can help write tests.**
 
 
