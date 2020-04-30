@@ -25,20 +25,20 @@
     "registry": "https://npm.pkg.github.com/@newtonmunene99"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.4",
-    "@types/mocha": "^5.2.7",
-    "@types/node": "^12.11.5",
-    "@typescript-eslint/parser": "^2.5.0",
+    "@types/chai": "^4.2.11",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^13.13.4",
+    "@typescript-eslint/parser": "^2.30.0",
     "chai": "^4.2.0",
-    "eslint": "^6.5.1",
-    "mocha": "^6.2.2",
+    "eslint": "^6.8.0",
+    "mocha": "^7.1.2",
     "ncp": "^2.0.0",
-    "nodemon": "^1.19.4",
-    "ts-node": "^8.4.1",
-    "typescript": "^3.6.4"
+    "nodemon": "^2.0.3",
+    "ts-node": "^8.9.1",
+    "typescript": "^3.8.3"
   },
   "dependencies": {
-    "axios": "^0.19.0"
+    "axios": "^0.19.2"
   },
   "repository": {
     "type": "git",
