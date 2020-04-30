@@ -158,7 +158,7 @@ This API enables Business to Customer (B2C) transactions between a company and c
 ```javascript
 mpesa
   .b2c({
-    InitiatorName: "Initiator Name",
+    Initiator: "Initiator Name",
     Amount: 1000 /* 1000 is an example amount */,
     PartyA: "Party A",
     PartyB: "Party B",
