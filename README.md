@@ -9,12 +9,12 @@ Please note that this module is intended for use in a node environment on the ba
 **Looking for contributors who can help write tests.**
 
 
-|     |Badge|
-|-----|-----|
-|Travis|[![Build Status](https://travis-ci.org/newtonmunene99/mpesa-api.svg?branch=master)](https://travis-ci.org/newtonmunene99/mpesa-api)|
-|Latest|[![Latest](https://badgen.net/npm/v/mpesa-api)](https://www.npmjs.com/package/mpesa-api)|
-|Minified|[![Minified Size](https://badgen.net/bundlephobia/min/mpesa-api)](https://bundlephobia.com/result?p=mpesa-api)|
-|MinZip|[![Min](https://badgen.net/bundlephobia/minzip/mpesa-api)](https://bundlephobia.com/result?p=mpesa-api)|
+|          | Badge                                                                                                                               |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Travis   | [![Build Status](https://travis-ci.org/newtonmunene99/mpesa-api.svg?branch=master)](https://travis-ci.org/newtonmunene99/mpesa-api) |
+| Latest   | [![Latest](https://badgen.net/npm/v/mpesa-api)](https://www.npmjs.com/package/mpesa-api)                                            |
+| Minified | [![Minified Size](https://badgen.net/bundlephobia/min/mpesa-api)](https://bundlephobia.com/result?p=mpesa-api)                      |
+| MinZip   | [![Min](https://badgen.net/bundlephobia/minzip/mpesa-api)](https://bundlephobia.com/result?p=mpesa-api)                             |
 
 
 Ready Methods
@@ -180,7 +180,7 @@ mpesa
   });
 ```
 
-1.  InitiatorName - This is the credential/username used to authenticate the transaction request.
+1.  Initiator - This is the credential/username used to authenticate the transaction request.
 2.  CommandID - Unique command for each transaction type e.g. SalaryPayment, BusinessPayment, PromotionPayment
 3.  Amount - The amount being transacted
 4.  PartyA - Organization’s shortcode initiating the transaction.
@@ -465,8 +465,10 @@ If you Wish to build
 
 ## Credits
 
-| **Contributor** |
-| [NewtonMunene](https://github.com/newtonmunene99) |
+| Name                                               | Role        |
+| -------------------------------------------------- | ----------- |
+| [Newton Munene](https://github.com/newtonmunene99) | Contributor |
+| --                                                 | --          |
 
 ## License
 
