@@ -468,7 +468,6 @@ If you Wish to build
 | Name                                               | Role        |
 | -------------------------------------------------- | ----------- |
 | [Newton Munene](https://github.com/newtonmunene99) | Contributor |
-| --                                                 | --          |
 
 ## License
 
