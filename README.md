@@ -434,6 +434,8 @@ mpesa
 9.  Occasion - Optional.
 10. Command ID - Default is `TransactionReversal`
 
+## Demo
+You can try it out on [Runkit](https://runkit.com/newtonmunene99/mpesa-api-demo)
 ## RoadMap
 
 - [x] Basic Documentation
