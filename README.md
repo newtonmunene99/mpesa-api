@@ -21,7 +21,7 @@ Ready Methods
 - [ ] B2B
 - [x] C2B
 - [x] B2C
-- [ ] TRANSACTION STATUS
+- [x] TRANSACTION STATUS
 - [x] ACCOUNT BALANCE
 - [ ] REVERSAL
 - [x] LIPA NA MPESA
