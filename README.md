@@ -8,14 +8,12 @@ Please note that this module is intended for use in a node environment on the ba
 
 **Looking for contributors who can help write tests.**
 
-
 |          | Badge                                                                                                                               |
 | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | Travis   | [![Build Status](https://travis-ci.org/newtonmunene99/mpesa-api.svg?branch=master)](https://travis-ci.org/newtonmunene99/mpesa-api) |
 | Latest   | [![Latest](https://badgen.net/npm/v/mpesa-api)](https://www.npmjs.com/package/mpesa-api)                                            |
 | Minified | [![Minified Size](https://badgen.net/bundlephobia/min/mpesa-api)](https://bundlephobia.com/result?p=mpesa-api)                      |
 | MinZip   | [![Min](https://badgen.net/bundlephobia/minzip/mpesa-api)](https://bundlephobia.com/result?p=mpesa-api)                             |
-
 
 Ready Methods
 
@@ -125,14 +123,14 @@ mpesa
     CommandID: "Command ID" /* OPTIONAL */,
     SenderIdentifierType: 4 /* OPTIONAL */,
     RecieverIdentifierType: 4 /* OPTIONAL */,
-    Remarks: "Remarks" /* OPTIONAL */
+    Remarks: "Remarks" /* OPTIONAL */,
   })
-  .then(response => {
+  .then((response) => {
     //Do something with the response
     //eg
     console.log(response);
   })
-  .catch(error => {
+  .catch((error) => {
     //Do something with the error;
     //eg
     console.error(error);
@@ -166,14 +164,14 @@ mpesa
     ResultURL: "Result URL",
     CommandID: "Command ID" /* OPTIONAL */,
     Occasion: "Occasion" /* OPTIONAL */,
-    Remarks: "Remarks" /* OPTIONAL */
+    Remarks: "Remarks" /* OPTIONAL */,
   })
-  .then(response => {
+  .then((response) => {
     //Do something with the response
     //eg
     console.log(response);
   })
-  .catch(error => {
+  .catch((error) => {
     //Do something with the error;
     //eg
     console.error(error);
@@ -206,14 +204,14 @@ mpesa
     ShortCode: "Short Code",
     ConfirmationURL: "Confirmation URL",
     ValidationURL: "Validation URL",
-    ResponseType: "Response Type"
+    ResponseType: "Response Type",
   })
-  .then(response => {
+  .then((response) => {
     //Do something with the response
     //eg
     console.log(response);
   })
-  .catch(error => {
+  .catch((error) => {
     //Do something with the error;
     //eg
     console.error(error);
@@ -234,14 +232,14 @@ mpesa
     Amount: 1000 /* 1000 is an example amount */,
     Msisdn: 254792123456,
     CommandID: "Command ID" /* OPTIONAL */,
-    BillRefNumber: "Bill Reference Number" /* OPTIONAL */
+    BillRefNumber: "Bill Reference Number" /* OPTIONAL */,
   })
-  .then(response => {
+  .then((response) => {
     //Do something with the response
     //eg
     console.log(response);
   })
-  .catch(error => {
+  .catch((error) => {
     //Do something with the error;
     //eg
     console.error(error);
@@ -267,14 +265,14 @@ mpesa
     QueueTimeOutURL: "Queue Timeout URL",
     ResultURL: "Result URL",
     CommandID: "Command ID" /* OPTIONAL */,
-    Remarks: "Remarks" /* OPTIONAL */
+    Remarks: "Remarks" /* OPTIONAL */,
   })
-  .then(response => {
+  .then((response) => {
     //Do something with the response
     //eg
     console.log(response);
   })
-  .catch(error => {
+  .catch((error) => {
     //Do something with the error;
     //eg
     console.error(error);
@@ -304,14 +302,14 @@ mpesa
     QueueTimeOutURL: "Queue Timeout URL",
     CommandID: "Command ID" /* OPTIONAL */,
     Remarks: "Remarks" /* OPTIONAL */,
-    Occasion: "Occasion" /* OPTIONAL */
+    Occasion: "Occasion" /* OPTIONAL */,
   })
-  .then(response => {
+  .then((response) => {
     //Do something with the response
     //eg
     console.log(response);
   })
-  .catch(error => {
+  .catch((error) => {
     //Do something with the error;
     //eg
     console.error(error);
@@ -343,14 +341,14 @@ mpesa
     AccountReference: "Account Reference",
     passKey: "Lipa Na Mpesa Pass Key",
     TransactionType: "Transaction Type" /* OPTIONAL */,
-    TransactionDesc: "Transaction Description" /* OPTIONAL */
+    TransactionDesc: "Transaction Description" /* OPTIONAL */,
   })
-  .then(response => {
+  .then((response) => {
     //Do something with the response
     //eg
     console.log(response);
   })
-  .catch(error => {
+  .catch((error) => {
     //Do something with the error;
     //eg
     console.error(error);
@@ -375,14 +373,14 @@ mpesa
   .lipaNaMpesaQuery({
     BusinessShortCode: 123456,
     CheckoutRequestID: "Checkout Request ID",
-    passKey: "Lipa Na Mpesa Pass Key"
+    passKey: "Lipa Na Mpesa Pass Key",
   })
-  .then(response => {
+  .then((response) => {
     //Do something with the response
     //eg
     console.log(response);
   })
-  .catch(error => {
+  .catch((error) => {
     //Do something with the error;
     //eg
     console.error(error);
@@ -409,14 +407,14 @@ mpesa
     CommandID: "Command ID" /* OPTIONAL */,
     RecieverIdentifierType: 11 /* OPTIONAL */,
     Remarks: "Remarks" /* OPTIONAL */,
-    Occasion: "Ocassion" /* OPTIONAL */
+    Occasion: "Ocassion" /* OPTIONAL */,
   })
-  .then(response => {
+  .then((response) => {
     //Do something with the response
     //eg
     console.log(response);
   })
-  .catch(error => {
+  .catch((error) => {
     //Do something with the error;
     //eg
     console.error(error);
@@ -435,7 +433,9 @@ mpesa
 10. Command ID - Default is `TransactionReversal`
 
 ## Demo
+
 You can try it out on [Runkit](https://runkit.com/newtonmunene99/mpesa-api-demo)
+
 ## RoadMap
 
 - [x] Basic Documentation
@@ -470,6 +470,7 @@ If you Wish to build
 | Name                                               | Role        |
 | -------------------------------------------------- | ----------- |
 | [Newton Munene](https://github.com/newtonmunene99) | Contributor |
+| [Nelson Bwogora](https://github.com/nelsonBlack)   | Contributor |
 
 ## License
 
