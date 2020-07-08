@@ -12,7 +12,7 @@ import {
   stkpushinterface,
   reversalinterface,
   credentialsinterface,
-  stkqueryinterface
+  stkqueryinterface,
 } from "./helpers/interfaces";
 import { routes } from "./helpers/routes";
 
@@ -57,28 +57,28 @@ export class Mpesa {
   c2bRegister(data: c2bregisterinterface): Promise<any> {
     return new Promise((resolve, reject) => {
       this.authenticate()
-        .then(token => {
+        .then((token) => {
           axios({
             method: "post",
             url: this.baseURL + routes.c2bregister,
             headers: {
-              Authorization: "Bearer " + token
+              Authorization: "Bearer " + token,
             },
             data: {
               ShortCode: data.ShortCode,
               ResponseType: data.ResponseType,
               ConfirmationURL: data.ConfirmationURL,
-              ValidationURL: data.ValidationURL
-            }
+              ValidationURL: data.ValidationURL,
+            },
           })
-            .then(response => {
+            .then((response) => {
               resolve(response.data);
             })
-            .catch(error => {
+            .catch((error) => {
               reject(error.response);
             });
         })
-        .catch(error => {
+        .catch((error) => {
           reject(error);
         });
     });
@@ -100,29 +100,31 @@ export class Mpesa {
   c2bSimulate(data: c2bsimulateinterface): Promise<any> {
     return new Promise((resolve, reject) => {
       this.authenticate()
-        .then(token => {
+        .then((token) => {
           axios({
             method: "post",
             url: this.baseURL + routes.c2bsimulate,
             headers: {
-              Authorization: "Bearer " + token
+              Authorization: "Bearer " + token,
             },
             data: {
               ShortCode: data.ShortCode,
               CommandID: data.CommandID,
               Amount: data.Amount,
               Msisdn: data.Msisdn,
-              BillRefNumber: data.BillRefNumber ? data.BillRefNumber : "account"
-            }
+              BillRefNumber: data.BillRefNumber
+                ? data.BillRefNumber
+                : "account",
+            },
           })
-            .then(response => {
+            .then((response) => {
               resolve(response.data);
             })
-            .catch(error => {
+            .catch((error) => {
               reject(error.response);
             });
         })
-        .catch(error => {
+        .catch((error) => {
           reject(error);
         });
     });
@@ -148,12 +150,12 @@ export class Mpesa {
   b2c(data: b2cinterface): Promise<any> {
     return new Promise((resolve, reject) => {
       this.authenticate()
-        .then(token => {
+        .then((token) => {
           axios({
             method: "post",
             url: this.baseURL + routes.b2c,
             headers: {
-              Authorization: "Bearer " + token
+              Authorization: "Bearer " + token,
             },
             data: {
               InitiatorName: data.Initiator,
@@ -165,17 +167,17 @@ export class Mpesa {
               Remarks: data.Remarks ? data.Remarks : "account",
               QueueTimeOutURL: data.QueueTimeOutURL,
               ResultURL: data.ResultURL,
-              Occasion: data.Occasion ? data.Occasion : "account"
-            }
+              Occasion: data.Occasion ? data.Occasion : "account",
+            },
           })
-            .then(response => {
+            .then((response) => {
               resolve(response.data);
             })
-            .catch(error => {
+            .catch((error) => {
               reject(error.response);
             });
         })
-        .catch(error => {
+        .catch((error) => {
           reject(error);
         });
     });
@@ -208,12 +210,12 @@ export class Mpesa {
         data.BusinessShortCode + data.passKey + Timestamp
       ).toString("base64");
       this.authenticate()
-        .then(token => {
+        .then((token) => {
           axios({
             method: "post",
             url: this.baseURL + routes.stkpush,
             headers: {
-              Authorization: "Bearer " + token
+              Authorization: "Bearer " + token,
             },
             data: {
               BusinessShortCode: data.BusinessShortCode,
@@ -230,17 +232,17 @@ export class Mpesa {
               AccountReference: data.AccountReference,
               TransactionDesc: data.TransactionDesc
                 ? data.TransactionDesc
-                : "Lipa Na Mpesa Online"
-            }
+                : "Lipa Na Mpesa Online",
+            },
           })
-            .then(response => {
+            .then((response) => {
               resolve(response.data);
             })
-            .catch(error => {
+            .catch((error) => {
               reject(error.response);
             });
         })
-        .catch(error => {
+        .catch((error) => {
           reject(error);
         });
     });
@@ -267,28 +269,28 @@ export class Mpesa {
         data.BusinessShortCode + data.passKey + Timestamp
       ).toString("base64");
       this.authenticate()
-        .then(token => {
+        .then((token) => {
           axios({
             method: "post",
             url: this.baseURL + routes.stkquery,
             headers: {
-              Authorization: "Bearer " + token
+              Authorization: "Bearer " + token,
             },
             data: {
               BusinessShortCode: data.BusinessShortCode,
               Password: Password,
               Timestamp: Timestamp,
-              CheckoutRequestID: data.CheckoutRequestID
-            }
+              CheckoutRequestID: data.CheckoutRequestID,
+            },
           })
-            .then(response => {
+            .then((response) => {
               resolve(response.data);
             })
-            .catch(error => {
+            .catch((error) => {
               reject(error.response);
             });
         })
-        .catch(error => {
+        .catch((error) => {
           reject(error);
         });
     });
@@ -314,12 +316,12 @@ export class Mpesa {
   reversal(data: reversalinterface): Promise<any> {
     return new Promise((resolve, reject) => {
       this.authenticate()
-        .then(token => {
+        .then((token) => {
           axios({
             method: "post",
             url: this.baseURL + routes.reversal,
             headers: {
-              Authorization: "Bearer " + token
+              Authorization: "Bearer " + token,
             },
             data: {
               Initiator: data.Initiator,
@@ -334,17 +336,17 @@ export class Mpesa {
               ResultURL: data.ResultURL,
               QueueTimeOutURL: data.QueueTimeOutURL,
               Remarks: data.Remarks ? data.Remarks : "Reversal",
-              Occasion: data.Occasion ? data.Occasion : "Reversal"
-            }
+              Occasion: data.Occasion ? data.Occasion : "Reversal",
+            },
           })
-            .then(response => {
+            .then((response) => {
               resolve(response.data);
             })
-            .catch(error => {
+            .catch((error) => {
               reject(error.response);
             });
         })
-        .catch(error => {
+        .catch((error) => {
           reject(error);
         });
     });
@@ -369,7 +371,7 @@ export class Mpesa {
   accountBalance(data: accountbalanceinterface): Promise<any> {
     return new Promise((resolve, reject) => {
       this.authenticate()
-        .then(token => {
+        .then((token) => {
           axios({
             method: "post",
             url: this.baseURL + routes.accountbalance,
@@ -377,22 +379,22 @@ export class Mpesa {
             data: {
               Initiator: data.Initiator,
               SecurityCredential: this.securitycredential,
-              CommandID: data.CommandID,
+              CommandID: data.CommandID ? data.CommandID : "AccountBalance",
               PartyA: data.PartyA,
               IdentifierType: data.IdentifierType ? data.IdentifierType : "4",
               Remarks: data.Remarks ? data.Remarks : "Account Balance",
               QueueTimeOutURL: data.QueueTimeOutURL,
-              ResultURL: data.ResultURL
-            }
+              ResultURL: data.ResultURL,
+            },
           })
-            .then(response => {
+            .then((response) => {
               resolve(response.data);
             })
-            .catch(error => {
+            .catch((error) => {
               reject(error.response);
             });
         })
-        .catch(error => {
+        .catch((error) => {
           reject(error);
         });
     });
@@ -408,13 +410,13 @@ export class Mpesa {
             "Basic " +
             Buffer.from(this.client_key + ":" + this.client_secret).toString(
               "base64"
-            )
-        }
+            ),
+        },
       })
-        .then(response => {
+        .then((response) => {
           resolve(response.data.access_token);
         })
-        .catch(error => {
+        .catch((error) => {
           reject(error.response);
         });
     });
