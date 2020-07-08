@@ -13,6 +13,7 @@ import {
   reversalinterface,
   credentialsinterface,
   stkqueryinterface,
+  transactionstatusinterface,
 } from "./helpers/interfaces";
 import { routes } from "./helpers/routes";
 
@@ -131,6 +132,62 @@ export class Mpesa {
   }
 
   /**
+   *Transaction Status
+   * @name Transaction Status
+   * @function
+   * @description Transaction Status API checks the status of a B2B, B2C and C2B APIs transactions.
+   * @see    {@link https://developer.safaricom.co.ke/docs#transaction-status }
+   * @param  {transactionstatusinterface} data
+   * @param  {string} Initiator  The name of Initiator to initiating the request.
+   * @param  {string} SecurityCredential Encrypted Credential of user getting transaction status.
+   * @param  {string} CommandID only 'TransactionStatusQuery' command id.
+   * @param  {string} TransactionID Unique identifier to identify a transaction on M-Pesa.
+   * @param  {string} PartyA Organization’s shortcode initiating the transaction.
+   * @param  {any|number} IdentifierType - Type of organization receiving the transaction
+   * @param  {string} ResultURL  The end-point that receives the response of the transaction
+   *  @param  {string} QueueTimeOutURL The timeout end-point that receives a timeout response.
+   * @param  {string} Remarks Comments that are sent along with the transaction.
+   * @param  {string} Occasion Optional
+   * @returns
+   * @memberof Mpesa
+   */
+  transactionStatus(data: transactionstatusinterface) {
+    return new Promise((resolve, reject) => {
+      this.authenticate()
+        .then((token) => {
+          axios({
+            method: "post",
+            url: this.baseURL + routes.transactionstatus,
+            headers: {
+              Authorization: "Bearer " + token,
+            },
+            data: {
+              Initiator: data.Initiator,
+              SecurityCredential: this.securitycredential,
+              CommandID: data.CommandID || "TransactionStatusQuery",
+              TransactionID: data.TransactionID,
+              PartyA: data.PartyA,
+              IdentifierType: data.IdentifierType,
+              ResultURL: data.ResultURL,
+              QueueTimeOutURL: data.QueueTimeOutURL,
+              Remarks: data.Remarks || "Transaction Reversal",
+              Occasion: data.Occasion || "TransactionReversal",
+            },
+          })
+            .then((response) => {
+              resolve(response.data);
+            })
+            .catch((error) => {
+              reject(error.response);
+            });
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  }
+
+  /**
    * Business to Customer(B2C)
    * @name B2C
    * @function
@@ -142,9 +199,9 @@ export class Mpesa {
    * @param  {string} PartyA Organization’s shortcode initiating the transaction.
    * @param  {string} PartyB Phone number receiving the transaction
    * @param  {string} Remarks Comments that are sent along with the transaction.
-   *  @param  {string} QueueTimeOutURL The timeout end-point that receives a timeout response.
+   * @param  {string} QueueTimeOutURL The timeout end-point that receives a timeout response.
    * @param  {string} ResultURL  The end-point that receives the response of the transaction
-   *  @param  {string} Occasion Optional
+   * @param  {string} Occasion Optional
    * @returns {Promise}
    */
   b2c(data: b2cinterface): Promise<any> {
