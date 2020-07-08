@@ -42,9 +42,9 @@ export declare class Mpesa {
      * @name Transaction Status
      * @function
      * @description Transaction Status API checks the status of a B2B, B2C and C2B APIs transactions.
-     * @see {@link https://developer.safaricom.co.ke/docs#transaction-status }
-     * @param {transactionstatusinterface} data
-     *  @param  {string} Initiator  The name of Initiator to initiating the request.
+     * @see    {@link https://developer.safaricom.co.ke/docs#transaction-status }
+     * @param  {transactionstatusinterface} data
+     * @param  {string} Initiator  The name of Initiator to initiating the request.
      * @param  {string} SecurityCredential Encrypted Credential of user getting transaction status.
      * @param  {string} CommandID only 'TransactionStatusQuery' command id.
      * @param  {string} TransactionID Unique identifier to identify a transaction on M-Pesa.
@@ -70,9 +70,9 @@ export declare class Mpesa {
      * @param  {string} PartyA Organization’s shortcode initiating the transaction.
      * @param  {string} PartyB Phone number receiving the transaction
      * @param  {string} Remarks Comments that are sent along with the transaction.
-     *  @param  {string} QueueTimeOutURL The timeout end-point that receives a timeout response.
+     * @param  {string} QueueTimeOutURL The timeout end-point that receives a timeout response.
      * @param  {string} ResultURL  The end-point that receives the response of the transaction
-     *  @param  {string} Occasion Optional
+     * @param  {string} Occasion Optional
      * @returns {Promise}
      */
     b2c(data: b2cinterface): Promise<any>;
