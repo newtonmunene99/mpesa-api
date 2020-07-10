@@ -33,10 +33,14 @@ export class Mpesa {
     this.baseURL =
       environment === "production" ? routes.production : routes.sandbox;
 
-    this.generateSecurityCredential(
-      credentials.initiator_password,
-      credentials.certificatepath
-    );
+    if (!credentials?.security_credential) {
+      this.generateSecurityCredential(
+        credentials.initiator_password,
+        credentials.certificatepath
+      );
+    } else {
+      this.securitycredential = credentials.security_credential;
+    }
   }
 
   /**

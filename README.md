@@ -73,7 +73,7 @@ const Mpesa = require("mpesa-api").Mpesa;
 const mpesa = new Mpesa(credentials, environment);
 ```
 
-A moment to explain the above. `credentials` should be an object containing key,secret,initiator_password and certificatepath as the properties/keys.
+A moment to explain the above. `credentials` should be an object containing key,secret,initiator password, security credential and certificate path as the properties/keys.
 
 ```javascript
 //example
@@ -81,11 +81,14 @@ const credentials = {
     client_key: 'YOUR_CONSUMER_KEY_HERE',
     client_secret: 'YOUR_CONSUMER_SECRET_HERE',
     initiator_password: 'YOUR_INITIATOR_PASSWORD_HERE',
+    security_credential: 'YOUR_SECURITY_CREDENTIAL',
     certificatepath: 'keys/example.cert'
 };
 // For the initiator_password, use the security credential from the test credentials page.link :https://developer.safaricom.co.ke/test_credentials
 
-// certificate path is otional. I've provided ceritificates for sandbox and production by default. If you choose not to include it Pass it as null.
+// security credential is optional. Set this if you're getting Initiator Name is invalid errors. You can generate your security credential on the test credentials page for sandbox environment or from your mpesa web portal for production environment.
+
+// certificate path is otional. I've provided ceritificates for sandbox and production by default. If you choose not to include it Pass it as null. If you have passed `security_credential` you should pass `certificatepath` as `null`
 const credentials = {
     ...,
     certificatepath: null
@@ -93,6 +96,7 @@ const credentials = {
 ```
 
 > You can get initiator password from Your Portal(production) or from test credentials(Sandbox). It will be the `Security Credential (Shortcode 1)`.
+> You can generate your security credential on the [test credentials](https://developer.safaricom.co.ke/test_credentials) page for sandbox environment or from your mpesa web portal for production environment. See [this](https://developer.safaricom.co.ke/docs#step-by-step-go-live-guide) guide for production environment(last step on the go live guide).
 
 Environment should be a string. It can be either 'production' or 'sandbox'
 
