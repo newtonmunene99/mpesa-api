@@ -1,6 +1,6 @@
 {
   "name": "mpesa-api",
-  "version": "3.0.0-beta.0",
+  "version": "3.0.0-beta.1",
   "description": "An NPM Module built with NodeJs to help you with M-Pesa Daraja API calls.",
   "main": "lib/index",
   "types": "lib/index",
