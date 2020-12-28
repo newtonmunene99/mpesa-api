@@ -1,11 +1,26 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "module": "commonjs",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "declaration": true,
+    "removeComments": false,
+    "allowSyntheticDefaultImports": true,
     "outDir": "lib",
+    "baseUrl": "src",
     "sourceMap": true,
-    "declaration": true
+    "lib": [
+      "ES6"
+    ]
   },
-  "include": ["./src/**/*"],
-  "exclude": ["node_modules", "src/**/*.spec.ts", "src/**/__tests__/*.ts"]
+  "include": [
+    ".eslintrc.js",
+    "jest.config.js",
+    "src/**/*.ts",
+    "__tests__/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+  ]
 }

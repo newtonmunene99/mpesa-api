@@ -32,6 +32,7 @@ bower_components
 # Compiled binary addons (http://nodejs.org/api/addons.html)
 build/Release
 lib/
+dist/
 
 # Dependency directories
 node_modules/
@@ -58,3 +59,4 @@ typings/
 # dotenv environment variables file
 .env
 
+__tests__/values.ts
