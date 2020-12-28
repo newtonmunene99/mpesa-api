@@ -4,13 +4,16 @@
   "description": "An NPM Module built with NodeJs to help you with M-Pesa Daraja API calls.",
   "main": "lib/index",
   "types": "lib/index",
+  "type": "commonjs",
   "homepage": "https://github.com/newtonmunene99/mpesa-api/",
   "scripts": {
     "start": "node lib/index.js",
     "dev": "nodemon --exec ./node_modules/.bin/ts-node -- ./src/index",
-    "build": "tsc && npm run copy-keys",
+    "prebuild": "rm -rf lib",
+    "build": "./node_modules/.bin/tsc --build --verbose && npm run copy-keys",
     "copy-keys": "ncp src/keys lib/keys",
-    "test": "mocha -r ts-node/register src/**/*.spec.ts"
+    "test": "jest",
+    "coverage": "jest --coverage"
   },
   "keywords": [
     "mpesa",
@@ -22,20 +25,24 @@
   "author": "Newton Munene <newtonmunene99@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "@types/chai": "^4.2.11",
-    "@types/mocha": "^7.0.2",
-    "@types/node": "^13.13.4",
-    "@typescript-eslint/parser": "^2.30.0",
-    "chai": "^4.2.0",
-    "eslint": "^6.8.0",
-    "mocha": "^7.1.2",
+    "@types/jest": "^26.0.19",
+    "@types/node": "^14.14.16",
+    "@typescript-eslint/eslint-plugin": "^4.11.0",
+    "@typescript-eslint/parser": "^4.11.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "eslint": "^7.16.0",
+    "eslint-config-prettier": "^7.1.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsdoc": "^30.7.9",
+    "jest": "^26.6.3",
+    "jest-mock-extended": "^1.0.10",
     "ncp": "^2.0.0",
-    "nodemon": "^2.0.3",
-    "ts-node": "^8.9.1",
-    "typescript": "^3.8.3"
-  },
-  "dependencies": {
-    "axios": "^0.19.2"
+    "nodemon": "^2.0.6",
+    "prettier": "^2.2.1",
+    "ts-jest": "^26.4.4",
+    "ts-mockito": "^2.6.1",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.1.3"
   },
   "repository": {
     "type": "git",
@@ -43,5 +50,10 @@
   },
   "bugs": {
     "url": "https://github.com/newtonmunene99/mpesa-api/issues"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
