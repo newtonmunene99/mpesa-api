@@ -1,5 +1,10 @@
-node_modules/
-src/
-__tests__/
+# Ignore everything
+*
 
-jest.config.ts
+# Except
+!lib
+!.npmignore
+!package.json
+!README.md
+!CHANGELOG.md
+!.npmignore

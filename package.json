@@ -10,7 +10,7 @@
     "start": "node lib/index.js",
     "dev": "nodemon --exec ./node_modules/.bin/ts-node -- ./src/index",
     "prebuild": "rm -rf lib",
-    "build": "./node_modules/.bin/tsc --build --verbose && npm run copy-keys",
+    "build": "./node_modules/.bin/tsc --project tsconfig.build.json && npm run copy-keys",
     "copy-keys": "ncp src/keys lib/keys",
     "test": "jest",
     "coverage": "jest --coverage"
