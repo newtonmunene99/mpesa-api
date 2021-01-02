@@ -2,7 +2,7 @@
 *
 
 # Except
-!lib
+lib
 !.npmignore
 !package.json
 !README.md
