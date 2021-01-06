@@ -2,6 +2,10 @@
 
 Notable changes to this project will be documented in this file.
 
+## [3.0.1] - 06/01/2021
+
+- Whitelists `/lib/` folder
+
 ## [3.0.0] - 28/12/2020
 
 - Adds support for a self generated security credential. Check how to do this on the [going live page]('https://developer.safaricom.co.ke/docs#step-by-step-go-live-guide').
