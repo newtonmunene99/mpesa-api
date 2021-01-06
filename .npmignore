@@ -2,9 +2,9 @@
 *
 
 # Except
-!lib
-!.npmignore
-!package.json
-!README.md
-!CHANGELOG.md
-!.npmignore
+!/lib/
+!/.npmignore
+!/package.json
+!/README.md
+!/CHANGELOG.md
+!/.npmignore
