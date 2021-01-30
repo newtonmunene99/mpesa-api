@@ -88,10 +88,10 @@ const credentials = {
 
 // security credential is optional. Set this if you're getting Initiator Name is invalid errors. You can generate your security credential on the test credentials page for sandbox environment or from your mpesa web portal for production environment.
 
-// certificate path is otional. I've provided ceritificates for sandbox and production by default. If you choose not to include it Pass it as null. If you have passed `security_credential` you should pass `certificatepath` as `null`
+// certificate path is otional. I've provided ceritificates for sandbox and production by default. If you choose not to include it Pass it as null. If you have passed `securityCredential` you should pass `certificatePath` as `null`
 const credentials = {
     ...,
-    certificatepath: null
+    certificatePath: null
 };
 ```
 
