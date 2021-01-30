@@ -17,14 +17,14 @@ Please note that this module is intended for use in a node environment on the ba
 
 Ready Methods
 
-- [x] C2BSIMULATE
-- [ ] B2B
-- [x] C2B
-- [x] B2C
-- [x] TRANSACTION STATUS
-- [x] ACCOUNT BALANCE
-- [ ] REVERSAL
-- [x] LIPA NA MPESA
+- [x] [B2B](#business-to-business) - **DEPRECATED**
+- [x] [C2B](#c2b)
+- [x] [B2C](#business-to-customer-b2c)
+- [x] [TRANSACTION STATUS](#transaction-status)
+- [x] [ACCOUNT BALANCE](#account-balance)
+- [x] [REVERSAL](#reversal)
+- [x] [LIPA NA MPESA STK PUSH](#lipa-na-mpesa-online)
+- [x] [LIPA NA MPESA QUERY](#lipa-na-mpesa-online-query)
 
 ## Prerequisites
 
@@ -78,11 +78,11 @@ A moment to explain the above. `credentials` should be an object containing key,
 ```javascript
 //example
 const credentials = {
-    client_key: 'YOUR_CONSUMER_KEY_HERE',
-    client_secret: 'YOUR_CONSUMER_SECRET_HERE',
-    initiator_password: 'YOUR_INITIATOR_PASSWORD_HERE',
-    security_credential: 'YOUR_SECURITY_CREDENTIAL',
-    certificatepath: 'keys/example.cert'
+    clientKey: 'YOUR_CONSUMER_KEY_HERE',
+    clientSecret: 'YOUR_CONSUMER_SECRET_HERE',
+    initiatorPassword: 'YOUR_INITIATOR_PASSWORD_HERE',
+    securityCredential: 'YOUR_SECURITY_CREDENTIAL',
+    certificatePath: 'keys/example.cert'
 };
 // For the initiator_password, use the security credential from the test credentials page.link :https://developer.safaricom.co.ke/test_credentials
 
