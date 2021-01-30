@@ -52,7 +52,7 @@ You Will need a few things from Safaricom before development.
 1.  Consumer Key
 2.  Consumer Secret
 3.  Test Credentials for Development/Sanbox environment
-
+4.  [Callback server with Mpesa apis whitelisted](#ip-whitelisting) 
 - Login or Register as a Safaricom developer [here](https://developer.safaricom.co.ke/login-register) if you haven't.
 - Add a new App [here](https://developer.safaricom.co.ke/user/me/apps)
 - You will be issued with a Consumer Key and Consumer Secret. You will use these to initiate an Mpesa Instance.
@@ -435,6 +435,24 @@ mpesa
 8.  Remarks - Comments that are sent along with the transaction.
 9.  Occasion - Optional.
 10. Command ID - Default is `TransactionReversal`
+
+
+## IP Whitelisting
+
+You might need to whitelist Mpesa IPs listed below on the server/firewall that receives the callbacks:
+
+- 196.201.214.200
+- 196.201.214.206
+- 196.201.213.114
+- 196.201.214.207
+- 196.201.214.208
+- 196.201.213.44
+- 196.201.212.127
+- 196.201.212.128
+- 196.201.212.129
+- 196.201.212.132
+- 196.201.212.136
+- 196.201.212.138
 
 ## Demo
 
