@@ -439,8 +439,10 @@ mpesa
 
 ## IP Whitelisting
 
-You might need to whitelist Mpesa IPs listed below on the server/firewall that receives the callbacks:
+You might need to whitelist Mpesa IPs listed below on the server/firewall that receives the callbacks.
 
+<details>
+  <summary>View List</summary>
 - 196.201.214.200
 - 196.201.214.206
 - 196.201.213.114
@@ -453,6 +455,8 @@ You might need to whitelist Mpesa IPs listed below on the server/firewall that r
 - 196.201.212.132
 - 196.201.212.136
 - 196.201.212.138
+</details>
+
 
 ## Demo
 
