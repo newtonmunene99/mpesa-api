@@ -17,14 +17,14 @@ Please note that this module is intended for use in a node environment on the ba
 
 Ready Methods
 
-- [x] C2BSIMULATE
-- [ ] B2B
-- [x] C2B
-- [x] B2C
-- [x] TRANSACTION STATUS
-- [x] ACCOUNT BALANCE
-- [ ] REVERSAL
-- [x] LIPA NA MPESA
+- [x] [B2B](#business-to-business) - **DEPRECATED**
+- [x] [C2B](#c2b)
+- [x] [B2C](#business-to-customer-b2c)
+- [x] [TRANSACTION STATUS](#transaction-status)
+- [x] [ACCOUNT BALANCE](#account-balance)
+- [x] [REVERSAL](#reversal)
+- [x] [LIPA NA MPESA STK PUSH](#lipa-na-mpesa-online)
+- [x] [LIPA NA MPESA QUERY](#lipa-na-mpesa-online-query)
 
 ## Prerequisites
 
@@ -52,7 +52,7 @@ You Will need a few things from Safaricom before development.
 1.  Consumer Key
 2.  Consumer Secret
 3.  Test Credentials for Development/Sanbox environment
-
+4.  [Callback server with Mpesa apis whitelisted](#ip-whitelisting) 
 - Login or Register as a Safaricom developer [here](https://developer.safaricom.co.ke/login-register) if you haven't.
 - Add a new App [here](https://developer.safaricom.co.ke/user/me/apps)
 - You will be issued with a Consumer Key and Consumer Secret. You will use these to initiate an Mpesa Instance.
@@ -78,20 +78,20 @@ A moment to explain the above. `credentials` should be an object containing key,
 ```javascript
 //example
 const credentials = {
-    client_key: 'YOUR_CONSUMER_KEY_HERE',
-    client_secret: 'YOUR_CONSUMER_SECRET_HERE',
-    initiator_password: 'YOUR_INITIATOR_PASSWORD_HERE',
-    security_credential: 'YOUR_SECURITY_CREDENTIAL',
-    certificatepath: 'keys/example.cert'
+    clientKey: 'YOUR_CONSUMER_KEY_HERE',
+    clientSecret: 'YOUR_CONSUMER_SECRET_HERE',
+    initiatorPassword: 'YOUR_INITIATOR_PASSWORD_HERE',
+    securityCredential: 'YOUR_SECURITY_CREDENTIAL',
+    certificatePath: 'keys/example.cert'
 };
 // For the initiator_password, use the security credential from the test credentials page.link :https://developer.safaricom.co.ke/test_credentials
 
 // security credential is optional. Set this if you're getting Initiator Name is invalid errors. You can generate your security credential on the test credentials page for sandbox environment or from your mpesa web portal for production environment.
 
-// certificate path is otional. I've provided ceritificates for sandbox and production by default. If you choose not to include it Pass it as null. If you have passed `security_credential` you should pass `certificatepath` as `null`
+// certificate path is otional. I've provided ceritificates for sandbox and production by default. If you choose not to include it Pass it as null. If you have passed `securityCredential` you should pass `certificatePath` as `null`
 const credentials = {
     ...,
-    certificatepath: null
+    certificatePath: null
 };
 ```
 
@@ -435,6 +435,30 @@ mpesa
 8.  Remarks - Comments that are sent along with the transaction.
 9.  Occasion - Optional.
 10. Command ID - Default is `TransactionReversal`
+
+
+## IP Whitelisting
+
+You might need to whitelist Mpesa IPs listed below on the server/firewall that receives the callbacks.
+
+<details>
+  <summary>View List</summary>
+
+- 196.201.214.200
+- 196.201.214.206
+- 196.201.213.114
+- 196.201.214.207
+- 196.201.214.208
+- 196.201.213.44
+- 196.201.212.127
+- 196.201.212.128
+- 196.201.212.129
+- 196.201.212.132
+- 196.201.212.136
+- 196.201.212.138
+
+</details>
+
 
 ## Demo
 
