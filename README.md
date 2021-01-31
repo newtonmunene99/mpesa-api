@@ -473,6 +473,7 @@ You can try it out on [Runkit](https://runkit.com/newtonmunene99/mpesa-api-demo)
 - [ ] Write Tests
 - [x] Validators for inputs
 - [ ] Tree shaking
+- [ ] Migrate from Typescript to JSDoc
 
 ## Build
 
