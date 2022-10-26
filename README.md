@@ -1,12 +1,18 @@
 # Mpesa-Api
 
+**⚠️⚠️⚠️⚠️⚠️**
+
+**The official daraja API and its documentation has recently changed significantly, some links and functionality may be outdated. Due to other obligations, I'm unable to actively maintain the package. Looking for contributors/maintainers who can help write tests and keep everything updated.**
+
+**⚠️⚠️⚠️⚠️⚠️**
+
+---
+
 :zap: :bomb: :fire: :fire: :bomb: :zap:
 
 An NPM Module built with NodeJs in mind to help you with M-Pesa Daraja API calls.
 
 Please note that this module is intended for use in a node environment on the backend and will raise a few issues if used on the client side/browser environment. This is mainly due to the file system.
-
-**The official daraja API documentation has recently changed significantly, some links may be outdated. Looking for contributors/maintainers who can help write tests and keep everything updated.**
 
 |          | Badge                                                                                                                               |
 | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
