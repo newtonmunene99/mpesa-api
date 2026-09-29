@@ -1,6 +1,6 @@
-import { request as httpsRequest } from 'https';
-import { request as httpRequest } from 'http';
-import { HttpServiceConfig, HttpServiceResponse } from '../models/interfaces';
+import { request as httpRequest } from 'node:http';
+import { request as httpsRequest } from 'node:https';
+import type { HttpServiceConfig, HttpServiceResponse } from '../models/interfaces';
 
 export class HttpService {
   private uri: URL;
@@ -13,14 +13,10 @@ export class HttpService {
     this.headers = headers;
   }
 
-  get<T = unknown>(
-    path: string,
-    { headers }: HttpServiceConfig,
-  ): Promise<HttpServiceResponse<T>> {
+  get<T = unknown>(path: string, { headers }: HttpServiceConfig): Promise<HttpServiceResponse<T>> {
     return new Promise<HttpServiceResponse<T>>((resolve, reject) => {
       try {
-        const request =
-          this.uri.protocol === 'https:' ? httpsRequest : httpRequest;
+        const request = this.uri.protocol === 'https:' ? httpsRequest : httpRequest;
 
         const clientRequest = request(
           {
@@ -47,7 +43,7 @@ export class HttpService {
 
               try {
                 data = JSON.parse(dataChunks);
-              } catch (error) {
+              } catch {
                 data = dataChunks?.toString();
               }
 
@@ -89,8 +85,7 @@ export class HttpService {
   ): Promise<HttpServiceResponse<T>> {
     return new Promise<HttpServiceResponse<T>>((resolve, reject) => {
       try {
-        const request =
-          this.uri.protocol === 'https:' ? httpsRequest : httpRequest;
+        const request = this.uri.protocol === 'https:' ? httpsRequest : httpRequest;
 
         const data = JSON.stringify(payload);
 
@@ -122,7 +117,7 @@ export class HttpService {
 
               try {
                 data = JSON.parse(dataChunks);
-              } catch (error) {
+              } catch {
                 data = dataChunks?.toString();
               }
 

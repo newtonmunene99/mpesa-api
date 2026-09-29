@@ -1,6 +1,6 @@
 import { createServer, type IncomingHttpHeaders, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
-import { afterAll, beforeAll, describe, expect, test } from 'vitest';
+import { afterAll, beforeAll, describe, expect, test } from 'vite-plus/test';
 import { HttpService } from '../../src/services/http.service';
 
 interface Received {
@@ -27,7 +27,9 @@ beforeAll(async () => {
           res.writeHead(200, { 'content-type': 'application/json' }).end('{"a":1}');
           break;
         case '/bad':
-          res.writeHead(400, { 'content-type': 'application/json' }).end('{"errorCode":"400.002.02"}');
+          res
+            .writeHead(400, { 'content-type': 'application/json' })
+            .end('{"errorCode":"400.002.02"}');
           break;
         case '/text':
           res.writeHead(200, { 'content-type': 'text/plain' }).end('plain');

@@ -1,8 +1,19 @@
-import { defineConfig } from 'vite-plus';
+import { defineConfig, type ViteUserConfig } from 'vite-plus';
 
-export default defineConfig({
+const config: ViteUserConfig = defineConfig({
   test: {
     include: ['__tests__/**/*.spec.ts'],
     environment: 'node',
   },
+  lint: {
+    options: {
+      typeAware: true,
+      typeCheck: true,
+    },
+  },
+  fmt: {
+    singleQuote: true,
+  },
 });
+
+export default config;

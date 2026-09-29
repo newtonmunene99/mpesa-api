@@ -1,9 +1,8 @@
-import { Buffer } from 'buffer';
-import { RSA_PKCS1_PADDING } from 'constants';
-import { publicEncrypt } from 'crypto';
-import { promises } from 'fs';
-import { resolve } from 'path';
-import {
+import { Buffer } from 'node:buffer';
+import { constants, publicEncrypt } from 'node:crypto';
+import { promises } from 'node:fs';
+import { resolve } from 'node:path';
+import type {
   AccountBalanceInterface,
   AccountBalanceResponseInterface,
   AuthorizeResponseInterface,
@@ -47,8 +46,7 @@ export class Mpesa {
     this.clientSecret = clientSecret;
 
     this.http = new HttpService({
-      baseURL:
-        environment === 'production' ? routes.production : routes.sandbox,
+      baseURL: environment === 'production' ? routes.production : routes.sandbox,
       headers: { 'Content-Type': 'application/json' },
     });
 
@@ -59,33 +57,24 @@ export class Mpesa {
     }
 
     if (!securityCredential) {
-      this.generateSecurityCredential(initiatorPassword, certificatePath);
+      void this.generateSecurityCredential(initiatorPassword, certificatePath);
     } else {
       this.securityCredential = securityCredential;
     }
   }
 
   private async authenticate(): Promise<string> {
-    const response = await this.http.get<AuthorizeResponseInterface>(
-      routes.oauth,
-      {
-        headers: {
-          Authorization:
-            'Basic ' +
-            Buffer.from(this.clientKey + ':' + this.clientSecret).toString(
-              'base64',
-            ),
-        },
+    const response = await this.http.get<AuthorizeResponseInterface>(routes.oauth, {
+      headers: {
+        Authorization:
+          'Basic ' + Buffer.from(this.clientKey + ':' + this.clientSecret).toString('base64'),
       },
-    );
+    });
 
     return response.data.access_token;
   }
 
-  private async generateSecurityCredential(
-    password: string,
-    certificatePath: string,
-  ) {
+  private async generateSecurityCredential(password: string, certificatePath: string) {
     let certificate: string;
 
     if (certificatePath != null) {
@@ -96,9 +85,7 @@ export class Mpesa {
       const certificateBuffer = await promises.readFile(
         resolve(
           __dirname,
-          this.environment === 'production'
-            ? 'keys/production-cert.cer'
-            : 'keys/sandbox-cert.cer',
+          this.environment === 'production' ? 'keys/production-cert.cer' : 'keys/sandbox-cert.cer',
         ),
       );
 
@@ -108,7 +95,7 @@ export class Mpesa {
     this.securityCredential = publicEncrypt(
       {
         key: certificate,
-        padding: RSA_PKCS1_PADDING,
+        padding: constants.RSA_PKCS1_PADDING,
       },
       Buffer.from(password),
     ).toString('base64');
@@ -345,9 +332,7 @@ export class Mpesa {
       .replace(/[^0-9]/g, '')
       .slice(0, -3);
 
-    const Password = Buffer.from(
-      BusinessShortCode + passKey + Timestamp,
-    ).toString('base64');
+    const Password = Buffer.from(BusinessShortCode + passKey + Timestamp).toString('base64');
 
     const token = await this.authenticate();
 
@@ -399,9 +384,7 @@ export class Mpesa {
       .replace(/[^0-9]/g, '')
       .slice(0, -3);
 
-    const Password = Buffer.from(
-      BusinessShortCode + passKey + Timestamp,
-    ).toString('base64');
+    const Password = Buffer.from(BusinessShortCode + passKey + Timestamp).toString('base64');
 
     const token = await this.authenticate();
 

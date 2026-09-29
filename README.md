@@ -58,7 +58,8 @@ You Will need a few things from Safaricom before development.
 1.  Consumer Key
 2.  Consumer Secret
 3.  Test Credentials for Development/Sanbox environment
-4.  [Callback server with Mpesa apis whitelisted](#ip-whitelisting) 
+4.  [Callback server with Mpesa apis whitelisted](#ip-whitelisting)
+
 - Login or Register as a Safaricom developer [here](https://developer.safaricom.co.ke/login-register) if you haven't.
 - Add a new App [here](https://developer.safaricom.co.ke/user/me/apps)
 - You will be issued with a Consumer Key and Consumer Secret. You will use these to initiate an Mpesa Instance.
@@ -71,9 +72,9 @@ You Will need a few things from Safaricom before development.
 
 ```javascript
 // import package
-import { Mpesa } from "mpesa-api";
+import { Mpesa } from 'mpesa-api';
 //OR
-const Mpesa = require("mpesa-api").Mpesa;
+const Mpesa = require('mpesa-api').Mpesa;
 
 // create a new instance of the api
 const mpesa = new Mpesa(credentials, environment);
@@ -107,9 +108,9 @@ const credentials = {
 Environment should be a string. It can be either 'production' or 'sandbox'
 
 ```javascript
-const environment = "sandbox";
+const environment = 'sandbox';
 //or
-const environment = "production";
+const environment = 'production';
 ```
 
 ## Methods and Api Calls
@@ -123,17 +124,17 @@ This API enables Business to Business (B2B) transactions between a business and 
 ```javascript
 mpesa
   .b2b({
-    InitiatorName: "Initiator Name",
+    InitiatorName: 'Initiator Name',
     Amount: 1000 /* 1000 is an example amount */,
-    PartyA: "Party A",
-    PartyB: "Party B",
-    AccountReference: "Account Reference",
-    QueueTimeOutURL: "Queue Timeout URL",
-    ResultURL: "Result URL",
-    CommandID: "Command ID" /* OPTIONAL */,
+    PartyA: 'Party A',
+    PartyB: 'Party B',
+    AccountReference: 'Account Reference',
+    QueueTimeOutURL: 'Queue Timeout URL',
+    ResultURL: 'Result URL',
+    CommandID: 'Command ID' /* OPTIONAL */,
     SenderIdentifierType: 4 /* OPTIONAL */,
     RecieverIdentifierType: 4 /* OPTIONAL */,
-    Remarks: "Remarks" /* OPTIONAL */,
+    Remarks: 'Remarks' /* OPTIONAL */,
   })
   .then((response) => {
     //Do something with the response
@@ -166,15 +167,15 @@ This API enables Business to Customer (B2C) transactions between a company and c
 ```javascript
 mpesa
   .b2c({
-    Initiator: "Initiator Name",
+    Initiator: 'Initiator Name',
     Amount: 1000 /* 1000 is an example amount */,
-    PartyA: "Party A",
-    PartyB: "Party B",
-    QueueTimeOutURL: "Queue Timeout URL",
-    ResultURL: "Result URL",
-    CommandID: "Command ID" /* OPTIONAL */,
-    Occasion: "Occasion" /* OPTIONAL */,
-    Remarks: "Remarks" /* OPTIONAL */,
+    PartyA: 'Party A',
+    PartyB: 'Party B',
+    QueueTimeOutURL: 'Queue Timeout URL',
+    ResultURL: 'Result URL',
+    CommandID: 'Command ID' /* OPTIONAL */,
+    Occasion: 'Occasion' /* OPTIONAL */,
+    Remarks: 'Remarks' /* OPTIONAL */,
   })
   .then((response) => {
     //Do something with the response
@@ -211,10 +212,10 @@ M-Pesa completes or cancels the transaction depending on the validation response
 ```javascript
 mpesa
   .c2bregister({
-    ShortCode: "Short Code",
-    ConfirmationURL: "Confirmation URL",
-    ValidationURL: "Validation URL",
-    ResponseType: "Response Type",
+    ShortCode: 'Short Code',
+    ConfirmationURL: 'Confirmation URL',
+    ValidationURL: 'Validation URL',
+    ResponseType: 'Response Type',
   })
   .then((response) => {
     //Do something with the response
@@ -241,8 +242,8 @@ mpesa
     ShortCode: 123456,
     Amount: 1000 /* 1000 is an example amount */,
     Msisdn: 254792123456,
-    CommandID: "Command ID" /* OPTIONAL */,
-    BillRefNumber: "Bill Reference Number" /* OPTIONAL */,
+    CommandID: 'Command ID' /* OPTIONAL */,
+    BillRefNumber: 'Bill Reference Number' /* OPTIONAL */,
   })
   .then((response) => {
     //Do something with the response
@@ -269,13 +270,13 @@ The Account Balance API requests for the account balance of a shortcode.
 ```javascript
 mpesa
   .accountBalance({
-    Initiator: "Initiator Name",
-    PartyA: "Party A",
-    IdentifierType: "Identifier Type",
-    QueueTimeOutURL: "Queue Timeout URL",
-    ResultURL: "Result URL",
-    CommandID: "Command ID" /* OPTIONAL */,
-    Remarks: "Remarks" /* OPTIONAL */,
+    Initiator: 'Initiator Name',
+    PartyA: 'Party A',
+    IdentifierType: 'Identifier Type',
+    QueueTimeOutURL: 'Queue Timeout URL',
+    ResultURL: 'Result URL',
+    CommandID: 'Command ID' /* OPTIONAL */,
+    Remarks: 'Remarks' /* OPTIONAL */,
   })
   .then((response) => {
     //Do something with the response
@@ -304,15 +305,15 @@ Transaction Status API checks the status of a B2B, B2C and C2B APIs transactions
 ```javascript
 mpesa
   .transactionStatus({
-    Initiator: "Initiator",
-    TransactionID: "Transaction ID",
-    PartyA: "Party A",
-    IdentifierType: "Identifier Type",
-    ResultURL: "Result URL",
-    QueueTimeOutURL: "Queue Timeout URL",
-    CommandID: "Command ID" /* OPTIONAL */,
-    Remarks: "Remarks" /* OPTIONAL */,
-    Occasion: "Occasion" /* OPTIONAL */,
+    Initiator: 'Initiator',
+    TransactionID: 'Transaction ID',
+    PartyA: 'Party A',
+    IdentifierType: 'Identifier Type',
+    ResultURL: 'Result URL',
+    QueueTimeOutURL: 'Queue Timeout URL',
+    CommandID: 'Command ID' /* OPTIONAL */,
+    Remarks: 'Remarks' /* OPTIONAL */,
+    Occasion: 'Occasion' /* OPTIONAL */,
   })
   .then((response) => {
     //Do something with the response
@@ -345,13 +346,13 @@ mpesa
   .lipaNaMpesaOnline({
     BusinessShortCode: 123456,
     Amount: 1000 /* 1000 is an example amount */,
-    PartyA: "Party A",
-    PhoneNumber: "Phone Number",
-    CallBackURL: "CallBack URL",
-    AccountReference: "Account Reference",
-    passKey: "Lipa Na Mpesa Pass Key",
-    TransactionType: "Transaction Type" /* OPTIONAL */,
-    TransactionDesc: "Transaction Description" /* OPTIONAL */,
+    PartyA: 'Party A',
+    PhoneNumber: 'Phone Number',
+    CallBackURL: 'CallBack URL',
+    AccountReference: 'Account Reference',
+    passKey: 'Lipa Na Mpesa Pass Key',
+    TransactionType: 'Transaction Type' /* OPTIONAL */,
+    TransactionDesc: 'Transaction Description' /* OPTIONAL */,
   })
   .then((response) => {
     //Do something with the response
@@ -382,8 +383,8 @@ mpesa
 mpesa
   .lipaNaMpesaQuery({
     BusinessShortCode: 123456,
-    CheckoutRequestID: "Checkout Request ID",
-    passKey: "Lipa Na Mpesa Pass Key",
+    CheckoutRequestID: 'Checkout Request ID',
+    passKey: 'Lipa Na Mpesa Pass Key',
   })
   .then((response) => {
     //Do something with the response
@@ -408,16 +409,16 @@ Reverses a B2B, B2C or C2B M-Pesa transaction.
 ```javascript
 mpesa
   .reversal({
-    Initiator: "Initiator",
-    TransactionID: "Transaction ID",
+    Initiator: 'Initiator',
+    TransactionID: 'Transaction ID',
     Amount: 1000 /* 1000 is an example amount */,
-    ReceiverParty: "Reciever Party",
-    ResultURL: "Result URL",
-    QueueTimeOutURL: "Queue Timeout URL",
-    CommandID: "Command ID" /* OPTIONAL */,
+    ReceiverParty: 'Reciever Party',
+    ResultURL: 'Result URL',
+    QueueTimeOutURL: 'Queue Timeout URL',
+    CommandID: 'Command ID' /* OPTIONAL */,
     RecieverIdentifierType: 11 /* OPTIONAL */,
-    Remarks: "Remarks" /* OPTIONAL */,
-    Occasion: "Ocassion" /* OPTIONAL */,
+    Remarks: 'Remarks' /* OPTIONAL */,
+    Occasion: 'Ocassion' /* OPTIONAL */,
   })
   .then((response) => {
     //Do something with the response
@@ -442,7 +443,6 @@ mpesa
 9.  Occasion - Optional.
 10. Command ID - Default is `TransactionReversal`
 
-
 ## IP Whitelisting
 
 You might need to whitelist Mpesa IPs listed below on the server/firewall that receives the callbacks.
@@ -464,7 +464,6 @@ You might need to whitelist Mpesa IPs listed below on the server/firewall that r
 - 196.201.212.138
 
 </details>
-
 
 ## Demo
 

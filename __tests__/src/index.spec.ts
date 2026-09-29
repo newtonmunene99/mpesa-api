@@ -1,4 +1,12 @@
-import { afterEach, beforeEach, describe, expect, test, vi, type MockInstance } from 'vitest';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+  type MockInstance,
+} from 'vite-plus/test';
 import { Mpesa } from '../../src/index';
 import type { CredentialsInterface, HttpServiceResponse } from '../../src/models/interfaces';
 import { HttpService } from '../../src/services/http.service';
@@ -26,7 +34,12 @@ beforeEach(() => {
     .mockResolvedValue(ok({ access_token: 'tok', expires_in: '3599' }));
   post = vi.spyOn(HttpService.prototype, 'post').mockResolvedValue(ok({ ResponseCode: '0' }));
   mpesa = new Mpesa(
-    { clientKey: 'key', clientSecret: 'secret', initiatorPassword: 'unused', securityCredential: 'SC' },
+    {
+      clientKey: 'key',
+      clientSecret: 'secret',
+      initiatorPassword: 'unused',
+      securityCredential: 'SC',
+    },
     'sandbox',
   );
 });

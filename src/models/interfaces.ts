@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-
-import { IncomingHttpHeaders } from 'http';
+import type { IncomingHttpHeaders } from 'node:http';
 
 export interface HttpServiceConfig {
   baseURL?: string;
@@ -569,9 +567,7 @@ export interface StkPushInterface {
   TransactionDesc?: string;
 }
 
-export type TransactionType =
-  | 'CustomerPayBillOnline'
-  | 'CustomerBuyGoodsOnline';
+export type TransactionType = 'CustomerPayBillOnline' | 'CustomerBuyGoodsOnline';
 
 export interface StkPushResponseInterface {
   MerchantRequestID: string;

@@ -2,44 +2,38 @@
   "name": "mpesa-api",
   "version": "3.0.2",
   "description": "An NPM Module built with NodeJs to help you with M-Pesa Daraja API calls.",
-  "main": "lib/index",
-  "types": "lib/index",
-  "type": "commonjs",
-  "homepage": "https://github.com/newtonmunene99/mpesa-api/",
-  "scripts": {
-    "build": "./node_modules/.bin/tsc --project tsconfig.build.json && npm run copy-keys",
-    "test": "vp test"
-  },
   "keywords": [
-    "mpesa",
-    "nodejs",
-    "node",
     "mobile money",
-    "money"
+    "money",
+    "mpesa",
+    "node",
+    "nodejs"
   ],
-  "author": "Newton Munene <newtonmunene99@gmail.com>",
-  "license": "MIT",
-  "devDependencies": {
-    "@types/node": "^14.14.16",
-    "@typescript-eslint/eslint-plugin": "^4.11.0",
-    "@typescript-eslint/parser": "^4.11.0",
-    "eslint": "^7.16.0",
-    "eslint-config-prettier": "^7.1.0",
-    "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-jsdoc": "^30.7.9",
-    "prettier": "^2.2.1",
-    "typescript": "7.0.2",
-    "vite-plus": "1.0.0"
+  "homepage": "https://github.com/newtonmunene99/mpesa-api/",
+  "bugs": {
+    "url": "https://github.com/newtonmunene99/mpesa-api/issues"
   },
-  "files": [
-    "/lib"
-  ],
+  "license": "MIT",
+  "author": "Newton Munene <newtonmunene99@gmail.com>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/newtonmunene99/mpesa-api.git"
   },
-  "bugs": {
-    "url": "https://github.com/newtonmunene99/mpesa-api/issues"
+  "files": [
+    "/lib"
+  ],
+  "type": "commonjs",
+  "main": "lib/index",
+  "types": "lib/index",
+  "scripts": {
+    "build": "./node_modules/.bin/tsc --project tsconfig.build.json && npm run copy-keys",
+    "test": "vp test",
+    "check": "vp check"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "typescript": "7.0.2",
+    "vite-plus": "1.0.0"
   },
   "packageManager": "pnpm@12.6.0"
 }
