@@ -1,0 +1,5 @@
+STK push send
+
+src/apis/stk-push.ts: stkPush(ctx) factory -> { send }; StkPushInput/StkPushResponse types with the Daraja field names in JSDoc. Wire: BusinessShortCode, Password base64(shortCode+passkey+timestamp), Timestamp EAT, TransactionType Pay Bill/Buy Goods, Amount, PartyA=PhoneNumber (normalised), PartyB (default shortCode), CallBackURL, AccountReference, TransactionDesc (default Payment). Response is camelCase plus raw.
+client.ts: Mpesa.stkPush.
+Tests: the exact wire body including the password literal MTc0Mzc5cGsyMDI2MDkyOTExMzAwMA== and the bearer header; response mapping; the till variant; phone normalisation; 4 issues in one error and no fetch; namespace on the client.
