@@ -1,0 +1,3 @@
+README badges
+
+Found in the Chrome hand check: the Minified and MinZip badges rendered broken because bundlephobia returns 429 upstream (through both badgen and shields). Replaced them with badgen packagephobia install size (200, 99.6 kB) and shields node/v (200; shows the engines range after the 4.0 publish).
