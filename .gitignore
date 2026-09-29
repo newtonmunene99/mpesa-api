@@ -58,5 +58,3 @@ typings/
 
 # dotenv environment variables file
 .env
-
-__tests__/values.ts
