@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vite-plus/test';
+import { describe, expect, test, vi } from 'vite-plus/test';
 import {
   type CachedToken,
   MemoryTokenStore,
@@ -162,12 +162,24 @@ describe('TokenManager', () => {
     expect(calls).toHaveLength(2);
   });
 
-  test('get and refresh started together share one request', async () => {
-    const { manager, calls } = setup([tokenResponse('t1')]);
+  test('refresh joins a fetch that is already in flight', async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const { manager, calls } = setup([
+      async () => {
+        await gate;
+        return new Response(JSON.stringify({ access_token: 't1', expires_in: 3599 }));
+      },
+    ]);
 
-    const [a, b] = await Promise.all([manager.get(), manager.refresh()]);
+    const pendingGet = manager.get();
+    await vi.waitFor(() => expect(calls).toHaveLength(1));
+    const pendingRefresh = manager.refresh();
+    release();
 
-    expect([a, b]).toEqual(['t1', 't1']);
+    expect(await Promise.all([pendingGet, pendingRefresh])).toEqual(['t1', 't1']);
     expect(calls).toHaveLength(1);
   });
 
@@ -226,5 +238,62 @@ describe('TokenManager', () => {
     const { manager } = setup([tokenResponse('t1', expiresIn)]);
 
     await expect(manager.get()).rejects.toBeInstanceOf(AuthError);
+  });
+
+  test('keeps using the newest token when saving it failed', async () => {
+    const store = new MemoryTokenStore();
+    await store.set('mpesa:sandbox:2c70e12b7a0646f9', {
+      accessToken: 't1',
+      expiresAt: T0 + 600_000,
+    });
+    let failSet = true;
+    const flaky: TokenStore = {
+      get: (key) => store.get(key),
+      set: async (key, token) => {
+        if (failSet) throw new Error('redis down');
+        await store.set(key, token);
+      },
+    };
+    const { manager, calls } = setup([tokenResponse('t2')], flaky);
+
+    expect(await manager.refresh('t1')).toBe('t2');
+    failSet = false;
+    expect(await manager.get()).toBe('t2');
+    expect(calls).toHaveLength(1);
+  });
+
+  test('a throwing warning hook does not lose the token', async () => {
+    const { fetch } = fakeFetch([tokenResponse('t1')]);
+    const manager = new TokenManager({
+      transport: { baseUrl: 'https://sandbox.safaricom.co.ke', fetch, timeoutMs: 1000 },
+      consumerKey: 'key',
+      consumerSecret: 'secret',
+      environment: 'sandbox',
+      store: {
+        get: async () => undefined,
+        set: async () => {
+          throw new Error('redis down');
+        },
+      },
+      onWarning: () => {
+        throw new Error('logger broken');
+      },
+    });
+
+    expect(await manager.get()).toBe('t1');
+  });
+
+  test('retries the store key digest after a failure', async () => {
+    const digest = vi
+      .spyOn(crypto.subtle, 'digest')
+      .mockRejectedValueOnce(new Error('digest unavailable'));
+    try {
+      const { manager } = setup([tokenResponse('t1')]);
+
+      await expect(manager.get()).rejects.toThrow('digest unavailable');
+      expect(await manager.get()).toBe('t1');
+    } finally {
+      digest.mockRestore();
+    }
   });
 });

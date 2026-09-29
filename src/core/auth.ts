@@ -56,6 +56,8 @@ export class TokenManager {
   readonly #now: () => number;
   #key: Promise<string> | undefined;
   #inFlight: Promise<string> | undefined;
+  /** The last token this manager fetched, used when the store holds an older one. */
+  #last: CachedToken | undefined;
 
   constructor(options: TokenManagerOptions) {
     this.#options = options;
@@ -83,6 +85,16 @@ export class TokenManager {
   }
 
   async #readUsable(key: string): Promise<string | undefined> {
+    const stored = await this.#readStored(key);
+    // Prefer whichever token was issued last: if saving to the store failed, the stored one
+    // has already been invalidated by Daraja.
+    const newest =
+      this.#last && (!stored || this.#last.expiresAt > stored.expiresAt) ? this.#last : stored;
+    if (!newest) return undefined;
+    return newest.expiresAt - this.#now() > REFRESH_MARGIN_MS ? newest.accessToken : undefined;
+  }
+
+  async #readStored(key: string): Promise<CachedToken | undefined> {
     let cached: unknown;
     try {
       cached = await this.#options.store.get(key);
@@ -93,7 +105,7 @@ export class TokenManager {
     const { accessToken, expiresAt } = cached as Partial<Record<keyof CachedToken, unknown>>;
     if (typeof accessToken !== 'string' || accessToken === '') return undefined;
     if (typeof expiresAt !== 'number' || !Number.isFinite(expiresAt)) return undefined;
-    return expiresAt - this.#now() > REFRESH_MARGIN_MS ? accessToken : undefined;
+    return { accessToken, expiresAt };
   }
 
   #storeKey(): Promise<string> {
@@ -152,16 +164,25 @@ export class TokenManager {
     }
 
     const token: CachedToken = { accessToken, expiresAt: this.#now() + expiresIn * 1000 };
+    this.#last = token;
     try {
       await store.set(key, token);
     } catch (error) {
       // The new token is valid (and the previous one is now invalid), so still use it.
-      this.#options.onWarning?.(
+      this.#warn(
         `Could not save the M-Pesa access token to the token store: ${
           error instanceof Error ? error.message : String(error)
         }`,
       );
     }
     return accessToken;
+  }
+
+  #warn(message: string): void {
+    try {
+      this.#options.onWarning?.(message);
+    } catch {
+      // A failing warning hook must not break token handling.
+    }
   }
 }
