@@ -1,0 +1,7 @@
+Client and context
+
+src/client.ts: MpesaConfig, Initiator (password+certificate | securityCredential), Environment, Context { environment, config, post, securityCredential(api), now }, createContext(config, clock) (internal), createMpesa(config) -> { environment } (namespaces are added by later todos).
+Config validation reports all issues at once; the certificate is parsed eagerly and its ValidationError is rethrown under createMpesa.
+post: bearer from TokenManager.get; on 401 or errorCode 404.001.03/400.003.01/401.002.01 -> tokens.refresh(rejected) and one retry; no retry otherwise.
+securityCredential: memoised; passthrough for securityCredential; encryptPkcs1v15 otherwise; onWarning once for an expired cert (guarded).
+14 tests.
