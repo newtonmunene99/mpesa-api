@@ -56,6 +56,7 @@ describe('HttpService', () => {
     expect(res.statusCode).toBe(200);
     expect(res.data).toEqual({ a: 1 });
     expect(received.method).toBe('GET');
+    expect(received.url).toBe('/json');
     expect(received.headers['x-base']).toBe('1');
     expect(received.headers.authorization).toBe('Bearer tok');
   });
@@ -64,6 +65,7 @@ describe('HttpService', () => {
     await client().post('/echo', { b: 2 }, { headers: {} });
 
     expect(received.method).toBe('POST');
+    expect(received.url).toBe('/echo');
     expect(received.body).toBe('{"b":2}');
     expect(received.headers['content-type']).toBe('application/json');
     expect(received.headers['content-length']).toBe('7');

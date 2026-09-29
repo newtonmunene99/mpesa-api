@@ -18,7 +18,7 @@ const config: ViteUserConfig = defineConfig({
     entry: ['src/index.ts'],
     format: ['esm'],
     platform: 'node',
-    dts: true,
+    dts: { sourcemap: true },
     sourcemap: true,
     copy: [{ from: 'src/keys/*.cer', to: 'dist/keys' }],
   },

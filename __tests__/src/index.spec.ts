@@ -8,7 +8,12 @@ import {
   type MockInstance,
 } from 'vite-plus/test';
 import { Mpesa } from '../../src/index';
-import type { CredentialsInterface, HttpServiceResponse } from '../../src/models/interfaces';
+import type {
+  AccountBalanceInterface,
+  CredentialsInterface,
+  HttpServiceResponse,
+  ReversalInterface,
+} from '../../src/models/interfaces';
 import { HttpService } from '../../src/services/http.service';
 
 const ok = <T>(data: T): HttpServiceResponse<T> => ({
@@ -240,8 +245,8 @@ describe('Mpesa', () => {
       ReceiverParty: '600000',
       ResultURL: 'https://result',
       QueueTimeOutURL: 'https://timeout',
-      CommandID: 'TransactionReversal',
-    });
+      // CommandID is typed as required but defaulted at runtime; omit it to pin the default.
+    } as ReversalInterface);
 
     expect(post).toHaveBeenCalledWith(
       '/mpesa/reversal/v1/request',
@@ -267,11 +272,10 @@ describe('Mpesa', () => {
     const res = await mpesa.accountBalance({
       Initiator: 'api',
       PartyA: '600000',
-      IdentifierType: '4',
       QueueTimeOutURL: 'https://timeout',
       ResultURL: 'https://result',
-      CommandID: 'AccountBalance',
-    });
+      // CommandID and IdentifierType are typed as required but defaulted at runtime; omit them to pin the defaults.
+    } as AccountBalanceInterface);
 
     expect(post).toHaveBeenCalledWith(
       '/mpesa/accountbalance/v1/query',
