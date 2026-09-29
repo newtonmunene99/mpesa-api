@@ -12,7 +12,7 @@ Thanks for helping. This guide covers local setup, the checks every change must 
   vp env doctor
   ```
 
-  If you don't install Vite+ globally, run the same commands as `pnpm exec vp …`. `vite-plus` is a dev dependency.
+  Without a global install, the project commands below (`check`, `test`, `pack`) also work as `pnpm exec vp …`, because `vite-plus` is a dev dependency. `vp env` needs the global CLI.
 
 ## Setup
 
@@ -37,7 +37,7 @@ Branch from `dev`. Pull requests target `dev`; `master` holds released code.
 Before you push, run:
 
 ```sh
-vp check && vp test && vp pack && pnpm run test:dist
+vp check && vp test && vp pack && pnpm run test:dist && pnpm run lint:pkg
 ```
 
 CI runs the same checks on Node 22, 24 and 26.
@@ -67,7 +67,7 @@ Maintainers release with [Changesets](https://github.com/changesets/changesets):
 1. Merging to `master` makes the release workflow open or update a **"chore: version packages"** PR, which bumps the version and writes the CHANGELOG.
 2. Merging that PR publishes to npm through trusted publishing, with provenance. No npm tokens are involved.
 
-Fixes for 3.x are made on the `v3.x` branch and published under the `v3` dist-tag.
+3.x receives bug and security fixes on the `v3.x` branch. Users install it with `npm i mpesa-api@3`. When a 3.x patch is published, use `npm publish --tag v3` so it doesn't replace `latest`.
 
 ## Reporting bugs and security issues
 

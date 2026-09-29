@@ -50,7 +50,7 @@ yarn add mpesa-api
 ### Versions
 
 - **4.x** is ESM only and needs Node.js 22.12+.
-- **3.x** supports CommonJS (`require`) and older Node versions. Install it with `npm i mpesa-api@3`. Fixes for 3.x are maintained on the [`v3.x`](https://github.com/newtonmunene99/mpesa-api/tree/v3.x) branch.
+- **3.x** supports CommonJS (`require`) and older Node versions. Install it with `npm i mpesa-api@3`. Bug and security fixes for 3.x are maintained on the [`v3.x`](https://github.com/newtonmunene99/mpesa-api/tree/v3.x) branch.
 
 ## Requisites
 

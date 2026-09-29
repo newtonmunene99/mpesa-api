@@ -4,11 +4,11 @@
 
 ## Supported versions
 
-| Version | Supported                                                                                          |
-| ------- | -------------------------------------------------------------------------------------------------- |
-| 4.x     | Yes                                                                                                |
-| 3.x     | Security fixes only, on the [`v3.x`](https://github.com/newtonmunene99/mpesa-api/tree/v3.x) branch |
-| < 3     | No                                                                                                 |
+| Version | Supported                                                                                             |
+| ------- | ----------------------------------------------------------------------------------------------------- |
+| 4.x     | Yes                                                                                                   |
+| 3.x     | Bug and security fixes, on the [`v3.x`](https://github.com/newtonmunene99/mpesa-api/tree/v3.x) branch |
+| < 3     | No                                                                                                    |
 
 ## Reporting a vulnerability
 
