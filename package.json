@@ -33,15 +33,23 @@
     },
     "./package.json": "./package.json"
   },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "build": "vp pack",
     "check": "vp check",
     "test": "vp test",
     "test:dist": "node scripts/smoke-dist.mjs",
-    "lint:pkg": "publint && attw --pack . --profile esm-only"
+    "lint:pkg": "publint && attw --pack . --profile esm-only",
+    "changeset": "changeset",
+    "release": "vp pack && changeset publish"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
+    "@changesets/changelog-github": "1.0.1",
+    "@changesets/cli": "3.0.3",
     "@types/node": "^26.6.3",
     "publint": "^0.3.24",
     "typescript": "7.0.2",
