@@ -1,0 +1,5 @@
+B2C pay (v3)
+
+b2c(ctx) -> { pay }. Wire: OriginatorConversationID (input or crypto.randomUUID), InitiatorName, SecurityCredential, CommandID, Amount, PartyA (shortCode), PartyB (normalised phone), Remarks, QueueTimeOutURL, ResultURL, Occassion only when given. Validation: commandId, amount 10-250000, shortCode, phone, remarks 2-100 (required), URLs, occasion 1-100.
+shared.ts: InitiatorResponse, mapInitiatorResponse, IdentifierType plus identifierTypeCode (for status and balance).
+Tests: 6 (full wire with decryption of the credential, a UUID stub, mapping, 4 issues, missing initiator, namespace).
