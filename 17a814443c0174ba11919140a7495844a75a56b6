@@ -2,3 +2,10 @@ Phase 1 verifier round-2 notes
 
 #last holds the last fetched token; #readUsable prefers it over a stored entry with an earlier expiresAt. The #warn wrapper swallows onWarning exceptions. Tests: newest token after a failed set; a throwing hook; digest rejection is not memoised (vi.spyOn crypto.subtle.digest); a refresh started while get is in flight (gated fake fetch) joins it.
 Each fix was mutation-checked: reverting it fails exactly its test.
+
+Phase 1 checkpoint: Core
+
+Tests: CI=true vp test 83/83; vp check 0 warnings; vp pack + test:dist smoke ok; lint:pkg ok. No node: imports in src/core.
+Per-todo verifier (pkcs1-security-credential): Approve; notes fixed in 9e3fce8.
+Phase verifier: Reject (7 issues) -> fixed in dae065a -> Approve with 4 notes -> fixed in 17a8144 (mutation-checked).
+Hand check: none needed (internal modules, no user-visible surface yet).
