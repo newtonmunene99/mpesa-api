@@ -4,9 +4,9 @@ import type { HttpServiceConfig, HttpServiceResponse } from '../models/interface
 
 export class HttpService {
   private uri: URL;
-  private headers: Record<string, any>;
+  private headers: Record<string, any> | undefined;
 
-  constructor(config?: HttpServiceConfig) {
+  constructor(config: HttpServiceConfig & { baseURL: string }) {
     const { baseURL, headers } = config;
 
     this.uri = new URL(baseURL);
@@ -58,7 +58,7 @@ export class HttpService {
                 data,
               };
 
-              if (statusCode >= 200 && statusCode < 300) {
+              if (statusCode !== undefined && statusCode >= 200 && statusCode < 300) {
                 return resolve(result);
               }
 
@@ -132,7 +132,7 @@ export class HttpService {
                 data,
               };
 
-              if (statusCode >= 200 && statusCode < 300) {
+              if (statusCode !== undefined && statusCode >= 200 && statusCode < 300) {
                 return resolve(result);
               }
 

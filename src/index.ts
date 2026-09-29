@@ -27,10 +27,10 @@ import { HttpService } from './services/http.service';
 
 export class Mpesa {
   private http: HttpService;
-  private environment: string;
+  private environment: string | undefined;
   private clientKey: string;
   private clientSecret: string;
-  private securityCredential: string;
+  private securityCredential: string | undefined;
 
   constructor(
     {
@@ -74,7 +74,10 @@ export class Mpesa {
     return response.data.access_token;
   }
 
-  private async generateSecurityCredential(password: string, certificatePath: string) {
+  private async generateSecurityCredential(
+    password: string,
+    certificatePath: string | null | undefined,
+  ) {
     let certificate: string;
 
     if (certificatePath != null) {

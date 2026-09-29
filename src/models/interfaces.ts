@@ -11,8 +11,8 @@ export interface HttpServiceResponse<T extends any = any> {
   path: string;
   method: string;
   headers: IncomingHttpHeaders;
-  statusCode: number;
-  statusMessage: string;
+  statusCode: number | undefined;
+  statusMessage: string | undefined;
   data: T;
 }
 
