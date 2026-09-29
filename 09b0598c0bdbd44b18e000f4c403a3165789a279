@@ -1,0 +1,4 @@
+EAT timestamps
+
+formatTimestamp(date) -> YYYYMMDDHHmmss at UTC+3 (verified 2026-09-29T08:30Z -> 20260929113000, year rollover 2026-12-31T22:00Z -> 20270101010000). parseTimestamp(string|number) and parseB2CDateTime(dd.MM.yyyy HH:mm:ss) return UTC Dates, with ValidationError on malformed or impossible dates (month 13).
+Red: module not found. Green: 7 tests.
