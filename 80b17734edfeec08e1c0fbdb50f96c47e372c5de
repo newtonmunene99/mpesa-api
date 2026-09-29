@@ -1,0 +1,4 @@
+Reversal
+
+request({ transactionId, amount, receiverParty, remarks, resultUrl, queueTimeoutUrl }) -> exactly the portal fields; RecieverIdentifierType "11"; no Occasion (3.x sent one). 5 issues in one error; remarks required; initiator required.
+5 tests.
