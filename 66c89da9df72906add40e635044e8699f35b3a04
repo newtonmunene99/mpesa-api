@@ -3,3 +3,14 @@ Phase 1 verifier follow-ups
 Delivered: the TransactionReversal, AccountBalance and IdentifierType "4" defaults are now pinned. Red was verified by changing each one; exactly the matching test failed. The HttpService tests assert /json and /echo. dist/index.d.mts.map now ships, so the d.mts sourceMappingURL resolves.
 
 Dropped: type-checking scripts/*.mjs (TypeScript rejects allowJs with isolatedDeclarations; Oxlint still lints the script).
+
+Phase 1 checkpoint: Toolchain, tests and package
+
+Tests: CI=true vp test, 15/15 passed (2 files); vp check had 0 errors and 0 warnings.
+Agent-run checks:
+- Fresh clone of the branch: pnpm install --frozen-lockfile, vp check, vp test, vp pack, pnpm run test:dist (smoke ok) and pnpm run lint:pkg (publint plus attw esm-only) all passed.
+- pnpm outdated: empty (R1.5).
+- No network (R1.4): sandbox-exec denying outbound except localhost gave vp test 15/15; a control https request to sandbox.safaricom.co.ke got EPERM.
+- pnpm pack --dry-run: dist/** (index.mjs, .map, .d.mts, .d.mts.map, keys/*.cer), CHANGELOG.md, LICENSE, package.json, README.md.
+Phase verifier: Approve with 7 notes. #2, #4 and #6 were fixed in 66c89da, #1 was recorded as a plan deviation, #5 was dropped (allowJs conflicts with isolatedDeclarations), and #3 and #7 were deferred to the Daraja track and phases 2/3.
+Hand check: none needed. It's a library with no UI, and the dist smoke test exercises the built package.
