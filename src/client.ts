@@ -1,3 +1,4 @@
+import { accountBalance, type AccountBalanceApi } from './apis/account-balance';
 import { b2c, type B2CApi } from './apis/b2c';
 import { c2b, type C2BApi } from './apis/c2b';
 import { stkPush, type StkPushApi } from './apis/stk-push';
@@ -59,6 +60,8 @@ export interface Mpesa {
   readonly b2c: B2CApi;
   /** Transaction Status queries. */
   readonly transactionStatus: TransactionStatusApi;
+  /** Account Balance queries. */
+  readonly accountBalance: AccountBalanceApi;
 }
 
 const BASE_URLS: Record<Environment, string> = {
@@ -185,5 +188,6 @@ export function createMpesa(config: MpesaConfig): Mpesa {
     c2b: c2b(ctx),
     b2c: b2c(ctx),
     transactionStatus: transactionStatus(ctx),
+    accountBalance: accountBalance(ctx),
   };
 }
