@@ -1,6 +1,7 @@
 import { b2c, type B2CApi } from './apis/b2c';
 import { c2b, type C2BApi } from './apis/c2b';
 import { stkPush, type StkPushApi } from './apis/stk-push';
+import { transactionStatus, type TransactionStatusApi } from './apis/transaction-status';
 import { MemoryTokenStore, TokenManager, type TokenStore } from './core/auth';
 import { parseCertificate, type RsaPublicKey } from './core/certificate';
 import { encryptPkcs1v15 } from './core/credential';
@@ -56,6 +57,8 @@ export interface Mpesa {
   readonly c2b: C2BApi;
   /** Business to Customer (B2C) payments. */
   readonly b2c: B2CApi;
+  /** Transaction Status queries. */
+  readonly transactionStatus: TransactionStatusApi;
 }
 
 const BASE_URLS: Record<Environment, string> = {
@@ -181,5 +184,6 @@ export function createMpesa(config: MpesaConfig): Mpesa {
     stkPush: stkPush(ctx),
     c2b: c2b(ctx),
     b2c: b2c(ctx),
+    transactionStatus: transactionStatus(ctx),
   };
 }
