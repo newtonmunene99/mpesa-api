@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer';
 import { constants, publicEncrypt } from 'node:crypto';
-import { promises } from 'node:fs';
-import { resolve } from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import type {
   AccountBalanceInterface,
   AccountBalanceResponseInterface,
@@ -81,14 +81,18 @@ export class Mpesa {
     let certificate: string;
 
     if (certificatePath != null) {
-      const certificateBuffer = await promises.readFile(certificatePath);
+      const certificateBuffer = await readFile(certificatePath);
 
       certificate = String(certificateBuffer);
     } else {
-      const certificateBuffer = await promises.readFile(
-        resolve(
-          __dirname,
-          this.environment === 'production' ? 'keys/production-cert.cer' : 'keys/sandbox-cert.cer',
+      const certificateBuffer = await readFile(
+        fileURLToPath(
+          new URL(
+            this.environment === 'production'
+              ? './keys/production-cert.cer'
+              : './keys/sandbox-cert.cer',
+            import.meta.url,
+          ),
         ),
       );
 

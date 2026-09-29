@@ -14,6 +14,14 @@ const config: ViteUserConfig = defineConfig({
   fmt: {
     singleQuote: true,
   },
+  pack: {
+    entry: ['src/index.ts'],
+    format: ['esm'],
+    platform: 'node',
+    dts: true,
+    sourcemap: true,
+    copy: [{ from: 'src/keys/*.cer', to: 'dist/keys' }],
+  },
 });
 
 export default config;
