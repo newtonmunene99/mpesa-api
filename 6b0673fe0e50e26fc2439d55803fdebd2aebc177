@@ -1,0 +1,7 @@
+Changesets + trusted publishing
+
+Delivered: .changeset/config.json (@changesets/changelog-github, repo newtonmunene99/mpesa-api, access public, baseBranch master), .changeset/README.md, and the major changeset esm-only-4-0.md (changeset status: mpesa-api major). .github/workflows/release.yml runs changesets/action@v2.1.2 with the v2 inputs (publish-script, commit-message, pr-title; v1 used publish/commit/title), permissions contents/pull-requests write and id-token write. package.json has the scripts changeset and release (vp pack && changeset publish) and publishConfig {access: public, provenance: true}.
+
+Verified: pnpm 12.6.0 (pinned by packageManager, used by setup-vp) contains the npm OIDC token-exchange path and ACTIONS_ID_TOKEN_REQUEST_URL handling, so changeset publish via pnpm can use trusted publishing. The npm-side trusted publisher still has to be configured by the maintainer (hand check).
+
+Removed: .github/workflows/npm-publish.yml (npm + GitHub Packages).
