@@ -1,0 +1,5 @@
+GitHub community files
+
+Added at the maintainer's request: a bug report form (version, Node, environment, API dropdown, reproduction, redacted response, required no-secrets checkbox), a feature request form, config.yml (blank issues off; links to Discussions and the security policy), pull_request_template.md, SECURITY.md (4.x supported; 3.x security fixes on v3.x; private vulnerability reporting), and CODE_OF_CONDUCT.md (Contributor Covenant 2.1 fetched from the official repo, contact via the maintainer's GitHub).
+
+Follow-up for the maintainer: private vulnerability reporting is currently disabled on the repo (the API returned enabled:false), and SECURITY.md relies on it.
