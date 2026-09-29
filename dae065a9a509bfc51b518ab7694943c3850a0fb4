@@ -1,0 +1,4 @@
+Phase 1 verifier fixes (Reject, 7 issues)
+
+1 malformed cached entries (empty or missing token, non-numeric expiry) are ignored; 2 store.get throwing = miss, store.set throwing -> onWarning + still returns the token; 3 refresh(rejected?) joins an in-flight fetch or returns a newer stored token; 4 expires_in <= 0 -> AuthError; 5 tests: failure then success, get+refresh share one call; 6 credential exhaustion -> MpesaError; 7 #key cleared on digest rejection.
+Tests: 80 total (11 new).
