@@ -1,0 +1,3 @@
+Final verifier fixes
+
+CONTRIBUTING no longer claims a v3 dist-tag (install with mpesa-api@3; 3.x patches publish with --tag v3). 3.x scope is "bug and security fixes" in README, SECURITY and CONTRIBUTING. The release PR is named "chore: version packages" in .changeset/README.md. The CONTRIBUTING pre-push line includes lint:pkg, like CI. The pnpm exec vp fallback is scoped to check/test/pack (vp env needs the global CLI). The .eslintcache ignore is removed. vp check is clean.
