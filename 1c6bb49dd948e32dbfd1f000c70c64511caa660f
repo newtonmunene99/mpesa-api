@@ -1,0 +1,6 @@
+GitHub Actions CI
+
+Delivered: .github/workflows/ci.yml (matrix Node 22/24/26, fail-fast off): vp install --frozen-lockfile, then vp check, vp test, vp pack, test:dist and lint:pkg. permissions: contents: read; concurrency cancels superseded runs.
+Pinned: actions/checkout@v7.0.1 and voidzero-dev/setup-vp@v1.21.1 (the latest tags on 2026-09-29).
+Checked locally: the YAML parses, and @action-validator/cli exits 0. The real check is the first PR run (phase 2 hand check).
+Removed: .travis.yml.
