@@ -1,0 +1,5 @@
+Validators and error hierarchy
+
+src/core/errors.ts: MpesaError base (name set from new.target), ValidationError(context, issues[]) with message "<context>: <path> <message>; ...", AuthError(status, errorCode), DarajaApiError(status, requestId, errorCode, errorMessage, body), NetworkError.
+src/core/validate.ts: Issues collector with throwIfAny; normalisePhone (07/01/+254/254 -> 2547/2541, 12 digits); checkPhone, checkLength (optional unless required), checkInt, checkUrl (absolute http(s); https in production; blockKeywords mpesa/m-pesa/safaricom/exec/exe/cmd/sql/query, case-insensitive), checkShortCode (5-7 digits), checkRequired.
+Red: module not found. Green: 18 tests.
