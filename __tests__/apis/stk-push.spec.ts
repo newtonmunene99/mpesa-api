@@ -135,3 +135,56 @@ describe('stkPush.send', () => {
     expect(typeof mpesa.stkPush.send).toBe('function');
   });
 });
+
+describe('stkPush.query', () => {
+  const queried = {
+    ResponseCode: '0',
+    ResponseDescription: 'The service request has been accepted successsfully',
+    MerchantRequestID: '22205-34066-1',
+    CheckoutRequestID: 'ws_CO_13012021093521236557',
+    ResultCode: '1032',
+    ResultDesc: 'Request cancelled by user',
+  };
+
+  test('sends the checkout request ID with derived password and timestamp', async () => {
+    const { api, calls } = setup([token, { status: 200, body: queried }]);
+
+    await api.query({ shortCode: 174379, checkoutRequestId: 'ws_CO_13012021093521236557' });
+
+    expect(calls[1]).toMatchObject({
+      url: 'https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query',
+      headers: { authorization: 'Bearer tok' },
+      body: {
+        BusinessShortCode: 174379,
+        Password: 'MTc0Mzc5cGsyMDI2MDkyOTExMzAwMA==',
+        Timestamp: '20260929113000',
+        CheckoutRequestID: 'ws_CO_13012021093521236557',
+      },
+    });
+  });
+
+  test('maps the result code to a number and keeps the raw body', async () => {
+    const { api } = setup([token, { status: 200, body: queried }]);
+
+    expect(
+      await api.query({ shortCode: 174379, checkoutRequestId: 'ws_CO_13012021093521236557' }),
+    ).toEqual({
+      merchantRequestId: '22205-34066-1',
+      checkoutRequestId: 'ws_CO_13012021093521236557',
+      responseCode: '0',
+      responseDescription: 'The service request has been accepted successsfully',
+      resultCode: 1032,
+      resultDesc: 'Request cancelled by user',
+      raw: queried,
+    });
+  });
+
+  test('requires the checkout request ID', async () => {
+    const { api, calls } = setup([]);
+
+    await expect(api.query({ shortCode: 174379, checkoutRequestId: '' })).rejects.toThrow(
+      'stkPush.query: checkoutRequestId is required',
+    );
+    expect(calls).toHaveLength(0);
+  });
+});

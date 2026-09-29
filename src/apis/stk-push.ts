@@ -38,13 +38,35 @@ export interface StkPushResponse {
   raw: unknown;
 }
 
+export interface StkQueryInput {
+  /** The shortcode used for the push (`BusinessShortCode`). */
+  shortCode: number;
+  /** From the `stkPush.send` response (`CheckoutRequestID`). */
+  checkoutRequestId: string;
+}
+
+export interface StkQueryResponse {
+  merchantRequestId: string;
+  checkoutRequestId: string;
+  responseCode: string;
+  responseDescription: string;
+  /** 0 means paid; for example 1032 means the customer cancelled. */
+  resultCode: number | string;
+  resultDesc: string;
+  /** Daraja's response body, unmodified. */
+  raw: unknown;
+}
+
 export interface StkPushApi {
   /** Sends an M-Pesa Express (STK push) payment prompt to the customer's phone. */
   send(input: StkPushInput): Promise<StkPushResponse>;
+  /** Checks the outcome of an STK push. */
+  query(input: StkQueryInput): Promise<StkQueryResponse>;
 }
 
 const PATHS = {
   send: '/mpesa/stkpush/v1/processrequest',
+  query: '/mpesa/stkpushquery/v1/query',
 } as const;
 
 const str = (value: unknown): string =>
@@ -53,6 +75,12 @@ const str = (value: unknown): string =>
     : typeof value === 'number' || typeof value === 'boolean'
       ? String(value)
       : '';
+
+/** Numeric strings become numbers; other codes (such as "R000002") stay strings. */
+const code = (value: unknown): number | string => {
+  const text = str(value);
+  return /^-?\d+$/.test(text) ? Number(text) : text;
+};
 
 function password(
   ctx: Context,
@@ -103,9 +131,35 @@ async function send(ctx: Context, input: StkPushInput): Promise<StkPushResponse>
   };
 }
 
+async function query(ctx: Context, input: StkQueryInput): Promise<StkQueryResponse> {
+  const issues = new Issues();
+  const passkey = ctx.config.passkey;
+  if (!passkey) issues.add('passkey', 'is required in the client config for stkPush');
+  checkShortCode(issues, 'shortCode', input.shortCode);
+  checkLength(issues, 'checkoutRequestId', input.checkoutRequestId, 1, 100, true);
+  issues.throwIfAny('stkPush.query');
+
+  const raw = await ctx.post<Record<string, unknown>>(PATHS.query, {
+    BusinessShortCode: input.shortCode,
+    ...password(ctx, input.shortCode, passkey!),
+    CheckoutRequestID: input.checkoutRequestId,
+  });
+
+  return {
+    merchantRequestId: str(raw.MerchantRequestID),
+    checkoutRequestId: str(raw.CheckoutRequestID),
+    responseCode: str(raw.ResponseCode),
+    responseDescription: str(raw.ResponseDescription),
+    resultCode: code(raw.ResultCode),
+    resultDesc: str(raw.ResultDesc),
+    raw,
+  };
+}
+
 /** M-Pesa Express (STK push). */
 export function stkPush(ctx: Context): StkPushApi {
   return {
     send: (input) => send(ctx, input),
+    query: (input) => query(ctx, input),
   };
 }
