@@ -1,3 +1,4 @@
+import { c2b, type C2BApi } from './apis/c2b';
 import { stkPush, type StkPushApi } from './apis/stk-push';
 import { MemoryTokenStore, TokenManager, type TokenStore } from './core/auth';
 import { parseCertificate, type RsaPublicKey } from './core/certificate';
@@ -50,6 +51,8 @@ export interface Mpesa {
   readonly environment: Environment;
   /** M-Pesa Express (STK push). */
   readonly stkPush: StkPushApi;
+  /** Customer to Business (C2B) payment notifications. */
+  readonly c2b: C2BApi;
 }
 
 const BASE_URLS: Record<Environment, string> = {
@@ -173,5 +176,6 @@ export function createMpesa(config: MpesaConfig): Mpesa {
   return {
     environment: ctx.environment,
     stkPush: stkPush(ctx),
+    c2b: c2b(ctx),
   };
 }

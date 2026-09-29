@@ -1,5 +1,6 @@
 import type { Context } from '../client';
 import { formatTimestamp } from '../core/time';
+import { code, str } from './shared';
 import {
   checkInt,
   checkLength,
@@ -68,19 +69,6 @@ const PATHS = {
   send: '/mpesa/stkpush/v1/processrequest',
   query: '/mpesa/stkpushquery/v1/query',
 } as const;
-
-const str = (value: unknown): string =>
-  typeof value === 'string'
-    ? value
-    : typeof value === 'number' || typeof value === 'boolean'
-      ? String(value)
-      : '';
-
-/** Numeric strings become numbers; other codes (such as "R000002") stay strings. */
-const code = (value: unknown): number | string => {
-  const text = str(value);
-  return /^-?\d+$/.test(text) ? Number(text) : text;
-};
 
 function password(
   ctx: Context,
