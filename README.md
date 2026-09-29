@@ -14,12 +14,12 @@ An NPM Module built with NodeJs in mind to help you with M-Pesa Daraja API calls
 
 Please note that this module is intended for use in a node environment on the backend and will raise a few issues if used on the client side/browser environment. This is mainly due to the file system.
 
-|          | Badge                                                                                                                                                         |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| CI       | [![CI](https://github.com/newtonmunene99/mpesa-api/actions/workflows/ci.yml/badge.svg)](https://github.com/newtonmunene99/mpesa-api/actions/workflows/ci.yml) |
-| Latest   | [![Latest](https://badgen.net/npm/v/mpesa-api)](https://www.npmjs.com/package/mpesa-api)                                                                      |
-| Minified | [![Minified Size](https://badgen.net/bundlephobia/min/mpesa-api)](https://bundlephobia.com/result?p=mpesa-api)                                                |
-| MinZip   | [![Min](https://badgen.net/bundlephobia/minzip/mpesa-api)](https://bundlephobia.com/result?p=mpesa-api)                                                       |
+|              | Badge                                                                                                                                                         |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CI           | [![CI](https://github.com/newtonmunene99/mpesa-api/actions/workflows/ci.yml/badge.svg)](https://github.com/newtonmunene99/mpesa-api/actions/workflows/ci.yml) |
+| Latest       | [![Latest](https://badgen.net/npm/v/mpesa-api)](https://www.npmjs.com/package/mpesa-api)                                                                      |
+| Install size | [![Install size](https://badgen.net/packagephobia/install/mpesa-api)](https://packagephobia.com/result?p=mpesa-api)                                           |
+| Node         | [![Node](https://img.shields.io/node/v/mpesa-api)](https://www.npmjs.com/package/mpesa-api)                                                                   |
 
 Ready Methods
 
