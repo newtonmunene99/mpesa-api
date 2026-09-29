@@ -1,0 +1,5 @@
+Docs for 4.0
+
+README: CI badge; prerequisites Node 22.12+ and ESM; npm/pnpm/yarn install; Versions section (4.x ESM, 3.x via mpesa-api@3 and the v3.x branch); require example removed; roadmap "Write Tests" checked; Build and Contributing replaced by links to CONTRIBUTING.md, CODE_OF_CONDUCT.md and SECURITY.md. The maintainer banner and method docs are unchanged (the Daraja 3.0 update rewrites them).
+CONTRIBUTING.md: prerequisites (Node 22.12+, pnpm, Vite+ or pnpm exec vp), setup, a command table, the pre-push gate, test rules (offline, literal assertions, no credentials), Conventional Commits, changesets and the release flow.
+Checked: vp check passes; pnpm exec vp resolves.
