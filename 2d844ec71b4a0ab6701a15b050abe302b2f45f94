@@ -1,0 +1,4 @@
+STK push query
+
+query({ shortCode, checkoutRequestId }) -> BusinessShortCode, Password, Timestamp, CheckoutRequestID. The response maps ResultCode through code(): numeric strings become numbers, others stay strings. Validation: passkey, shortCode, checkoutRequestId required.
+Tests: wire body plus bearer; mapping (1032); a missing ID throws with no fetch. The response field names come from SDK 3.x; the sandbox phase confirms them.
