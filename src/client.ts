@@ -1,6 +1,7 @@
 import { accountBalance, type AccountBalanceApi } from './apis/account-balance';
 import { b2c, type B2CApi } from './apis/b2c';
 import { c2b, type C2BApi } from './apis/c2b';
+import { reversal, type ReversalApi } from './apis/reversal';
 import { stkPush, type StkPushApi } from './apis/stk-push';
 import { transactionStatus, type TransactionStatusApi } from './apis/transaction-status';
 import { MemoryTokenStore, TokenManager, type TokenStore } from './core/auth';
@@ -62,6 +63,8 @@ export interface Mpesa {
   readonly transactionStatus: TransactionStatusApi;
   /** Account Balance queries. */
   readonly accountBalance: AccountBalanceApi;
+  /** Transaction reversals. */
+  readonly reversal: ReversalApi;
 }
 
 const BASE_URLS: Record<Environment, string> = {
@@ -189,5 +192,6 @@ export function createMpesa(config: MpesaConfig): Mpesa {
     b2c: b2c(ctx),
     transactionStatus: transactionStatus(ctx),
     accountBalance: accountBalance(ctx),
+    reversal: reversal(ctx),
   };
 }
