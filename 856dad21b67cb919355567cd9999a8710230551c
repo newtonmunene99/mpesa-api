@@ -4,3 +4,13 @@ Phase 2 verifier fixes
 - release.yml sets NPM_CONFIG_PROVENANCE=true on the changesets step (R5.2).
 - dependabot.yml sets target-branch: dev for npm and github-actions.
 Checked: action-validator exits 0, the dependabot YAML parses, changeset status shows mpesa-api major, and vp check is clean.
+
+Phase 2 checkpoint: CI and release
+
+Agent-run: the local gate (vp check, vp test 15/15, vp pack, test:dist, lint:pkg) passes; action-validator passes on ci.yml and release.yml; changeset status shows mpesa-api major.
+Phase verifier: Reject (4 issues) then Approve after 856dad2 (changeset wording, NPM_CONFIG_PROVENANCE, dependabot target-branch dev).
+Hand check:
+- Pushed the feature branch and opened PR #47 to dev. GitHub Actions CI run 36547484284 passed on Node 22 (20s), 24 (17s) and 26 (16s).
+- The maintainer confirmed the npm trusted publisher is configured for release.yml.
+- Pushed v3.x (efa4b76) and refs/notes/commits to origin.
+Not yet exercised: the first publish, which happens when the Version Packages PR merges into master.
