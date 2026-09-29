@@ -1,3 +1,4 @@
+import { b2c, type B2CApi } from './apis/b2c';
 import { c2b, type C2BApi } from './apis/c2b';
 import { stkPush, type StkPushApi } from './apis/stk-push';
 import { MemoryTokenStore, TokenManager, type TokenStore } from './core/auth';
@@ -53,6 +54,8 @@ export interface Mpesa {
   readonly stkPush: StkPushApi;
   /** Customer to Business (C2B) payment notifications. */
   readonly c2b: C2BApi;
+  /** Business to Customer (B2C) payments. */
+  readonly b2c: B2CApi;
 }
 
 const BASE_URLS: Record<Environment, string> = {
@@ -177,5 +180,6 @@ export function createMpesa(config: MpesaConfig): Mpesa {
     environment: ctx.environment,
     stkPush: stkPush(ctx),
     c2b: c2b(ctx),
+    b2c: b2c(ctx),
   };
 }
