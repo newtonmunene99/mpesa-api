@@ -1,16 +1,15 @@
 import { request as httpsRequest } from 'https';
 import { request as httpRequest } from 'http';
-import { parse, UrlWithStringQuery } from 'url';
 import { HttpServiceConfig, HttpServiceResponse } from '../models/interfaces';
 
 export class HttpService {
-  private uri: UrlWithStringQuery;
+  private uri: URL;
   private headers: Record<string, any>;
 
   constructor(config?: HttpServiceConfig) {
     const { baseURL, headers } = config;
 
-    this.uri = parse(baseURL);
+    this.uri = new URL(baseURL);
     this.headers = headers;
   }
 
@@ -27,6 +26,7 @@ export class HttpService {
           {
             protocol: this.uri.protocol,
             hostname: this.uri.hostname,
+            port: this.uri.port,
             path,
             method: 'GET',
             headers: {
@@ -98,6 +98,7 @@ export class HttpService {
           {
             protocol: this.uri.protocol,
             hostname: this.uri.hostname,
+            port: this.uri.port,
             path,
             method: 'POST',
             headers: {
