@@ -1,0 +1,5 @@
+Phase 1 verifier follow-ups
+
+Delivered: the TransactionReversal, AccountBalance and IdentifierType "4" defaults are now pinned. Red was verified by changing each one; exactly the matching test failed. The HttpService tests assert /json and /echo. dist/index.d.mts.map now ships, so the d.mts sourceMappingURL resolves.
+
+Dropped: type-checking scripts/*.mjs (TypeScript rejects allowJs with isolatedDeclarations; Oxlint still lints the script).
