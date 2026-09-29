@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-
-import { IncomingHttpHeaders } from 'http';
+import type { IncomingHttpHeaders } from 'node:http';
 
 export interface HttpServiceConfig {
   baseURL?: string;
@@ -13,8 +11,8 @@ export interface HttpServiceResponse<T extends any = any> {
   path: string;
   method: string;
   headers: IncomingHttpHeaders;
-  statusCode: number;
-  statusMessage: string;
+  statusCode: number | undefined;
+  statusMessage: string | undefined;
   data: T;
 }
 
@@ -569,9 +567,7 @@ export interface StkPushInterface {
   TransactionDesc?: string;
 }
 
-export type TransactionType =
-  | 'CustomerPayBillOnline'
-  | 'CustomerBuyGoodsOnline';
+export type TransactionType = 'CustomerPayBillOnline' | 'CustomerBuyGoodsOnline';
 
 export interface StkPushResponseInterface {
   MerchantRequestID: string;

@@ -14,12 +14,12 @@ An NPM Module built with NodeJs in mind to help you with M-Pesa Daraja API calls
 
 Please note that this module is intended for use in a node environment on the backend and will raise a few issues if used on the client side/browser environment. This is mainly due to the file system.
 
-|          | Badge                                                                                                                               |
-| -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Travis   | [![Build Status](https://travis-ci.org/newtonmunene99/mpesa-api.svg?branch=master)](https://travis-ci.org/newtonmunene99/mpesa-api) |
-| Latest   | [![Latest](https://badgen.net/npm/v/mpesa-api)](https://www.npmjs.com/package/mpesa-api)                                            |
-| Minified | [![Minified Size](https://badgen.net/bundlephobia/min/mpesa-api)](https://bundlephobia.com/result?p=mpesa-api)                      |
-| MinZip   | [![Min](https://badgen.net/bundlephobia/minzip/mpesa-api)](https://bundlephobia.com/result?p=mpesa-api)                             |
+|              | Badge                                                                                                                                                         |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CI           | [![CI](https://github.com/newtonmunene99/mpesa-api/actions/workflows/ci.yml/badge.svg)](https://github.com/newtonmunene99/mpesa-api/actions/workflows/ci.yml) |
+| Latest       | [![Latest](https://badgen.net/npm/v/mpesa-api)](https://www.npmjs.com/package/mpesa-api)                                                                      |
+| Install size | [![Install size](https://badgen.net/packagephobia/install/mpesa-api)](https://packagephobia.com/result?p=mpesa-api)                                           |
+| Node         | [![Node](https://img.shields.io/node/v/mpesa-api)](https://www.npmjs.com/package/mpesa-api)                                                                   |
 
 Ready Methods
 
@@ -34,22 +34,23 @@ Ready Methods
 
 ## Prerequisites
 
-1.  Node 6+.
-2.  NPM(comes with Node) or Yarn.
+1.  Node.js 22.12 or later.
+2.  An ES module project (`"type": "module"`, or `.mjs`/`.mts` files). From version 4, `mpesa-api` is published as ESM only.
 
 ## Installation
 
-Mpesa-Api uses Node Package Manager
-
-```
+```sh
 npm i mpesa-api
-```
-
-Or Yarn
-
-```
+# or
+pnpm add mpesa-api
+# or
 yarn add mpesa-api
 ```
+
+### Versions
+
+- **4.x** is ESM only and needs Node.js 22.12+.
+- **3.x** supports CommonJS (`require`) and older Node versions. Install it with `npm i mpesa-api@3`. Bug and security fixes for 3.x are maintained on the [`v3.x`](https://github.com/newtonmunene99/mpesa-api/tree/v3.x) branch.
 
 ## Requisites
 
@@ -58,7 +59,8 @@ You Will need a few things from Safaricom before development.
 1.  Consumer Key
 2.  Consumer Secret
 3.  Test Credentials for Development/Sanbox environment
-4.  [Callback server with Mpesa apis whitelisted](#ip-whitelisting) 
+4.  [Callback server with Mpesa apis whitelisted](#ip-whitelisting)
+
 - Login or Register as a Safaricom developer [here](https://developer.safaricom.co.ke/login-register) if you haven't.
 - Add a new App [here](https://developer.safaricom.co.ke/user/me/apps)
 - You will be issued with a Consumer Key and Consumer Secret. You will use these to initiate an Mpesa Instance.
@@ -71,9 +73,7 @@ You Will need a few things from Safaricom before development.
 
 ```javascript
 // import package
-import { Mpesa } from "mpesa-api";
-//OR
-const Mpesa = require("mpesa-api").Mpesa;
+import { Mpesa } from 'mpesa-api';
 
 // create a new instance of the api
 const mpesa = new Mpesa(credentials, environment);
@@ -107,9 +107,9 @@ const credentials = {
 Environment should be a string. It can be either 'production' or 'sandbox'
 
 ```javascript
-const environment = "sandbox";
+const environment = 'sandbox';
 //or
-const environment = "production";
+const environment = 'production';
 ```
 
 ## Methods and Api Calls
@@ -123,17 +123,17 @@ This API enables Business to Business (B2B) transactions between a business and 
 ```javascript
 mpesa
   .b2b({
-    InitiatorName: "Initiator Name",
+    InitiatorName: 'Initiator Name',
     Amount: 1000 /* 1000 is an example amount */,
-    PartyA: "Party A",
-    PartyB: "Party B",
-    AccountReference: "Account Reference",
-    QueueTimeOutURL: "Queue Timeout URL",
-    ResultURL: "Result URL",
-    CommandID: "Command ID" /* OPTIONAL */,
+    PartyA: 'Party A',
+    PartyB: 'Party B',
+    AccountReference: 'Account Reference',
+    QueueTimeOutURL: 'Queue Timeout URL',
+    ResultURL: 'Result URL',
+    CommandID: 'Command ID' /* OPTIONAL */,
     SenderIdentifierType: 4 /* OPTIONAL */,
     RecieverIdentifierType: 4 /* OPTIONAL */,
-    Remarks: "Remarks" /* OPTIONAL */,
+    Remarks: 'Remarks' /* OPTIONAL */,
   })
   .then((response) => {
     //Do something with the response
@@ -166,15 +166,15 @@ This API enables Business to Customer (B2C) transactions between a company and c
 ```javascript
 mpesa
   .b2c({
-    Initiator: "Initiator Name",
+    Initiator: 'Initiator Name',
     Amount: 1000 /* 1000 is an example amount */,
-    PartyA: "Party A",
-    PartyB: "Party B",
-    QueueTimeOutURL: "Queue Timeout URL",
-    ResultURL: "Result URL",
-    CommandID: "Command ID" /* OPTIONAL */,
-    Occasion: "Occasion" /* OPTIONAL */,
-    Remarks: "Remarks" /* OPTIONAL */,
+    PartyA: 'Party A',
+    PartyB: 'Party B',
+    QueueTimeOutURL: 'Queue Timeout URL',
+    ResultURL: 'Result URL',
+    CommandID: 'Command ID' /* OPTIONAL */,
+    Occasion: 'Occasion' /* OPTIONAL */,
+    Remarks: 'Remarks' /* OPTIONAL */,
   })
   .then((response) => {
     //Do something with the response
@@ -211,10 +211,10 @@ M-Pesa completes or cancels the transaction depending on the validation response
 ```javascript
 mpesa
   .c2bregister({
-    ShortCode: "Short Code",
-    ConfirmationURL: "Confirmation URL",
-    ValidationURL: "Validation URL",
-    ResponseType: "Response Type",
+    ShortCode: 'Short Code',
+    ConfirmationURL: 'Confirmation URL',
+    ValidationURL: 'Validation URL',
+    ResponseType: 'Response Type',
   })
   .then((response) => {
     //Do something with the response
@@ -241,8 +241,8 @@ mpesa
     ShortCode: 123456,
     Amount: 1000 /* 1000 is an example amount */,
     Msisdn: 254792123456,
-    CommandID: "Command ID" /* OPTIONAL */,
-    BillRefNumber: "Bill Reference Number" /* OPTIONAL */,
+    CommandID: 'Command ID' /* OPTIONAL */,
+    BillRefNumber: 'Bill Reference Number' /* OPTIONAL */,
   })
   .then((response) => {
     //Do something with the response
@@ -269,13 +269,13 @@ The Account Balance API requests for the account balance of a shortcode.
 ```javascript
 mpesa
   .accountBalance({
-    Initiator: "Initiator Name",
-    PartyA: "Party A",
-    IdentifierType: "Identifier Type",
-    QueueTimeOutURL: "Queue Timeout URL",
-    ResultURL: "Result URL",
-    CommandID: "Command ID" /* OPTIONAL */,
-    Remarks: "Remarks" /* OPTIONAL */,
+    Initiator: 'Initiator Name',
+    PartyA: 'Party A',
+    IdentifierType: 'Identifier Type',
+    QueueTimeOutURL: 'Queue Timeout URL',
+    ResultURL: 'Result URL',
+    CommandID: 'Command ID' /* OPTIONAL */,
+    Remarks: 'Remarks' /* OPTIONAL */,
   })
   .then((response) => {
     //Do something with the response
@@ -304,15 +304,15 @@ Transaction Status API checks the status of a B2B, B2C and C2B APIs transactions
 ```javascript
 mpesa
   .transactionStatus({
-    Initiator: "Initiator",
-    TransactionID: "Transaction ID",
-    PartyA: "Party A",
-    IdentifierType: "Identifier Type",
-    ResultURL: "Result URL",
-    QueueTimeOutURL: "Queue Timeout URL",
-    CommandID: "Command ID" /* OPTIONAL */,
-    Remarks: "Remarks" /* OPTIONAL */,
-    Occasion: "Occasion" /* OPTIONAL */,
+    Initiator: 'Initiator',
+    TransactionID: 'Transaction ID',
+    PartyA: 'Party A',
+    IdentifierType: 'Identifier Type',
+    ResultURL: 'Result URL',
+    QueueTimeOutURL: 'Queue Timeout URL',
+    CommandID: 'Command ID' /* OPTIONAL */,
+    Remarks: 'Remarks' /* OPTIONAL */,
+    Occasion: 'Occasion' /* OPTIONAL */,
   })
   .then((response) => {
     //Do something with the response
@@ -345,13 +345,13 @@ mpesa
   .lipaNaMpesaOnline({
     BusinessShortCode: 123456,
     Amount: 1000 /* 1000 is an example amount */,
-    PartyA: "Party A",
-    PhoneNumber: "Phone Number",
-    CallBackURL: "CallBack URL",
-    AccountReference: "Account Reference",
-    passKey: "Lipa Na Mpesa Pass Key",
-    TransactionType: "Transaction Type" /* OPTIONAL */,
-    TransactionDesc: "Transaction Description" /* OPTIONAL */,
+    PartyA: 'Party A',
+    PhoneNumber: 'Phone Number',
+    CallBackURL: 'CallBack URL',
+    AccountReference: 'Account Reference',
+    passKey: 'Lipa Na Mpesa Pass Key',
+    TransactionType: 'Transaction Type' /* OPTIONAL */,
+    TransactionDesc: 'Transaction Description' /* OPTIONAL */,
   })
   .then((response) => {
     //Do something with the response
@@ -382,8 +382,8 @@ mpesa
 mpesa
   .lipaNaMpesaQuery({
     BusinessShortCode: 123456,
-    CheckoutRequestID: "Checkout Request ID",
-    passKey: "Lipa Na Mpesa Pass Key",
+    CheckoutRequestID: 'Checkout Request ID',
+    passKey: 'Lipa Na Mpesa Pass Key',
   })
   .then((response) => {
     //Do something with the response
@@ -408,16 +408,16 @@ Reverses a B2B, B2C or C2B M-Pesa transaction.
 ```javascript
 mpesa
   .reversal({
-    Initiator: "Initiator",
-    TransactionID: "Transaction ID",
+    Initiator: 'Initiator',
+    TransactionID: 'Transaction ID',
     Amount: 1000 /* 1000 is an example amount */,
-    ReceiverParty: "Reciever Party",
-    ResultURL: "Result URL",
-    QueueTimeOutURL: "Queue Timeout URL",
-    CommandID: "Command ID" /* OPTIONAL */,
+    ReceiverParty: 'Reciever Party',
+    ResultURL: 'Result URL',
+    QueueTimeOutURL: 'Queue Timeout URL',
+    CommandID: 'Command ID' /* OPTIONAL */,
     RecieverIdentifierType: 11 /* OPTIONAL */,
-    Remarks: "Remarks" /* OPTIONAL */,
-    Occasion: "Ocassion" /* OPTIONAL */,
+    Remarks: 'Remarks' /* OPTIONAL */,
+    Occasion: 'Ocassion' /* OPTIONAL */,
   })
   .then((response) => {
     //Do something with the response
@@ -442,7 +442,6 @@ mpesa
 9.  Occasion - Optional.
 10. Command ID - Default is `TransactionReversal`
 
-
 ## IP Whitelisting
 
 You might need to whitelist Mpesa IPs listed below on the server/firewall that receives the callbacks.
@@ -465,7 +464,6 @@ You might need to whitelist Mpesa IPs listed below on the server/firewall that r
 
 </details>
 
-
 ## Demo
 
 You can try it out on [Runkit](https://runkit.com/newtonmunene99/mpesa-api-demo)
@@ -476,29 +474,14 @@ You can try it out on [Runkit](https://runkit.com/newtonmunene99/mpesa-api-demo)
 - [x] Deploy to Npm
 - [x] Migrate to Typescript
 - [x] Detailed Documentation
-- [ ] Write Tests
+- [x] Write Tests
 - [x] Validators for inputs
 - [ ] Tree shaking
 - [ ] Migrate from Typescript to JSDoc
 
-## Build
-
-If you Wish to build
-
-1. Clone this repo
-2. CD into repo
-3. run `npm install` to install dependencies
-4. run `npm run build` to build
-5. run `npm run start:dev` to run package in development mode
-
 ## Contributing
 
-1. Fork the project then clone the forked project
-2. Create your feature branch: `git checkout -b my-new-feature`
-3. Make your changes and add name to Contributors list below.
-4. Commit your changes: `git commit -m 'Add some feature'`
-5. Push to the branch: `git push origin my-new-feature`
-6. Submit a pull request.
+Contributions are welcome. See [CONTRIBUTING.md](./CONTRIBUTING.md) for setup, the checks to run, and how releases work. Please follow the [Code of Conduct](./CODE_OF_CONDUCT.md), and report security issues privately as described in [SECURITY.md](./SECURITY.md).
 
 ## Credits
 

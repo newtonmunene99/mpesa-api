@@ -1,0 +1,30 @@
+name: Release
+
+on:
+  push:
+    branches: [master]
+
+concurrency: release-${{ github.ref }}
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: voidzero-dev/setup-vp@v1.21.1
+        with:
+          node-version: '24'
+          cache: true
+      - run: vp install --frozen-lockfile
+      - uses: changesets/action@v2.1.2
+        with:
+          publish-script: pnpm run release
+          commit-message: 'chore: version packages'
+          pr-title: 'chore: version packages'
+        env:
+          NPM_CONFIG_PROVENANCE: 'true'

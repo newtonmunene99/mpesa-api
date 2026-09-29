@@ -1,9 +1,8 @@
-import { Buffer } from 'buffer';
-import { RSA_PKCS1_PADDING } from 'constants';
-import { publicEncrypt } from 'crypto';
-import { promises } from 'fs';
-import { resolve } from 'path';
-import {
+import { Buffer } from 'node:buffer';
+import { constants, publicEncrypt } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import type {
   AccountBalanceInterface,
   AccountBalanceResponseInterface,
   AuthorizeResponseInterface,
@@ -28,10 +27,10 @@ import { HttpService } from './services/http.service';
 
 export class Mpesa {
   private http: HttpService;
-  private environment: string;
+  private environment: string | undefined;
   private clientKey: string;
   private clientSecret: string;
-  private securityCredential: string;
+  private securityCredential: string | undefined;
 
   constructor(
     {
@@ -47,8 +46,7 @@ export class Mpesa {
     this.clientSecret = clientSecret;
 
     this.http = new HttpService({
-      baseURL:
-        environment === 'production' ? routes.production : routes.sandbox,
+      baseURL: environment === 'production' ? routes.production : routes.sandbox,
       headers: { 'Content-Type': 'application/json' },
     });
 
@@ -59,46 +57,42 @@ export class Mpesa {
     }
 
     if (!securityCredential) {
-      this.generateSecurityCredential(initiatorPassword, certificatePath);
+      void this.generateSecurityCredential(initiatorPassword, certificatePath);
     } else {
       this.securityCredential = securityCredential;
     }
   }
 
   private async authenticate(): Promise<string> {
-    const response = await this.http.get<AuthorizeResponseInterface>(
-      routes.oauth,
-      {
-        headers: {
-          Authorization:
-            'Basic ' +
-            Buffer.from(this.clientKey + ':' + this.clientSecret).toString(
-              'base64',
-            ),
-        },
+    const response = await this.http.get<AuthorizeResponseInterface>(routes.oauth, {
+      headers: {
+        Authorization:
+          'Basic ' + Buffer.from(this.clientKey + ':' + this.clientSecret).toString('base64'),
       },
-    );
+    });
 
     return response.data.access_token;
   }
 
   private async generateSecurityCredential(
     password: string,
-    certificatePath: string,
+    certificatePath: string | null | undefined,
   ) {
     let certificate: string;
 
     if (certificatePath != null) {
-      const certificateBuffer = await promises.readFile(certificatePath);
+      const certificateBuffer = await readFile(certificatePath);
 
       certificate = String(certificateBuffer);
     } else {
-      const certificateBuffer = await promises.readFile(
-        resolve(
-          __dirname,
-          this.environment === 'production'
-            ? 'keys/production-cert.cer'
-            : 'keys/sandbox-cert.cer',
+      const certificateBuffer = await readFile(
+        fileURLToPath(
+          new URL(
+            this.environment === 'production'
+              ? './keys/production-cert.cer'
+              : './keys/sandbox-cert.cer',
+            import.meta.url,
+          ),
         ),
       );
 
@@ -108,7 +102,7 @@ export class Mpesa {
     this.securityCredential = publicEncrypt(
       {
         key: certificate,
-        padding: RSA_PKCS1_PADDING,
+        padding: constants.RSA_PKCS1_PADDING,
       },
       Buffer.from(password),
     ).toString('base64');
@@ -345,9 +339,7 @@ export class Mpesa {
       .replace(/[^0-9]/g, '')
       .slice(0, -3);
 
-    const Password = Buffer.from(
-      BusinessShortCode + passKey + Timestamp,
-    ).toString('base64');
+    const Password = Buffer.from(BusinessShortCode + passKey + Timestamp).toString('base64');
 
     const token = await this.authenticate();
 
@@ -399,9 +391,7 @@ export class Mpesa {
       .replace(/[^0-9]/g, '')
       .slice(0, -3);
 
-    const Password = Buffer.from(
-      BusinessShortCode + passKey + Timestamp,
-    ).toString('base64');
+    const Password = Buffer.from(BusinessShortCode + passKey + Timestamp).toString('base64');
 
     const token = await this.authenticate();
 
