@@ -1,0 +1,5 @@
+C2B register URLs
+
+src/apis/c2b.ts: c2b(ctx) -> { registerUrls }; mapC2BResponse accepts OriginatorCoversationID|OriginatorConversationID. Wire: ShortCode as a string, ResponseType, ConfirmationURL, ValidationURL, to /mpesa/c2b/v2/registerurl. Production-only rules: https plus the keyword block.
+src/apis/shared.ts: str() and code() (moved from stk-push.ts; created earlier than the plan put it, under b2c).
+Tests: 7 (wire, both spellings, production rules, sandbox leniency, defaultAction case, namespace).
