@@ -1,0 +1,7 @@
+Grouped Dependabot
+
+Delivered: .github/dependabot.yml opens weekly grouped PRs for dev dependencies (the npm ecosystem, which covers pnpm lockfiles) and for all GitHub Actions.
+
+Why: it replaces 17 stale per-package Dependabot branches from 2021-2023 with two grouped PRs a week.
+
+Checked: the YAML parses (js-yaml), and vp check stays clean.
