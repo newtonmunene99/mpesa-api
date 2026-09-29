@@ -1,0 +1,10 @@
+ESM-only dist/ from vp pack
+
+Delivered: `vp pack` builds dist/index.mjs, index.d.mts, a sourcemap, and dist/keys/*.cer (target node22.12, taken from engines). `import { Mpesa } from 'mpesa-api'` resolves through exports, and the bundled sandbox certificate produces a 256-byte RSA credential.
+
+Red: scripts/smoke-dist.mjs failed with ERR_MODULE_NOT_FOUND: Cannot find package 'mpesa-api' (no exports, no build).
+Green: smoke ok; `lint:pkg` (publint plus attw --profile esm-only) exits 0; `pnpm pack --dry-run` lists only dist/**, CHANGELOG.md, LICENSE, package.json and README.md.
+
+Changes: package.json (type module, exports, types, engines >=22.12, sideEffects false, files, scripts build/check/test/test:dist/lint:pkg; publint and @arethetypeswrong/cli dev deps); vite.config.ts pack block (tsdown copy entry from src/keys/*.cer to dist/keys); src/index.ts certificate path via new URL(..., import.meta.url) with the same sandbox/production choice; node:fs/promises readFile for both reads; .npmignore removed; lib/ dropped from .gitignore.
+
+Deviation: added CHANGELOG.md to `files`, because npm doesn't auto-include it and the spec's tarball list expects it.
