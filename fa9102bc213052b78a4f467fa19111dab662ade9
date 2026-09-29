@@ -1,0 +1,11 @@
+vp check replaces ESLint + Prettier on TypeScript 7
+
+Delivered: `vp check` (Oxfmt, type-aware Oxlint, tsgolint) exits 0 with 0 errors. The 7 remaining warnings are all "no-useless-default-assignment requires strictNullChecks", which the strict todo clears.
+
+Found along the way: TypeScript 7 defaults strict to true, so strict: false is explicit until the next commit. Vite+ bundles Vitest, so tests import from 'vite-plus/test'; 'vitest' does not resolve.
+
+Changes: tsconfig (es2023, module preserve, bundler resolution, verbatimModuleSyntax, isolatedDeclarations, no baseUrl); vite.config.ts lint and fmt blocks with a ViteUserConfig annotation for isolatedDeclarations; type-only imports; node: specifiers; crypto.constants.RSA_PKCS1_PADDING; `void` on the fire-and-forget credential call (behaviour unchanged, fixed in the API rework); unused catch bindings dropped; README and .travis.yml reformatted (the maintainer approved this).
+
+Removed: eslint 7, @typescript-eslint 4, eslint plugins, prettier 2, .eslintrc.js, .eslintignore, .prettierrc, tsconfig.build.json. @types/node 14 -> 26.6.3.
+
+Tests: 15/15 still green.
