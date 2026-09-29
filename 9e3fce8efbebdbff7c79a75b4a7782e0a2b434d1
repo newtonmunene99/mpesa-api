@@ -1,0 +1,5 @@
+PKCS#1 v1.5 security credential
+
+encryptPkcs1v15({ n, e }, plaintext, random?) -> base64. EM = 00 02 PS 00 M; PS is non-zero and re-drawn, and gives up after 100 fills of zeros; c = m^e mod n via square and multiply; left-padded to k bytes.
+Tests: 50 random passwords round-trip via node:crypto privateDecrypt (RSA_PKCS1_PADDING), each 256 bytes; the zero-redraw stub; k-11 boundary in ASCII (245/246) and UTF-8 (122/123 x e-acute); an all-zero random source throws.
+Independent verifier: Approve. Its notes on the return-shape mismatch with the plan, the infinite loop and the multibyte test are fixed; the non-hermetic passwords and the rare left-pad path are accepted.
