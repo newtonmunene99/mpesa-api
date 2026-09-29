@@ -14,12 +14,12 @@ An NPM Module built with NodeJs in mind to help you with M-Pesa Daraja API calls
 
 Please note that this module is intended for use in a node environment on the backend and will raise a few issues if used on the client side/browser environment. This is mainly due to the file system.
 
-|          | Badge                                                                                                                               |
-| -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Travis   | [![Build Status](https://travis-ci.org/newtonmunene99/mpesa-api.svg?branch=master)](https://travis-ci.org/newtonmunene99/mpesa-api) |
-| Latest   | [![Latest](https://badgen.net/npm/v/mpesa-api)](https://www.npmjs.com/package/mpesa-api)                                            |
-| Minified | [![Minified Size](https://badgen.net/bundlephobia/min/mpesa-api)](https://bundlephobia.com/result?p=mpesa-api)                      |
-| MinZip   | [![Min](https://badgen.net/bundlephobia/minzip/mpesa-api)](https://bundlephobia.com/result?p=mpesa-api)                             |
+|          | Badge                                                                                                                                                         |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CI       | [![CI](https://github.com/newtonmunene99/mpesa-api/actions/workflows/ci.yml/badge.svg)](https://github.com/newtonmunene99/mpesa-api/actions/workflows/ci.yml) |
+| Latest   | [![Latest](https://badgen.net/npm/v/mpesa-api)](https://www.npmjs.com/package/mpesa-api)                                                                      |
+| Minified | [![Minified Size](https://badgen.net/bundlephobia/min/mpesa-api)](https://bundlephobia.com/result?p=mpesa-api)                                                |
+| MinZip   | [![Min](https://badgen.net/bundlephobia/minzip/mpesa-api)](https://bundlephobia.com/result?p=mpesa-api)                                                       |
 
 Ready Methods
 
@@ -34,22 +34,23 @@ Ready Methods
 
 ## Prerequisites
 
-1.  Node 6+.
-2.  NPM(comes with Node) or Yarn.
+1.  Node.js 22.12 or later.
+2.  An ES module project (`"type": "module"`, or `.mjs`/`.mts` files). From version 4, `mpesa-api` is published as ESM only.
 
 ## Installation
 
-Mpesa-Api uses Node Package Manager
-
-```
+```sh
 npm i mpesa-api
-```
-
-Or Yarn
-
-```
+# or
+pnpm add mpesa-api
+# or
 yarn add mpesa-api
 ```
+
+### Versions
+
+- **4.x** is ESM only and needs Node.js 22.12+.
+- **3.x** supports CommonJS (`require`) and older Node versions. Install it with `npm i mpesa-api@3`. Fixes for 3.x are maintained on the [`v3.x`](https://github.com/newtonmunene99/mpesa-api/tree/v3.x) branch.
 
 ## Requisites
 
@@ -73,8 +74,6 @@ You Will need a few things from Safaricom before development.
 ```javascript
 // import package
 import { Mpesa } from 'mpesa-api';
-//OR
-const Mpesa = require('mpesa-api').Mpesa;
 
 // create a new instance of the api
 const mpesa = new Mpesa(credentials, environment);
@@ -475,29 +474,14 @@ You can try it out on [Runkit](https://runkit.com/newtonmunene99/mpesa-api-demo)
 - [x] Deploy to Npm
 - [x] Migrate to Typescript
 - [x] Detailed Documentation
-- [ ] Write Tests
+- [x] Write Tests
 - [x] Validators for inputs
 - [ ] Tree shaking
 - [ ] Migrate from Typescript to JSDoc
 
-## Build
-
-If you Wish to build
-
-1. Clone this repo
-2. CD into repo
-3. run `npm install` to install dependencies
-4. run `npm run build` to build
-5. run `npm run start:dev` to run package in development mode
-
 ## Contributing
 
-1. Fork the project then clone the forked project
-2. Create your feature branch: `git checkout -b my-new-feature`
-3. Make your changes and add name to Contributors list below.
-4. Commit your changes: `git commit -m 'Add some feature'`
-5. Push to the branch: `git push origin my-new-feature`
-6. Submit a pull request.
+Contributions are welcome. See [CONTRIBUTING.md](./CONTRIBUTING.md) for setup, the checks to run, and how releases work. Please follow the [Code of Conduct](./CODE_OF_CONDUCT.md), and report security issues privately as described in [SECURITY.md](./SECURITY.md).
 
 ## Credits
 
