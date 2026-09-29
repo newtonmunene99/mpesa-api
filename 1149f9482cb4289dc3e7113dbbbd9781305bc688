@@ -1,0 +1,5 @@
+Transaction Status
+
+query(): Initiator, SecurityCredential, CommandID TransactionStatusQuery, TransactionID and/or OriginalConversationID (keys omitted when not given), PartyA, IdentifierType, ResultURL, QueueTimeOutURL, Remarks (default "Transaction status"), Occasion (single s) when given.
+shared.ts: checkParty (msisdn -> phone normalisation, else 5-9 digits), checkIdentifierType.
+5 tests. Which ID combinations Daraja accepts is left to the sandbox phase (Verification 3).
