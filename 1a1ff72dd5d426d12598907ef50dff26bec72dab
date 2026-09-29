@@ -1,0 +1,11 @@
+HttpService honours baseURL port; WHATWG URL
+
+Delivered: HttpService requests reach the port given in baseURL, and the url.parse deprecation warning is gone from test output.
+
+Red: the new tests failed with "connect ECONNREFUSED 127.0.0.1:80", because the request options carried the hostname but not the port.
+
+Fix: new URL(baseURL), then port: this.uri.port in both get and post.
+
+Tests (__tests__/src/http.service.spec.ts, a local server on 127.0.0.1:0): JSON get with base and per-call headers; post body, content-type and content-length; 400 rejection with the parsed body; text body fallback; ECONNREFUSED on a closed port.
+
+Found, not fixed: Content-Length uses the string length, not the byte length (a bug for non-ASCII bodies). Deferred to the Daraja API rework.
