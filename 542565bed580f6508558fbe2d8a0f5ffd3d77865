@@ -1,0 +1,5 @@
+fetch transport
+
+request(transport, { method, path, headers?, body? }): accept application/json; content-type only when there is a body; AbortSignal.timeout(timeoutMs) -> NetworkError "timed out after Nms"; non-2xx -> DarajaApiError with fields from { requestId, errorCode, errorMessage } when JSON, else body text; 2xx with ResponseCode != "0" -> DarajaApiError(errorCode = ResponseCode); 2xx non-JSON -> NetworkError; fetch reject -> NetworkError with cause.
+Test helper __tests__/helpers/fake-fetch.ts records calls and replays status/body, Error or function responses.
+9 tests, including that no bearer token appears in the message or the JSON of the error.
