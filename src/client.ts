@@ -1,3 +1,4 @@
+import { stkPush, type StkPushApi } from './apis/stk-push';
 import { MemoryTokenStore, TokenManager, type TokenStore } from './core/auth';
 import { parseCertificate, type RsaPublicKey } from './core/certificate';
 import { encryptPkcs1v15 } from './core/credential';
@@ -47,6 +48,8 @@ export interface Context {
 
 export interface Mpesa {
   readonly environment: Environment;
+  /** M-Pesa Express (STK push). */
+  readonly stkPush: StkPushApi;
 }
 
 const BASE_URLS: Record<Environment, string> = {
@@ -167,5 +170,8 @@ export function createContext(config: MpesaConfig, clock: () => Date = () => new
 /** Creates a Daraja client. No network calls are made until an API is called. */
 export function createMpesa(config: MpesaConfig): Mpesa {
   const ctx = createContext(config);
-  return { environment: ctx.environment };
+  return {
+    environment: ctx.environment,
+    stkPush: stkPush(ctx),
+  };
 }
