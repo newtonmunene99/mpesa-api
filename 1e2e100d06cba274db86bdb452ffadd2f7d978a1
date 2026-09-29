@@ -1,0 +1,4 @@
+Account Balance
+
+query({ partyA, identifierType?, resultUrl, queueTimeoutUrl, remarks? }) -> Initiator, SecurityCredential, CommandID AccountBalance, PartyA, IdentifierType, Remarks (default "Account balance"), QueueTimeOutURL, ResultURL. The shape matches the portal docs (research notes). The ack sample comes from the portal.
+Red: module missing. Green: 4 tests.
