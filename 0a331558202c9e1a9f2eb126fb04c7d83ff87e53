@@ -1,0 +1,4 @@
+Token manager
+
+TokenStore { get, set } interface; MemoryTokenStore (a private Map). TokenManager.get(): store key mpesa:<env>:<sha256(consumerKey) first 16 hex>; returns the cached token if expiresAt - now > 60s; otherwise a single-flight fetch (#inFlight cleared in finally). refresh() always fetches. expires_in is accepted as a number or a string. Token errors: DarajaApiError -> AuthError(status, errorCode); a missing access_token -> AuthError.
+9 tests with an injected clock. The phase-1 verifier reviews this as the risky (auth) todo.
