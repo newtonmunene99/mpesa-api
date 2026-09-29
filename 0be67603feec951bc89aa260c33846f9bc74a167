@@ -1,0 +1,4 @@
+C2B simulate
+
+simulate({ shortCode, type, amount, phoneNumber, billRefNumber? }) -> ShortCode, CommandID, Amount, Msisdn (number), BillRefNumber (null for till). Production -> ValidationError (environment). The 3.x default of "account" is removed.
+4 tests.
