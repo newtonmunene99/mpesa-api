@@ -1,0 +1,6 @@
+Phase 2 verifier fixes
+
+- The changeset no longer promises a nonexistent v3 dist-tag; 3.x installs via mpesa-api@3. The require() wording matches the spec (works only through require(esm), not officially supported).
+- release.yml sets NPM_CONFIG_PROVENANCE=true on the changesets step (R5.2).
+- dependabot.yml sets target-branch: dev for npm and github-actions.
+Checked: action-validator exits 0, the dependabot YAML parses, changeset status shows mpesa-api major, and vp check is clean.
