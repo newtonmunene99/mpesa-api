@@ -1,4 +1,4 @@
-import { ValidationError } from './errors';
+import { MpesaError, ValidationError } from './errors';
 
 export type RandomFill = (bytes: Uint8Array<ArrayBuffer>) => Uint8Array<ArrayBuffer>;
 
@@ -37,7 +37,7 @@ function modPow(base: bigint, exponent: bigint, modulus: bigint): bigint {
 function nonZeroRandom(out: Uint8Array<ArrayBuffer>, random: RandomFill): void {
   let filled = 0;
   for (let attempts = 0; filled < out.length; attempts++) {
-    if (attempts === 100) throw new Error('random source produced no non-zero bytes');
+    if (attempts === 100) throw new MpesaError('random source produced no non-zero bytes');
     const chunk = random(new Uint8Array(out.length - filled));
     for (const b of chunk) {
       if (b !== 0 && filled < out.length) out[filled++] = b;

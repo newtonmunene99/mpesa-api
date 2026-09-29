@@ -17,6 +17,7 @@ const tokenResponse = (token: string, expiresIn: number | string = 3599): FakeRe
 
 function setup(responses: FakeResponse[], store: TokenStore = new MemoryTokenStore()) {
   let now = T0;
+  const warnings: string[] = [];
   const { fetch, calls } = fakeFetch(responses);
   const manager = new TokenManager({
     transport: { baseUrl: 'https://sandbox.safaricom.co.ke', fetch, timeoutMs: 1000 },
@@ -25,10 +26,12 @@ function setup(responses: FakeResponse[], store: TokenStore = new MemoryTokenSto
     environment: 'sandbox',
     store,
     now: () => now,
+    onWarning: (message) => warnings.push(message),
   });
   return {
     manager,
     calls,
+    warnings,
     advance: (ms: number) => {
       now += ms;
     },
@@ -144,6 +147,83 @@ describe('TokenManager', () => {
 
   test('rejects a token response without access_token', async () => {
     const { manager } = setup([{ status: 200, body: { expires_in: 3599 } }]);
+
+    await expect(manager.get()).rejects.toBeInstanceOf(AuthError);
+  });
+
+  test('a failed token fetch leaves the manager usable', async () => {
+    const { manager, calls } = setup([
+      { status: 400, body: { errorCode: '400.008.01' } },
+      tokenResponse('t1'),
+    ]);
+
+    await expect(manager.get()).rejects.toBeInstanceOf(AuthError);
+    expect(await manager.get()).toBe('t1');
+    expect(calls).toHaveLength(2);
+  });
+
+  test('get and refresh started together share one request', async () => {
+    const { manager, calls } = setup([tokenResponse('t1')]);
+
+    const [a, b] = await Promise.all([manager.get(), manager.refresh()]);
+
+    expect([a, b]).toEqual(['t1', 't1']);
+    expect(calls).toHaveLength(1);
+  });
+
+  test('refresh with the rejected token reuses a newer stored token', async () => {
+    const { manager, calls } = setup([tokenResponse('t1'), tokenResponse('t2')]);
+
+    await manager.get();
+    expect(await manager.refresh('t1')).toBe('t2');
+    expect(await manager.refresh('t1')).toBe('t2');
+    expect(calls).toHaveLength(2);
+  });
+
+  test.each([
+    ['an empty token', { accessToken: '', expiresAt: T0 + 600_000 }],
+    ['a missing token', { expiresAt: T0 + 600_000 }],
+    ['a non-numeric expiry', { accessToken: 'stale', expiresAt: 'soon' }],
+  ])('ignores a cached entry with %s', async (_, entry) => {
+    const store: TokenStore = {
+      get: async () => entry as unknown as CachedToken,
+      set: async () => {},
+    };
+    const { manager, calls } = setup([tokenResponse('fresh')], store);
+
+    expect(await manager.get()).toBe('fresh');
+    expect(calls).toHaveLength(1);
+  });
+
+  test('treats a failing store read as a cache miss', async () => {
+    const store: TokenStore = {
+      get: async () => {
+        throw new Error('redis down');
+      },
+      set: async () => {},
+    };
+    const { manager } = setup([tokenResponse('t1')], store);
+
+    expect(await manager.get()).toBe('t1');
+  });
+
+  test('still returns the new token when the store write fails, and warns', async () => {
+    const store: TokenStore = {
+      get: async () => undefined,
+      set: async () => {
+        throw new Error('redis down');
+      },
+    };
+    const { manager, warnings } = setup([tokenResponse('t1')], store);
+
+    expect(await manager.get()).toBe('t1');
+    expect(warnings).toEqual([
+      'Could not save the M-Pesa access token to the token store: redis down',
+    ]);
+  });
+
+  test.each([0, -1, ''])('rejects a token response with expires_in %j', async (expiresIn) => {
+    const { manager } = setup([tokenResponse('t1', expiresIn)]);
 
     await expect(manager.get()).rejects.toBeInstanceOf(AuthError);
   });

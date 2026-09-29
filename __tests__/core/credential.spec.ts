@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vite-plus/test';
 import { parseCertificate } from '../../src/core/certificate';
 import { encryptPkcs1v15 } from '../../src/core/credential';
-import { ValidationError } from '../../src/core/errors';
+import { MpesaError, ValidationError } from '../../src/core/errors';
 
 const fixture = (name: string): string =>
   readFileSync(new URL(`../fixtures/certs/${name}`, import.meta.url), 'utf8');
@@ -60,6 +60,7 @@ describe('encryptPkcs1v15', () => {
 
   test('gives up when the random source only returns zeros', () => {
     const zeros = (bytes: Uint8Array<ArrayBuffer>): Uint8Array<ArrayBuffer> => bytes.fill(0);
+    expect(() => encryptPkcs1v15(key, 'pw', zeros)).toThrow(MpesaError);
     expect(() => encryptPkcs1v15(key, 'pw', zeros)).toThrow(/no non-zero bytes/);
   });
 });

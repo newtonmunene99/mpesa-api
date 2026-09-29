@@ -36,6 +36,8 @@ export interface TokenManagerOptions {
   environment: 'sandbox' | 'production';
   store: TokenStore;
   now?: () => number;
+  /** Receives non-fatal problems, such as a token store that fails to save. */
+  onWarning?: (message: string) => void;
 }
 
 /** Tokens are refreshed when fewer than this many milliseconds remain. */
@@ -63,20 +65,44 @@ export class TokenManager {
   /** Returns a cached token, fetching a new one when missing or about to expire. */
   async get(): Promise<string> {
     const key = await this.#storeKey();
-    const cached = await this.#options.store.get(key);
-    if (cached && cached.expiresAt - this.#now() > REFRESH_MARGIN_MS) {
-      return cached.accessToken;
-    }
+    const cached = await this.#readUsable(key);
+    return cached ?? this.#fetchOnce(key);
+  }
+
+  /**
+   * Replaces a token Daraja rejected. When another caller has already stored a newer valid
+   * token, that token is returned instead of fetching again, because every new token
+   * invalidates the one before it.
+   */
+  async refresh(rejected?: string): Promise<string> {
+    const key = await this.#storeKey();
+    if (this.#inFlight) return this.#inFlight;
+    const cached = await this.#readUsable(key);
+    if (cached !== undefined && rejected !== undefined && cached !== rejected) return cached;
     return this.#fetchOnce(key);
   }
 
-  /** Fetches a new token regardless of the cache (used after Daraja rejects a token). */
-  async refresh(): Promise<string> {
-    return this.#fetchOnce(await this.#storeKey());
+  async #readUsable(key: string): Promise<string | undefined> {
+    let cached: unknown;
+    try {
+      cached = await this.#options.store.get(key);
+    } catch {
+      return undefined;
+    }
+    if (typeof cached !== 'object' || cached === null) return undefined;
+    const { accessToken, expiresAt } = cached as Partial<Record<keyof CachedToken, unknown>>;
+    if (typeof accessToken !== 'string' || accessToken === '') return undefined;
+    if (typeof expiresAt !== 'number' || !Number.isFinite(expiresAt)) return undefined;
+    return expiresAt - this.#now() > REFRESH_MARGIN_MS ? accessToken : undefined;
   }
 
   #storeKey(): Promise<string> {
-    this.#key ??= storeKey(this.#options.environment, this.#options.consumerKey);
+    this.#key ??= storeKey(this.#options.environment, this.#options.consumerKey).catch(
+      (error: unknown) => {
+        this.#key = undefined;
+        throw error;
+      },
+    );
     return this.#key;
   }
 
@@ -116,12 +142,26 @@ export class TokenManager {
     >;
     const accessToken = record.access_token;
     const expiresIn = Number(record.expires_in);
-    if (typeof accessToken !== 'string' || accessToken === '' || !Number.isFinite(expiresIn)) {
+    if (
+      typeof accessToken !== 'string' ||
+      accessToken === '' ||
+      !Number.isFinite(expiresIn) ||
+      expiresIn <= 0
+    ) {
       throw new AuthError('Token response is missing access_token or expires_in', 200);
     }
 
     const token: CachedToken = { accessToken, expiresAt: this.#now() + expiresIn * 1000 };
-    await store.set(key, token);
+    try {
+      await store.set(key, token);
+    } catch (error) {
+      // The new token is valid (and the previous one is now invalid), so still use it.
+      this.#options.onWarning?.(
+        `Could not save the M-Pesa access token to the token store: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
     return accessToken;
   }
 }
