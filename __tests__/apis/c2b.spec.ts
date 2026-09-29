@@ -109,3 +109,75 @@ describe('c2b.registerUrls', () => {
     expect(typeof mpesa.c2b.registerUrls).toBe('function');
   });
 });
+
+describe('c2b.simulate', () => {
+  const ok = {
+    OriginatorCoversationID: '53e3-4aa8-9fe0-8fb5e4092cdd3405976',
+    ResponseCode: '0',
+    ResponseDescription: 'Accept the service request successfully.',
+  };
+
+  test('simulates a paybill payment on the v2 endpoint', async () => {
+    const { api, calls } = setup([token, { status: 200, body: ok }]);
+
+    const res = await api.simulate({
+      shortCode: 600984,
+      type: 'paybill',
+      amount: 1,
+      phoneNumber: '254708374149',
+      billRefNumber: 'acc',
+    });
+
+    expect(calls[1]).toMatchObject({
+      url: 'https://sandbox.safaricom.co.ke/mpesa/c2b/v2/simulate',
+      headers: { authorization: 'Bearer tok' },
+      body: {
+        ShortCode: 600984,
+        CommandID: 'CustomerPayBillOnline',
+        Amount: 1,
+        Msisdn: 254708374149,
+        BillRefNumber: 'acc',
+      },
+    });
+    expect(res).toEqual({
+      originatorConversationId: '53e3-4aa8-9fe0-8fb5e4092cdd3405976',
+      responseCode: '0',
+      responseDescription: 'Accept the service request successfully.',
+      raw: ok,
+    });
+  });
+
+  test('sends a null bill reference for till payments', async () => {
+    const { api, calls } = setup([token, { status: 200, body: ok }]);
+
+    await api.simulate({ shortCode: 600984, type: 'till', amount: 1, phoneNumber: '0708374149' });
+
+    expect(calls[1]?.body).toEqual({
+      ShortCode: 600984,
+      CommandID: 'CustomerBuyGoodsOnline',
+      Amount: 1,
+      Msisdn: 254708374149,
+      BillRefNumber: null,
+    });
+  });
+
+  test('requires a bill reference for paybill payments', async () => {
+    const { api, calls } = setup([]);
+
+    await expect(
+      api.simulate({ shortCode: 600984, type: 'paybill', amount: 1, phoneNumber: '254708374149' }),
+    ).rejects.toThrow('c2b.simulate: billRefNumber is required for paybill payments');
+    expect(calls).toHaveLength(0);
+  });
+
+  test('is only available in sandbox', async () => {
+    const { api, calls } = setup([], 'production');
+
+    await expect(
+      api.simulate({ shortCode: 600984, type: 'till', amount: 1, phoneNumber: '254708374149' }),
+    ).rejects.toThrow(
+      'c2b.simulate: environment must be sandbox; Daraja does not support simulation in production',
+    );
+    expect(calls).toHaveLength(0);
+  });
+});
