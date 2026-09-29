@@ -1,0 +1,6 @@
+Certificate parser
+
+parseCertificate(string | Uint8Array) -> { n, e, notAfter? }. It walks Certificate -> tbsCertificate (optional [0] version, then serial, signature, issuer) -> validity (UTCTime/GeneralizedTime notAfter) -> subject -> SubjectPublicKeyInfo -> rsaEncryption OID check -> BIT STRING -> RSAPublicKey. PEM PUBLIC KEY goes straight to SPKI.
+Tests: n and e equal node:crypto JWK for PEM, SPKI and DER; notAfter matches X509Certificate.validTo and the expired fixture (2021-01-01); EC is rejected; malformed and truncated input throw ValidationError.
+Extra check (not committed): the legacy Safaricom sandbox and production .cer files parse, and n matches node:crypto.
+Fixtures: __tests__/fixtures/certs (test-only key; README explains).
