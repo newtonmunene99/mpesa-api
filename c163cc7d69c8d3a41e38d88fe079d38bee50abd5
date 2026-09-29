@@ -1,0 +1,9 @@
+Offline test suite on pnpm + Vite+
+
+Delivered: `vp test` runs 10 offline tests covering every public Mpesa method, OAuth basic auth, and the constructor's missing-credential error.
+
+Why: the Jest baseline ran 1 passed / 6 failed on Node 24 because the ts-mockito spies called through to the live sandbox, which returned 403. Nothing in the old suite pinned behaviour.
+
+How: vi.spyOn on HttpService.prototype.get/post returns canned responses; each test asserts the literal route, body with defaults and bearer header. Fake timers pin the STK timestamp (2026-09-29T08:30:00Z gives 20260929083000). Verified red by mutating a default, a route and the basic-auth prefix; exactly the matching test failed each time.
+
+Files: package.json, pnpm-lock.yaml (new), vite.config.ts (new), __tests__/src/index.spec.ts; deleted package-lock.json, jest.config.js, .vscode/launch.json, __tests__/src/values.ts, __tests__/src/values.copy.ts; .gitignore stale line removed.
