@@ -1,0 +1,5 @@
+Strict TypeScript
+
+Delivered: strict: true. vp check reports 0 errors and 0 warnings (the 7 strictNullChecks lint warnings are gone). 15/15 tests green.
+
+Type-only fixes for 11 errors: the HttpService constructor requires baseURL; statusCode/statusMessage are `number|string | undefined` on HttpServiceResponse, with an explicit undefined guard (same result as before, since undefined >= 200 is false); Mpesa.environment and securityCredential are `string | undefined` (honest: environment is never assigned, and the credential is set asynchronously; both are fixed in the API rework); certificatePath is `string | null | undefined`.
