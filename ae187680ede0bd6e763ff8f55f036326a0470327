@@ -1,3 +1,14 @@
 README badges
 
 Found in the Chrome hand check: the Minified and MinZip badges rendered broken because bundlephobia returns 429 upstream (through both badgen and shields). Replaced them with badgen packagephobia install size (200, 99.6 kB) and shields node/v (200; shows the engines range after the 4.0 publish).
+
+Phase 3 checkpoint: Documentation (final phase)
+
+Final verifier (whole track diff, R1-R6 and Acceptance): Reject with 7 consistency issues, then Approve after 562ea55.
+Hand check, done in Chrome at the maintainer's request:
+- README: the CI badge shows "passing"; Versions, Prerequisites and Installation render, and the v3.x link resolves.
+- CONTRIBUTING.md: the command table and code blocks render.
+- bug_report.yml: GitHub parses it as a valid Issue Form, with the required fields and the no-secrets checkbox.
+- Security tab: private vulnerability reporting is enabled (the maintainer ran the gh api PUT). The security policy shows Disabled until SECURITY.md reaches the default branch.
+- Defect found: the bundlephobia Minified/MinZip badges were broken (upstream 429). Fixed in ae18768 (install size + node badges); re-checked in Chrome and both render.
+CI run 36548755508 on ae18768 passed on Node 22/24/26.
