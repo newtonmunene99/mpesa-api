@@ -1,0 +1,4 @@
+Validation coverage (Acceptance 3)
+
+38 new cases across stk-push, c2b, b2c, transaction-status, account-balance and reversal specs; each asserts issues exactly and calls.length 0. Mutation check: b2c max 300000, accountReference optional, and reversal id 40 each fail exactly one test.
+174 tests total.
