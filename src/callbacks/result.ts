@@ -22,7 +22,8 @@ export interface DarajaResult {
    * `ResultParameters` flattened by `Key`. Strings and numbers keep Daraja's type, booleans
    * become strings, and the documented date keys become `Date`. Keys without a value are
    * left out, and when a key repeats the last one wins. Use `parseBalances` on
-   * `AccountBalance` and `DebitAccountBalance`.
+   * `AccountBalance` and `DebitAccountBalance`. Keys come from the webhook body and may
+   * include `__proto__` as an own property: copy with spread, not `Object.assign`.
    */
   parameters: Record<string, string | number | Date>;
   /** `ReferenceData` flattened by `Key`. */
