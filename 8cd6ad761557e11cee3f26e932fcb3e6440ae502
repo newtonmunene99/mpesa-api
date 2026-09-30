@@ -1,0 +1,3 @@
+apply-sandbox-findings: confirmations
+Tests: 259 passed, 11 skipped. vp check clean.
+Resolved: V3 (either ID or both), V4 (EAT accepted), V6 (query fields; ResultCode string -> number). Not settled: V2 (Occasion spelling) and V5 (SDK credential accepted): the sandbox delivered no result callbacks. Recorded in conductor/research/daraja/README.md (local) and the spec Addendum (local).
