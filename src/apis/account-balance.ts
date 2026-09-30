@@ -32,6 +32,7 @@ const PATH = '/mpesa/accountbalance/v1/query';
 async function query(ctx: Context, input: AccountBalanceInput): Promise<InitiatorResponse> {
   const issues = new Issues();
   const production = ctx.environment === 'production';
+  if (!ctx.config.initiator) issues.add('initiator', 'is required');
   checkIdentifierType(issues, input.identifierType);
   const partyA = checkParty(issues, 'partyA', input.partyA, input.identifierType);
   checkUrl(issues, 'resultUrl', input.resultUrl, { production });
@@ -46,7 +47,7 @@ async function query(ctx: Context, input: AccountBalanceInput): Promise<Initiato
     CommandID: 'AccountBalance',
     PartyA: partyA,
     IdentifierType: identifierTypeCode(input.identifierType),
-    Remarks: input.remarks ?? 'Account balance',
+    Remarks: input.remarks || 'Account balance',
     QueueTimeOutURL: input.queueTimeoutUrl,
     ResultURL: input.resultUrl,
   });

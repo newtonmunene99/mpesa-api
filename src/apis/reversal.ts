@@ -30,6 +30,7 @@ const PATH = '/mpesa/reversal/v1/request';
 async function request(ctx: Context, input: ReversalInput): Promise<InitiatorResponse> {
   const issues = new Issues();
   const production = ctx.environment === 'production';
+  if (!ctx.config.initiator) issues.add('initiator', 'is required');
   checkLength(issues, 'transactionId', input.transactionId, 1, 20, true);
   checkInt(issues, 'amount', input.amount, 1);
   checkParty(issues, 'receiverParty', input.receiverParty, 'shortcode');

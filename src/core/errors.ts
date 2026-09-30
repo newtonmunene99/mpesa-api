@@ -1,5 +1,12 @@
 /** Base class for every error thrown by mpesa-api. */
 export class MpesaError extends Error {
+  /**
+   * For `b2c.pay`: the OriginatorConversationID that was (or may have been) sent. When a
+   * payment fails with a network error or timeout, query its status with this ID before
+   * retrying, so the customer isn't paid twice.
+   */
+  originatorConversationId?: string;
+
   constructor(message: string, options?: { cause?: unknown }) {
     super(message, options);
     this.name = new.target.name;

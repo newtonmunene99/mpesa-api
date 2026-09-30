@@ -181,3 +181,23 @@ describe('c2b.simulate', () => {
     expect(calls).toHaveLength(0);
   });
 });
+
+describe('c2b.simulate in production', () => {
+  test('reports the environment together with field issues', async () => {
+    const { api, calls } = setup([], 'production');
+
+    const error = await api
+      .simulate({ shortCode: 600984, type: 'paybill', amount: 0, phoneNumber: '254708374149' })
+      .catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([
+      {
+        path: 'environment',
+        message: 'must be sandbox; Daraja does not support simulation in production',
+      },
+      { path: 'amount', message: 'must be at least 1' },
+      { path: 'billRefNumber', message: 'is required for paybill payments' },
+    ]);
+    expect(calls).toHaveLength(0);
+  });
+});

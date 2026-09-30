@@ -84,7 +84,6 @@ async function simulate(ctx: Context, input: C2BSimulateInput): Promise<C2BRespo
   const issues = new Issues();
   if (ctx.environment !== 'sandbox') {
     issues.add('environment', 'must be sandbox; Daraja does not support simulation in production');
-    issues.throwIfAny('c2b.simulate');
   }
   checkShortCode(issues, 'shortCode', input.shortCode);
   if (input.type !== 'paybill' && input.type !== 'till') {

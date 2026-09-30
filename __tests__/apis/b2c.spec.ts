@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 import { b2c } from '../../src/apis/b2c';
 import { createContext, createMpesa, type MpesaConfig } from '../../src/client';
-import { ValidationError } from '../../src/core/errors';
+import { NetworkError, ValidationError } from '../../src/core/errors';
 import { fakeFetch, type FakeResponse } from '../helpers/fake-fetch';
 
 const read = (name: string): string =>
@@ -152,5 +152,70 @@ describe('b2c.pay', () => {
       fetch,
     });
     expect(typeof mpesa.b2c.pay).toBe('function');
+  });
+});
+
+describe('b2c.pay OriginatorConversationID handling', () => {
+  test('returns the generated ID even when Daraja does not echo it', async () => {
+    vi.spyOn(globalThis.crypto, 'randomUUID').mockReturnValue(
+      '11111111-2222-4333-8444-555555555555',
+    );
+    const { ConversationID, ResponseCode, ResponseDescription } = accepted;
+    const { api } = setup([
+      token,
+      { status: 200, body: { ConversationID, ResponseCode, ResponseDescription } },
+    ]);
+
+    const res = await api.pay(input);
+
+    expect(res.originatorConversationId).toBe('11111111-2222-4333-8444-555555555555');
+  });
+
+  test('attaches the ID to errors so the payment can be checked', async () => {
+    const { api } = setup([token, new TypeError('socket hang up')]);
+
+    const error = await api
+      .pay({ ...input, originatorConversationId: 'caller-id-9' })
+      .catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(NetworkError);
+    expect((error as NetworkError).originatorConversationId).toBe('caller-id-9');
+  });
+
+  test('resends the identical body after a token refresh', async () => {
+    const { api, calls } = setup([
+      token,
+      { status: 404, body: { errorCode: '404.001.03', errorMessage: 'Invalid Access Token' } },
+      { status: 200, body: { access_token: 'tok2', expires_in: 3599 } },
+      { status: 200, body: accepted },
+    ]);
+
+    await api.pay(input);
+
+    expect(calls).toHaveLength(4);
+    expect(calls[3]?.body).toEqual(calls[1]?.body);
+    expect(calls[3]?.headers.authorization).toBe('Bearer tok2');
+  });
+});
+
+describe('b2c.pay input edge cases', () => {
+  test('omits an empty occasion', async () => {
+    const { api, calls } = setup([token, { status: 200, body: accepted }]);
+
+    await api.pay({ ...input, occasion: '' });
+
+    expect(calls[1]?.body).not.toHaveProperty('Occassion');
+  });
+
+  test('reports a missing initiator together with field issues', async () => {
+    const { api, calls } = setup([], { initiator: undefined });
+
+    const error = await api.pay({ ...input, amount: 5 }).catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([
+      { path: 'initiator', message: 'is required' },
+      { path: 'amount', message: 'must be at least 10' },
+    ]);
+    expect(calls).toHaveLength(0);
   });
 });

@@ -1,6 +1,6 @@
 import { constants, privateDecrypt } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { describe, expect, test } from 'vite-plus/test';
+import { describe, expect, test, vi } from 'vite-plus/test';
 import { createContext, createMpesa, type MpesaConfig } from '../src/client';
 import { DarajaApiError, ValidationError } from '../src/core/errors';
 import { fakeFetch, type FakeResponse } from './helpers/fake-fetch';
@@ -204,5 +204,38 @@ describe('context', () => {
     expect(decrypt(credential)).toBe('pw');
     expect(warnings).toHaveLength(1);
     expect(warnings[0]).toContain('2021-01-01');
+  });
+});
+
+describe('security credential edge cases', () => {
+  test('rejects a password too long for the certificate key', () => {
+    const { fetch } = fakeFetch([]);
+    expect(() =>
+      createMpesa(
+        baseConfig(fetch, {
+          initiator: { name: 'api', password: 'x'.repeat(246), certificate: cert('test-cert.pem') },
+        }),
+      ),
+    ).toThrow('createMpesa: initiator.password must be at most 245 bytes for this certificate');
+  });
+
+  test('retries encryption after a failure instead of caching it', async () => {
+    const { fetch } = fakeFetch([]);
+    const ctx = createContext(
+      baseConfig(fetch, {
+        initiator: { name: 'api', password: 'pw', certificate: cert('test-cert.pem') },
+      }),
+    );
+    const random = vi
+      .spyOn(crypto, 'getRandomValues')
+      .mockImplementation(<T extends ArrayBufferView | null>(array: T): T => {
+        if (array instanceof Uint8Array) array.fill(0);
+        return array;
+      });
+
+    await expect(ctx.securityCredential('b2c.pay')).rejects.toThrow(/no non-zero bytes/);
+    random.mockRestore();
+
+    expect(decrypt((await ctx.securityCredential('b2c.pay')).credential)).toBe('pw');
   });
 });

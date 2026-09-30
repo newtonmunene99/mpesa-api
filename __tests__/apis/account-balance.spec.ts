@@ -99,3 +99,13 @@ describe('accountBalance.query', () => {
     expect(typeof mpesa.accountBalance.query).toBe('function');
   });
 });
+
+describe('accountBalance.query empty optionals', () => {
+  test('defaults empty remarks', async () => {
+    const { api, calls } = setup([token, { status: 200, body: accepted }]);
+
+    await api.query({ ...input, remarks: '' });
+
+    expect(calls[1]?.body).toMatchObject({ Remarks: 'Account balance' });
+  });
+});

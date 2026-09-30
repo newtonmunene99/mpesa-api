@@ -8,6 +8,11 @@ function byteLength(n: bigint): number {
   return Math.ceil(n.toString(16).length / 2);
 }
 
+/** The longest plaintext, in UTF-8 bytes, that PKCS#1 v1.5 can encrypt with this key. */
+export function maxPlaintextBytes(key: { n: bigint }): number {
+  return byteLength(key.n) - 11;
+}
+
 function bytesToBigInt(bytes: Uint8Array): bigint {
   let hex = '';
   for (const b of bytes) hex += b.toString(16).padStart(2, '0');

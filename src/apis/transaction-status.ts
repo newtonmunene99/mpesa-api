@@ -38,6 +38,7 @@ const PATH = '/mpesa/transactionstatus/v1/query';
 async function query(ctx: Context, input: TransactionStatusInput): Promise<InitiatorResponse> {
   const issues = new Issues();
   const production = ctx.environment === 'production';
+  if (!ctx.config.initiator) issues.add('initiator', 'is required');
   if (!input.transactionId && !input.originalConversationId) {
     issues.add('transactionId', 'or originalConversationId is required');
   }
@@ -62,8 +63,8 @@ async function query(ctx: Context, input: TransactionStatusInput): Promise<Initi
     IdentifierType: identifierTypeCode(input.identifierType),
     ResultURL: input.resultUrl,
     QueueTimeOutURL: input.queueTimeoutUrl,
-    Remarks: input.remarks ?? 'Transaction status',
-    ...(input.occasion === undefined ? {} : { Occasion: input.occasion }),
+    Remarks: input.remarks || 'Transaction status',
+    ...(input.occasion ? { Occasion: input.occasion } : {}),
   });
   return mapInitiatorResponse(raw);
 }

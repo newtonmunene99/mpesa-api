@@ -126,3 +126,35 @@ describe('transactionStatus.query', () => {
     expect(typeof mpesa.transactionStatus.query).toBe('function');
   });
 });
+
+describe('transactionStatus.query empty optionals', () => {
+  test('defaults empty remarks and omits an empty occasion', async () => {
+    const { api, calls } = setup([token, { status: 200, body: accepted }]);
+
+    await api.query({
+      transactionId: 'NEF61H8J60',
+      partyA: 600782,
+      remarks: '',
+      occasion: '',
+      ...urls,
+    });
+
+    expect(calls[1]?.body).toMatchObject({ Remarks: 'Transaction status' });
+    expect(calls[1]?.body).not.toHaveProperty('Occasion');
+  });
+
+  test('reports a missing initiator together with field issues', async () => {
+    const { fetch, calls } = fakeFetch([]);
+    const api = transactionStatus(
+      createContext({ environment: 'sandbox', consumerKey: 'k', consumerSecret: 's', fetch }),
+    );
+
+    const error = await api.query({ partyA: 600782, ...urls }).catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([
+      { path: 'initiator', message: 'is required' },
+      { path: 'transactionId', message: 'or originalConversationId is required' },
+    ]);
+    expect(calls).toHaveLength(0);
+  });
+});

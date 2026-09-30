@@ -106,7 +106,7 @@ async function send(ctx: Context, input: StkPushInput): Promise<StkPushResponse>
     PhoneNumber: phone,
     CallBackURL: input.callbackUrl,
     AccountReference: input.accountReference,
-    TransactionDesc: input.description ?? 'Payment',
+    TransactionDesc: input.description || 'Payment',
   });
 
   return {

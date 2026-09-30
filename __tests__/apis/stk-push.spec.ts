@@ -188,3 +188,13 @@ describe('stkPush.query', () => {
     expect(calls).toHaveLength(0);
   });
 });
+
+describe('stkPush.send empty optionals', () => {
+  test('defaults an empty description', async () => {
+    const { api, calls } = setup([token, { status: 200, body: accepted }]);
+
+    await api.send({ ...input, description: '' });
+
+    expect(calls[1]?.body).toMatchObject({ TransactionDesc: 'Payment' });
+  });
+});

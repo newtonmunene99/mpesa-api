@@ -6,7 +6,7 @@ import { stkPush, type StkPushApi } from './apis/stk-push';
 import { transactionStatus, type TransactionStatusApi } from './apis/transaction-status';
 import { MemoryTokenStore, TokenManager, type TokenStore } from './core/auth';
 import { parseCertificate, type RsaPublicKey } from './core/certificate';
-import { encryptPkcs1v15 } from './core/credential';
+import { encryptPkcs1v15, maxPlaintextBytes } from './core/credential';
 import { DarajaApiError, ValidationError } from './core/errors';
 import { request, type Transport } from './core/http';
 import { Issues } from './core/validate';
@@ -109,6 +109,15 @@ function validateConfig(config: MpesaConfig): RsaPublicKey | undefined {
       }
       throw error;
     }
+    const limit = maxPlaintextBytes(key);
+    if (new TextEncoder().encode(String(initiator.password)).length > limit) {
+      throw new ValidationError('createMpesa', [
+        {
+          path: 'initiator.password',
+          message: `must be at most ${limit} bytes for this certificate`,
+        },
+      ]);
+    }
   }
   return key;
 }
@@ -176,7 +185,10 @@ export function createContext(config: MpesaConfig, clock: () => Date = () => new
           }
         }
         return { name: initiator.name, credential: encryptPkcs1v15(key!, initiator.password) };
-      })();
+      })().catch((error: unknown) => {
+        credential = undefined;
+        throw error;
+      });
       return credential;
     },
   };

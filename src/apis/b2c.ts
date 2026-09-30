@@ -1,4 +1,5 @@
 import type { Context } from '../client';
+import { MpesaError } from '../core/errors';
 import {
   checkInt,
   checkLength,
@@ -50,6 +51,7 @@ const COMMANDS: readonly B2CCommand[] = ['SalaryPayment', 'BusinessPayment', 'Pr
 async function pay(ctx: Context, input: B2CInput): Promise<InitiatorResponse> {
   const issues = new Issues();
   const production = ctx.environment === 'production';
+  if (!ctx.config.initiator) issues.add('initiator', 'is required');
   if (!COMMANDS.includes(input.commandId)) {
     issues.add('commandId', "must be 'SalaryPayment', 'BusinessPayment' or 'PromotionPayment'");
   }
@@ -65,21 +67,32 @@ async function pay(ctx: Context, input: B2CInput): Promise<InitiatorResponse> {
   }
   issues.throwIfAny('b2c.pay');
 
+  const originatorConversationId = input.originatorConversationId || crypto.randomUUID();
   const { name, credential } = await ctx.securityCredential('b2c.pay');
-  const raw = await ctx.post<Record<string, unknown>>(PATH, {
-    OriginatorConversationID: input.originatorConversationId ?? crypto.randomUUID(),
-    InitiatorName: name,
-    SecurityCredential: credential,
-    CommandID: input.commandId,
-    Amount: input.amount,
-    PartyA: input.shortCode,
-    PartyB: phone,
-    Remarks: input.remarks,
-    QueueTimeOutURL: input.queueTimeoutUrl,
-    ResultURL: input.resultUrl,
-    ...(input.occasion === undefined ? {} : { Occassion: input.occasion }),
-  });
-  return mapInitiatorResponse(raw);
+  let raw: Record<string, unknown>;
+  try {
+    raw = await ctx.post<Record<string, unknown>>(PATH, {
+      OriginatorConversationID: originatorConversationId,
+      InitiatorName: name,
+      SecurityCredential: credential,
+      CommandID: input.commandId,
+      Amount: input.amount,
+      PartyA: input.shortCode,
+      PartyB: phone,
+      Remarks: input.remarks,
+      QueueTimeOutURL: input.queueTimeoutUrl,
+      ResultURL: input.resultUrl,
+      ...(input.occasion ? { Occassion: input.occasion } : {}),
+    });
+  } catch (error) {
+    if (error instanceof MpesaError) error.originatorConversationId = originatorConversationId;
+    throw error;
+  }
+  const response = mapInitiatorResponse(raw);
+  return {
+    ...response,
+    originatorConversationId: response.originatorConversationId || originatorConversationId,
+  };
 }
 
 /** Business to Customer (B2C) payments. */
