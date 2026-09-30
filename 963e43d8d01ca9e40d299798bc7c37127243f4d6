@@ -1,0 +1,4 @@
+Refactor (codebase-design item 1). No public API change.
+Gate: vp check clean, 266 tests, pack, test:dist, lint:pkg.
+Mutations in initiatorRequest, each caught by existing tests: no initiator check (2 fail), no resultUrl check (5), no error tagging (1), no ID fallback (1), ignoring InitiatorName (1), dropping ResultURL (4).
+Two tests updated for the new issue order only (URLs after the API's fields).
