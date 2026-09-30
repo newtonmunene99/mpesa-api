@@ -1,0 +1,6 @@
+fix-p3-1 (phase 3 verifier round 1: 2 must-fix + 8 notes, all addressed)
+
+Tests: 239/239 (23 new); vp check 0 warnings; pack, test:dist, lint:pkg pass.
+Mutations (each fails its test): drop InitiatedTime, === to ==, let null Values through, flatten with {}, setOwn via assignment, loose Number(), drop the parseBalances string guard, non-canonical codes, no str() on accept.
+Equivalent survivors: 'in' vs Object.hasOwn in stk.ts (flatten output has no prototype, kept as defence in depth). The blank-amount check in balances.ts was redundant with the strict decimal check and was removed.
+Spec deviation: parseBalances(value: unknown) instead of string.
