@@ -46,6 +46,7 @@
     "build": "vp pack",
     "check": "vp check",
     "test": "vp test",
+    "test:sandbox": "MPESA_SANDBOX=1 vp test --project sandbox",
     "test:dist": "node scripts/check-dist-neutral.mjs && node scripts/smoke-dist.mjs",
     "lint:pkg": "publint && attw --pack . --profile esm-only",
     "changeset": "changeset",

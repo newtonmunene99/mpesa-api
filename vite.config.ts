@@ -2,8 +2,26 @@ import { defineConfig, type ViteUserConfig } from 'vite-plus';
 
 const config: ViteUserConfig = defineConfig({
   test: {
-    include: ['__tests__/**/*.spec.ts'],
     environment: 'node',
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: 'unit',
+          include: ['__tests__/**/*.spec.ts'],
+          exclude: ['__tests__/sandbox/**'],
+        },
+      },
+      {
+        // Calls the live Daraja sandbox. Every spec skips unless MPESA_SANDBOX=1.
+        extends: true,
+        test: {
+          name: 'sandbox',
+          include: ['__tests__/sandbox/**/*.spec.ts'],
+          testTimeout: 120_000,
+        },
+      },
+    ],
   },
   lint: {
     options: {
