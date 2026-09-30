@@ -2,3 +2,9 @@ Validation coverage (Acceptance 3)
 
 38 new cases across stk-push, c2b, b2c, transaction-status, account-balance and reversal specs; each asserts issues exactly and calls.length 0. Mutation check: b2c max 300000, accountReference optional, and reversal id 40 each fail exactly one test.
 174 tests total.
+
+Phase 2 checkpoint: Client and APIs
+
+Tests: 174/174; vp check, vp pack, test:dist (neutral scan + smoke) and lint:pkg all pass; clean clone passes; no .cer files in the tarball.
+Phase verifier: Reject (6 issues) -> fixed in 0a9b419 (behaviour) and 8fac767 (tests, mutation-checked) -> Approve, no new issues.
+Hand check: none needed (sandbox run is phase 4).
