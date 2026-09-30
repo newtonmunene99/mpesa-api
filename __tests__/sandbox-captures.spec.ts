@@ -4,7 +4,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vite-plus/test';
-import { parseStkCallback } from '../src/callbacks';
+import { parseResult, parseStkCallback } from '../src/callbacks';
 import { createMpesa } from '../src/client';
 import { fakeFetch, type FakeResponse } from './helpers/fake-fetch';
 import { sandboxCapture } from './helpers/sandbox-capture';
@@ -77,6 +77,28 @@ describe('sandbox captures', () => {
     );
 
     expect(parseStkCallback(body)).toMatchObject({ resultCode: 1037, ok: false });
+  });
+
+  // The shared sandbox initiator was locked on every B2C shortcode on 2026-09-30.
+  test('a live B2C failure result parses (callbacks/b2c-result-locked.json)', () => {
+    const body: unknown = JSON.parse(
+      readFileSync(
+        new URL('./fixtures/sandbox/callbacks/b2c-result-locked.json', import.meta.url),
+        'utf8',
+      ),
+    );
+
+    expect(parseResult(body)).toMatchObject({
+      resultType: 0,
+      resultCode: 8006,
+      resultDesc: 'The security credential is locked.',
+      ok: false,
+      transactionId: 'XXXXXXXXXX',
+      parameters: {},
+      referenceData: {
+        QueueTimeoutURL: 'https://internalsandbox.safaricom.co.ke/mpesa/b2cresults/v1/submit',
+      },
+    });
   });
 
   // Verification 2 (acknowledgement only; the result callbacks never arrived).
