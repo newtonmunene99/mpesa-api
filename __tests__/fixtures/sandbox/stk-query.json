@@ -1,0 +1,11 @@
+{
+  "status": 200,
+  "response": {
+    "ResponseCode": "0",
+    "ResponseDescription": "The service request has been accepted successfully",
+    "MerchantRequestID": "ac7b-470b-8df7-23ab3cef38271071873",
+    "CheckoutRequestID": "ws_CO_REDACTED",
+    "ResultCode": "1037",
+    "ResultDesc": "No response from user."
+  }
+}
