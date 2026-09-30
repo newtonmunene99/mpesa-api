@@ -1,0 +1,10 @@
+Public exports, runtime-neutral dist
+
+src/index.ts: runtime createMpesa, MemoryTokenStore and the 5 error classes, plus types for config, initiator, token store and every namespace input/response/api. Internal factories and helpers are not exported.
+Removed: src/routes.ts, src/services/http.service.ts, src/models/interfaces.ts, src/keys/*.cer, __tests__/src/*.
+vite.config.ts: platform neutral, fixedExtension true (keeps .mjs/.d.mts), copy step removed.
+scripts/check-dist-neutral.mjs: scans dist/*.mjs for node: or builtinModules imports (static, side-effect, dynamic), require, __dirname, Buffer., process.*; checked by injecting 6 cases.
+scripts/smoke-dist.mjs: B2C through the package exports with a stubbed fetch; the credential decrypts with the test key.
+Tests: exports.spec (runtime names) and exports-types.spec (expectTypeOf per public type).
+Per-todo verifier: Approve; notes 1 and 4 fixed here, notes 2 and 3 (CONTRIBUTING, issue template) moved to readme-4-0.
+Extra: under Bun 1.4.2, the dist builds a credential that openssl decrypts. The Node-side privateDecrypt in the smoke script is refused by Bun, which is expected.
