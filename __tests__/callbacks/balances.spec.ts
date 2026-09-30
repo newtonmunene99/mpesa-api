@@ -10,7 +10,7 @@ describe('parseBalances', () => {
   test('splits the documented Account Balance value', () => {
     const { parameters } = parseResult(fixture('balance-result.json'));
 
-    expect(parseBalances(parameters.AccountBalance as string)).toEqual([
+    expect(parseBalances(parameters.AccountBalance)).toEqual([
       {
         account: 'Working Account',
         currency: 'KES',
@@ -57,7 +57,7 @@ describe('parseBalances', () => {
   test("splits a reversal's DebitAccountBalance", () => {
     const { parameters } = parseResult(fixture('reversal-result-success.json'));
 
-    expect(parseBalances(parameters.DebitAccountBalance as string)).toEqual([
+    expect(parseBalances(parameters.DebitAccountBalance)).toEqual([
       {
         account: 'Utility Account',
         currency: 'KES',
@@ -96,5 +96,20 @@ describe('parseBalances', () => {
     expect(error).toBeInstanceOf(ValidationError);
     expect((error as ValidationError).issues).toEqual(issues);
     expect((error as Error).message.startsWith('parseBalances: ')).toBe(true);
+  });
+
+  test.each([
+    ['a blank amount', 'A|KES||1|2|3', [{ path: '[0].available', message: 'must be a number' }]],
+    ['a hex amount', 'A|KES|0x10|1|2|3', [{ path: '[0].available', message: 'must be a number' }]],
+    ['a missing value', undefined, [{ path: 'value', message: 'must be a string' }]],
+    ['a Date value', new Date(0), [{ path: 'value', message: 'must be a string' }]],
+  ])('rejects %s', (_, value, issues) => {
+    try {
+      parseBalances(value);
+      throw new Error('expected parseBalances to throw');
+    } catch (e) {
+      expect(e).toBeInstanceOf(ValidationError);
+      expect((e as ValidationError).issues).toEqual(issues);
+    }
   });
 });

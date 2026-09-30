@@ -1,7 +1,7 @@
 import { str } from '../apis/shared';
 import { ValidationError } from '../core/errors';
 import { Issues } from '../core/validate';
-import { isRecord, readNumber, readTimestamp } from './shared';
+import { isBlank, isRecord, readNumber, readTimestamp, requireValue } from './shared';
 
 /** A C2B validation or confirmation request, as Daraja POSTs it to your registered URLs. */
 export interface C2BNotification {
@@ -27,8 +27,6 @@ export interface C2BNotification {
 
 const REQUIRED = ['TransactionType', 'TransID', 'TransTime', 'TransAmount', 'BusinessShortCode'];
 
-const isBlank = (value: unknown): boolean => value === undefined || value === null || value === '';
-
 /**
  * Parses a C2B validation or confirmation request. Pass the already-parsed JSON. Throws
  * `ValidationError` when required keys are missing or values are malformed.
@@ -38,15 +36,13 @@ export function parseC2BNotification(body: unknown): C2BNotification {
     throw new ValidationError('parseC2BNotification', [{ path: 'body', message: 'is required' }]);
   }
   const issues = new Issues();
-  for (const key of REQUIRED) {
-    if (isBlank(body[key])) issues.add(key, 'is required');
-  }
-  const transTime = isBlank(body.TransTime)
-    ? undefined
-    : readTimestamp(issues, 'TransTime', body.TransTime);
-  const transAmount = isBlank(body.TransAmount)
-    ? undefined
-    : readNumber(issues, 'TransAmount', body.TransAmount);
+  const usable = new Set(REQUIRED.filter((key) => requireValue(issues, key, body[key])));
+  const transTime = usable.has('TransTime')
+    ? readTimestamp(issues, 'TransTime', body.TransTime)
+    : undefined;
+  const transAmount = usable.has('TransAmount')
+    ? readNumber(issues, 'TransAmount', body.TransAmount)
+    : undefined;
   const orgAccountBalance = isBlank(body.OrgAccountBalance)
     ? undefined
     : readNumber(issues, 'OrgAccountBalance', body.OrgAccountBalance);
@@ -107,7 +103,7 @@ export const c2bValidationResponse: {
   accept: (thirdPartyTransId) => ({
     ResultCode: '0',
     ResultDesc: 'Accepted',
-    ...(thirdPartyTransId ? { ThirdPartyTransID: thirdPartyTransId } : {}),
+    ...(thirdPartyTransId ? { ThirdPartyTransID: str(thirdPartyTransId) } : {}),
   }),
   reject: (code) => {
     if (!REJECTION_CODES.has(code)) {

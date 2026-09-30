@@ -144,3 +144,72 @@ describe('parseStkCallback', () => {
     expect((error as Error).message.startsWith('parseStkCallback: ')).toBe(true);
   });
 });
+
+describe('parseStkCallback hostile and odd input', () => {
+  const base = { MerchantRequestID: 'm', CheckoutRequestID: 'c', ResultCode: 0, ResultDesc: 'ok' };
+  const parseIssues = (body: unknown): unknown => {
+    try {
+      parseStkCallback(body);
+    } catch (e) {
+      return (e as ValidationError).issues;
+    }
+    throw new Error('expected parseStkCallback to throw');
+  };
+
+  test('a __proto__ item cannot forge metadata', () => {
+    const body: unknown = JSON.parse(
+      '{"Body":{"stkCallback":{"MerchantRequestID":"m","CheckoutRequestID":"c","ResultCode":0,' +
+        '"CallbackMetadata":{"Item":[{"Name":"__proto__","Value":{"Amount":999,"MpesaReceiptNumber":"FAKE"}}]}}}}',
+    );
+
+    expect(parseStkCallback(body).metadata).toEqual({});
+  });
+
+  test('skips items whose Value is null or blank', () => {
+    const result = parseStkCallback(
+      callback({
+        ...base,
+        CallbackMetadata: {
+          Item: [
+            { Name: 'Amount', Value: null },
+            { Name: 'Balance', Value: '  ' },
+          ],
+        },
+      }),
+    );
+
+    expect(result.metadata).toEqual({});
+  });
+
+  test("treats a non-canonical code such as '00' as a failure", () => {
+    const result = parseStkCallback(callback({ ...base, ResultCode: '00' }));
+
+    expect(result.resultCode).toBe('00');
+    expect(result.ok).toBe(false);
+  });
+
+  test.each([
+    ['hex', '0x10'],
+    ['exponent', '1e3'],
+    ['padded', ' 1 '],
+    ['infinite', Infinity],
+  ])('rejects a %s amount', (_, value) => {
+    expect(
+      parseIssues(
+        callback({ ...base, CallbackMetadata: { Item: [{ Name: 'Amount', Value: value }] } }),
+      ),
+    ).toEqual([{ path: 'Body.stkCallback.CallbackMetadata.Amount', message: 'must be a number' }]);
+  });
+
+  test('rejects required keys that are not strings or numbers', () => {
+    expect(
+      parseIssues(
+        callback({ ...base, MerchantRequestID: { a: 1 }, ResultCode: {}, CheckoutRequestID: ' ' }),
+      ),
+    ).toEqual([
+      { path: 'Body.stkCallback.MerchantRequestID', message: 'must be a string or number' },
+      { path: 'Body.stkCallback.CheckoutRequestID', message: 'is required' },
+      { path: 'Body.stkCallback.ResultCode', message: 'must be a string or number' },
+    ]);
+  });
+});

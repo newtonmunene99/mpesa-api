@@ -84,6 +84,22 @@ describe('parseC2BNotification', () => {
   ])('rejects %s', (_, body, issues) => {
     expect(issuesOf(() => parseC2BNotification(body), 'parseC2BNotification')).toEqual(issues);
   });
+
+  test.each([
+    ['a whitespace-only TransAmount', { TransAmount: '  ' }, 'TransAmount', 'is required'],
+    ['an object TransID', { TransID: {} }, 'TransID', 'must be a string or number'],
+    ['a padded TransAmount', { TransAmount: ' 5 ' }, 'TransAmount', 'must be a number'],
+  ])('rejects %s', (_, override, path, message) => {
+    expect(
+      issuesOf(() => parseC2BNotification({ ...fixture(), ...override }), 'parseC2BNotification'),
+    ).toEqual([{ path, message }]);
+  });
+
+  test('omits a whitespace-only OrgAccountBalance', () => {
+    expect(parseC2BNotification({ ...fixture(), OrgAccountBalance: ' ' })).not.toHaveProperty(
+      'orgAccountBalance',
+    );
+  });
 });
 
 describe('c2bValidationResponse', () => {
@@ -108,6 +124,10 @@ describe('c2bValidationResponse', () => {
       });
     },
   );
+
+  test('sends ThirdPartyTransID as a string', () => {
+    expect(c2bValidationResponse.accept(42 as never).ThirdPartyTransID).toBe('42');
+  });
 
   test('refuses an undocumented rejection code', () => {
     expect(

@@ -8,10 +8,14 @@ export const str = (value: unknown): string =>
       ? String(value)
       : '';
 
-/** Numeric strings become numbers; other codes (such as "R000002") stay strings. */
+/**
+ * Canonical integer strings ("0", "2001") become numbers; anything else, such as "R000002",
+ * "00" or an integer too large to represent exactly, stays a string.
+ */
 export const code = (value: unknown): number | string => {
   const text = str(value);
-  return /^-?\d+$/.test(text) ? Number(text) : text;
+  const n = Number(text);
+  return /^-?\d+$/.test(text) && Number.isSafeInteger(n) && String(n) === text ? n : text;
 };
 
 /** The acknowledgement returned by B2C, Transaction Status, Account Balance and Reversal. */

@@ -1,3 +1,4 @@
+import { ValidationError } from '../core/errors';
 import { Issues } from '../core/validate';
 import { readNumber } from './shared';
 
@@ -17,8 +18,13 @@ const AMOUNTS = ['available', 'uncleared', 'reserved', 'unreserved'] as const;
 /**
  * Splits the packed balance string in Account Balance's `AccountBalance` and Reversal's
  * `DebitAccountBalance` parameters: `'Name|KES|available|uncleared|reserved|unreserved&…'`.
+ * Takes `unknown` so a parameter can be passed straight from `parseResult`; anything but a
+ * string throws `ValidationError`.
  */
-export function parseBalances(value: string): AccountBalanceEntry[] {
+export function parseBalances(value: unknown): AccountBalanceEntry[] {
+  if (typeof value !== 'string') {
+    throw new ValidationError('parseBalances', [{ path: 'value', message: 'must be a string' }]);
+  }
   const issues = new Issues();
   const entries: AccountBalanceEntry[] = [];
   value
@@ -40,10 +46,7 @@ export function parseBalances(value: string): AccountBalanceEntry[] {
         unreserved: 0,
       };
       AMOUNTS.forEach((name, i) => {
-        const path = `[${index}].${name}`;
-        const raw = amounts[i]!;
-        if (raw.trim() === '') issues.add(path, 'must be a number');
-        else entry[name] = readNumber(issues, path, raw) ?? 0;
+        entry[name] = readNumber(issues, `[${index}].${name}`, amounts[i]) ?? 0;
       });
       entries.push(entry);
     });

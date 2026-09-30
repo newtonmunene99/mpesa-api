@@ -196,3 +196,44 @@ describe('parseResult', () => {
     expect(issuesOf(body)).toEqual(issues);
   });
 });
+
+describe('parseResult hostile and odd input', () => {
+  test('keeps a __proto__ key as an own property without changing the prototype', () => {
+    const body: unknown = JSON.parse(
+      `{"Result":${JSON.stringify(minimal).slice(0, -1)},"ResultParameters":{"ResultParameter":[{"Key":"__proto__","Value":"x"}]},` +
+        '"ReferenceData":{"ReferenceItem":{"Key":"__proto__","Value":"y"}}}}',
+    );
+
+    const result = parseResult(body);
+
+    expect(Object.getPrototypeOf(result.parameters)).toBe(Object.prototype);
+    expect(Object.hasOwn(result.parameters, '__proto__')).toBe(true);
+    expect(Object.getOwnPropertyDescriptor(result.parameters, '__proto__')?.value).toBe('x');
+    expect(Object.getOwnPropertyDescriptor(result.referenceData, '__proto__')?.value).toBe('y');
+  });
+
+  test('converts InitiatedTime', () => {
+    const result = parseResult({
+      Result: {
+        ...minimal,
+        ResultParameters: { ResultParameter: { Key: 'InitiatedTime', Value: 20180223054112 } },
+      },
+    });
+
+    expect(result.parameters.InitiatedTime).toEqual(new Date('2018-02-23T02:41:12Z'));
+  });
+
+  test.each([
+    ['an object ResultType', { ResultType: {} }, 'Result.ResultType', 'must be a string or number'],
+    ['an array ResultCode', { ResultCode: [] }, 'Result.ResultCode', 'must be a string or number'],
+    [
+      'an array OriginatorConversationID',
+      { OriginatorConversationID: ['o'] },
+      'Result.OriginatorConversationID',
+      'must be a string or number',
+    ],
+    ['a blank ConversationID', { ConversationID: '  ' }, 'Result.ConversationID', 'is required'],
+  ])('rejects %s', (_, override, path, message) => {
+    expect(issuesOf({ Result: { ...minimal, ...override } })).toEqual([{ path, message }]);
+  });
+});

@@ -1,7 +1,7 @@
 import { code, str } from '../apis/shared';
 import { ValidationError } from '../core/errors';
 import { Issues } from '../core/validate';
-import { flatten, isRecord, readNumber, readTimestamp, requireKey } from './shared';
+import { flatten, isRecord, readNumber, readTimestamp, requireValue } from './shared';
 
 /** The `CallbackMetadata` of a successful STK push, when Daraja sends it. */
 export interface StkCallbackMetadata {
@@ -39,7 +39,7 @@ export function parseStkCallback(body: unknown): StkCallback {
   }
   const issues = new Issues();
   for (const key of ['MerchantRequestID', 'CheckoutRequestID', 'ResultCode']) {
-    requireKey(issues, PATH, stk, key);
+    requireValue(issues, `${PATH}.${key}`, stk[key]);
   }
 
   const resultCode = code(stk.ResultCode);
@@ -56,20 +56,21 @@ export function parseStkCallback(body: unknown): StkCallback {
     const items = flatten(stk.CallbackMetadata.Item, 'Name');
     const path = `${PATH}.CallbackMetadata`;
     const metadata: StkCallbackMetadata = {};
-    if ('Amount' in items) {
+    if (Object.hasOwn(items, 'Amount')) {
       const amount = readNumber(issues, `${path}.Amount`, items.Amount);
       if (amount !== undefined) metadata.amount = amount;
     }
-    if ('MpesaReceiptNumber' in items) metadata.mpesaReceiptNumber = str(items.MpesaReceiptNumber);
-    if ('Balance' in items) {
+    if (Object.hasOwn(items, 'MpesaReceiptNumber'))
+      metadata.mpesaReceiptNumber = str(items.MpesaReceiptNumber);
+    if (Object.hasOwn(items, 'Balance')) {
       const balance = readNumber(issues, `${path}.Balance`, items.Balance);
       if (balance !== undefined) metadata.balance = balance;
     }
-    if ('TransactionDate' in items) {
+    if (Object.hasOwn(items, 'TransactionDate')) {
       const date = readTimestamp(issues, `${path}.TransactionDate`, items.TransactionDate);
       if (date) metadata.transactionDate = date;
     }
-    if ('PhoneNumber' in items) metadata.phoneNumber = str(items.PhoneNumber);
+    if (Object.hasOwn(items, 'PhoneNumber')) metadata.phoneNumber = str(items.PhoneNumber);
     result.metadata = metadata;
   }
 
