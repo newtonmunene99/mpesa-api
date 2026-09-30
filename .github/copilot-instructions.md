@@ -47,6 +47,15 @@ Aim for deep modules: a lot of behaviour behind a small interface.
 - **Test through the interface callers use.** Tests go through `createMpesa`, or an API factory with a real `Context` and the fake `fetch`, not past them into private helpers.
 - **Accept dependencies, return results.** Pass things in (`fetch`, the clock, the token store) rather than creating them inside, and return values rather than mutating arguments.
 
+### Complexity
+
+`vp check` enforces a complexity gate (the `lint` block in `vite.config.ts`, run by oxlint with SonarJS loaded through `jsPlugins`):
+
+- **Errors:** cyclomatic complexity above 15 (a `switch` counts once), SonarJS cognitive complexity above 15, and blocks nested more than 4 deep.
+- **Warnings:** functions over 80 lines (blank lines and comments excluded), more than 4 parameters, and callbacks nested more than 4 deep. Tests are exempt from the length, callback and cognitive limits.
+
+When a function goes over, split it along its own job boundaries (a parser's field reads, a validator's certificate step), not at an arbitrary line: each helper should have a name that says what it does. Pass related values as one object (`{ min, max, required }`) rather than adding positional parameters. Only exceed a limit when the shape is genuinely clearer, with `// oxlint-disable-next-line <rule> -- <reason>`; never disable a rule without a reason.
+
 ## Daraja facts that are easy to get wrong
 
 - Timestamps are East Africa Time (UTC+3), `YYYYMMDDHHmmss`; use `core/time.ts`, not `toISOString()`.
