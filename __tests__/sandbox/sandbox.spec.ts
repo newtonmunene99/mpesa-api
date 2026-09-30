@@ -75,18 +75,22 @@ describe.skipIf(!enabled)('Daraja sandbox', () => {
     consumerKey: need('MPESA_CONSUMER_KEY'),
     consumerSecret: need('MPESA_CONSUMER_SECRET'),
     passkey: need('MPESA_PASSKEY'),
-    initiator: {
-      name: need('MPESA_INITIATOR_NAME'),
-      password: need('MPESA_INITIATOR_PASSWORD'),
-      certificate: certificateText(),
-    },
+    // The portal's Test Credentials page generates a SecurityCredential; a certificate is only
+    // needed to check the SDK's own encryption (Verification 5).
+    initiator: env.MPESA_SECURITY_CREDENTIAL
+      ? { name: need('MPESA_INITIATOR_NAME'), securityCredential: env.MPESA_SECURITY_CREDENTIAL }
+      : {
+          name: need('MPESA_INITIATOR_NAME'),
+          password: need('MPESA_INITIATOR_PASSWORD'),
+          certificate: certificateText(),
+        },
     tokenStore,
     onWarning: (message) => console.warn(`[sandbox] ${message}`),
   });
 
   const state: { checkoutRequestId?: string; b2cOriginatorId?: string } = {};
 
-  test('the portal certificate parses (Verification 5)', () => {
+  test.skipIf(!env.MPESA_CERTIFICATE_PATH)('the portal certificate parses (Verification 5)', () => {
     const key = parseCertificate(certificateText());
 
     expect(key.n.toString(2)).toHaveLength(2048);
