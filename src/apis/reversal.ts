@@ -1,6 +1,7 @@
 import type { Context } from '../client';
-import { checkInt, checkLength, checkUrl, Issues } from '../core/validate';
-import { checkParty, type InitiatorResponse, mapInitiatorResponse } from './shared';
+import { checkInt, checkLength } from '../core/validate';
+import { initiatorRequest } from './initiator';
+import { checkParty, type InitiatorResponse } from './shared';
 
 export interface ReversalInput {
   /** The M-Pesa receipt number of the C2B transaction to reverse (`TransactionID`). */
@@ -27,33 +28,28 @@ export interface ReversalApi {
 
 const PATH = '/mpesa/reversal/v1/request';
 
-async function request(ctx: Context, input: ReversalInput): Promise<InitiatorResponse> {
-  const issues = new Issues();
-  const production = ctx.environment === 'production';
-  if (!ctx.config.initiator) issues.add('initiator', 'is required');
-  checkLength(issues, 'transactionId', input.transactionId, 1, 20, true);
-  checkInt(issues, 'amount', input.amount, 1);
-  checkParty(issues, 'receiverParty', input.receiverParty, 'shortcode');
-  checkUrl(issues, 'resultUrl', input.resultUrl, { production });
-  checkUrl(issues, 'queueTimeoutUrl', input.queueTimeoutUrl, { production });
-  checkLength(issues, 'remarks', input.remarks, 2, 100, true);
-  issues.throwIfAny('reversal.request');
-
-  const { name, credential } = await ctx.securityCredential('reversal.request');
-  const raw = await ctx.post<Record<string, unknown>>(PATH, {
-    Initiator: name,
-    SecurityCredential: credential,
-    CommandID: 'TransactionReversal',
-    TransactionID: input.transactionId,
-    Amount: input.amount,
-    ReceiverParty: input.receiverParty,
-    // Daraja's spelling; the docs fix the value at "11".
-    RecieverIdentifierType: '11',
-    ResultURL: input.resultUrl,
-    QueueTimeOutURL: input.queueTimeoutUrl,
-    Remarks: input.remarks,
+function request(ctx: Context, input: ReversalInput): Promise<InitiatorResponse> {
+  return initiatorRequest(ctx, {
+    api: 'reversal.request',
+    path: PATH,
+    resultUrl: input.resultUrl,
+    queueTimeoutUrl: input.queueTimeoutUrl,
+    fields: (issues) => {
+      checkLength(issues, 'transactionId', input.transactionId, 1, 20, true);
+      checkInt(issues, 'amount', input.amount, 1);
+      checkParty(issues, 'receiverParty', input.receiverParty, 'shortcode');
+      checkLength(issues, 'remarks', input.remarks, 2, 100, true);
+      return {
+        CommandID: 'TransactionReversal',
+        TransactionID: input.transactionId,
+        Amount: input.amount,
+        ReceiverParty: input.receiverParty,
+        // Daraja's spelling; the docs fix the value at "11".
+        RecieverIdentifierType: '11',
+        Remarks: input.remarks,
+      };
+    },
   });
-  return mapInitiatorResponse(raw);
 }
 
 /** Transaction reversals. */

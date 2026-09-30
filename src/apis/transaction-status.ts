@@ -1,12 +1,12 @@
 import type { Context } from '../client';
-import { checkLength, checkUrl, Issues } from '../core/validate';
+import { checkLength } from '../core/validate';
+import { initiatorRequest } from './initiator';
 import {
   checkIdentifierType,
   checkParty,
   type IdentifierType,
   identifierTypeCode,
   type InitiatorResponse,
-  mapInitiatorResponse,
 } from './shared';
 
 export interface TransactionStatusInput {
@@ -35,38 +35,33 @@ export interface TransactionStatusApi {
 
 const PATH = '/mpesa/transactionstatus/v1/query';
 
-async function query(ctx: Context, input: TransactionStatusInput): Promise<InitiatorResponse> {
-  const issues = new Issues();
-  const production = ctx.environment === 'production';
-  if (!ctx.config.initiator) issues.add('initiator', 'is required');
-  if (!input.transactionId && !input.originalConversationId) {
-    issues.add('transactionId', 'or originalConversationId is required');
-  }
-  checkIdentifierType(issues, input.identifierType);
-  const partyA = checkParty(issues, 'partyA', input.partyA, input.identifierType);
-  checkUrl(issues, 'resultUrl', input.resultUrl, { production });
-  checkUrl(issues, 'queueTimeoutUrl', input.queueTimeoutUrl, { production });
-  checkLength(issues, 'remarks', input.remarks, 1, 100);
-  checkLength(issues, 'occasion', input.occasion, 1, 100);
-  issues.throwIfAny('transactionStatus.query');
-
-  const { name, credential } = await ctx.securityCredential('transactionStatus.query');
-  const raw = await ctx.post<Record<string, unknown>>(PATH, {
-    Initiator: name,
-    SecurityCredential: credential,
-    CommandID: 'TransactionStatusQuery',
-    ...(input.transactionId ? { TransactionID: input.transactionId } : {}),
-    ...(input.originalConversationId
-      ? { OriginalConversationID: input.originalConversationId }
-      : {}),
-    PartyA: partyA,
-    IdentifierType: identifierTypeCode(input.identifierType),
-    ResultURL: input.resultUrl,
-    QueueTimeOutURL: input.queueTimeoutUrl,
-    Remarks: input.remarks || 'Transaction status',
-    ...(input.occasion ? { Occasion: input.occasion } : {}),
+function query(ctx: Context, input: TransactionStatusInput): Promise<InitiatorResponse> {
+  return initiatorRequest(ctx, {
+    api: 'transactionStatus.query',
+    path: PATH,
+    resultUrl: input.resultUrl,
+    queueTimeoutUrl: input.queueTimeoutUrl,
+    fields: (issues) => {
+      if (!input.transactionId && !input.originalConversationId) {
+        issues.add('transactionId', 'or originalConversationId is required');
+      }
+      checkIdentifierType(issues, input.identifierType);
+      const partyA = checkParty(issues, 'partyA', input.partyA, input.identifierType);
+      checkLength(issues, 'remarks', input.remarks, 1, 100);
+      checkLength(issues, 'occasion', input.occasion, 1, 100);
+      return {
+        CommandID: 'TransactionStatusQuery',
+        ...(input.transactionId ? { TransactionID: input.transactionId } : {}),
+        ...(input.originalConversationId
+          ? { OriginalConversationID: input.originalConversationId }
+          : {}),
+        PartyA: partyA,
+        IdentifierType: identifierTypeCode(input.identifierType),
+        Remarks: input.remarks || 'Transaction status',
+        ...(input.occasion ? { Occasion: input.occasion } : {}),
+      };
+    },
   });
-  return mapInitiatorResponse(raw);
 }
 
 /** Transaction Status queries. */

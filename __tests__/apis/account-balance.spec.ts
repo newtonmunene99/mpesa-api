@@ -76,8 +76,8 @@ describe('accountBalance.query', () => {
     expect(error).toBeInstanceOf(ValidationError);
     expect((error as ValidationError).issues).toEqual([
       { path: 'partyA', message: 'must be a 5 to 9 digit shortcode' },
-      { path: 'resultUrl', message: 'must be an absolute URL' },
       { path: 'remarks', message: 'must be at most 100 characters' },
+      { path: 'resultUrl', message: 'must be an absolute URL' },
     ]);
     expect(calls).toHaveLength(0);
   });
