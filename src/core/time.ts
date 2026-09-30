@@ -18,6 +18,11 @@ export function formatTimestamp(date: Date): string {
   );
 }
 
+/**
+ * Converts EAT date parts to a `Date`. `Date.UTC` silently rolls impossible dates over
+ * (31 February becomes 3 March), so the parts are read back and compared; a mismatch, or an
+ * out-of-range time, throws `ValidationError` quoting `value`.
+ */
 function fromEatParts(
   value: string,
   year: number,
@@ -44,7 +49,10 @@ function fromEatParts(
   return new Date(utc - EAT_OFFSET_MS);
 }
 
-/** Parses Daraja's `YYYYMMDDHHmmss` (EAT), sent as a string or a number. */
+/**
+ * Parses Daraja's `YYYYMMDDHHmmss` (EAT), sent as a string or a number. Throws
+ * `ValidationError` for any other shape or an impossible date.
+ */
 export function parseTimestamp(value: string | number): Date {
   const text = String(value);
   const m = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/.exec(text);
@@ -57,7 +65,10 @@ export function parseTimestamp(value: string | number): Date {
   return fromEatParts(text, y!, mo!, d!, h!, mi!, s!);
 }
 
-/** Parses B2C's `dd.MM.yyyy HH:mm:ss` (EAT), as in TransactionCompletedDateTime. */
+/**
+ * Parses B2C's `dd.MM.yyyy HH:mm:ss` (EAT), as in TransactionCompletedDateTime. Throws
+ * `ValidationError` for any other shape or an impossible date.
+ */
 export function parseB2CDateTime(value: string): Date {
   const m = /^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}):(\d{2})$/.exec(value);
   if (!m) {

@@ -9,14 +9,18 @@ import { flatten, isRecord, readTimestamp, requireValue, setOwn } from './shared
  * Daraja POSTs to the request's `ResultURL`.
  */
 export interface DarajaResult {
+  /** Usually 0. Daraja documents it only as whether the result was sent to your listener. */
   resultType: number;
   /** 0 on success. Numeric strings become numbers; codes such as "R000002" stay strings. */
   resultCode: number | string;
   resultDesc: string;
   /** `resultCode === 0`. */
   ok: boolean;
+  /** The `originatorConversationId` from the request's acknowledgement; match results on it. */
   originatorConversationId: string;
+  /** M-Pesa's ID for the request, as in the acknowledgement. */
   conversationId: string;
+  /** The M-Pesa transaction ID; a placeholder such as "SKE0000000" when nothing was processed. */
   transactionId: string;
   /**
    * `ResultParameters` flattened by `Key`. Strings and numbers keep Daraja's type, booleans

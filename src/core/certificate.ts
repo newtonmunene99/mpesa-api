@@ -1,20 +1,26 @@
 import { ValidationError } from './errors';
 
+/** An RSA public key, and the certificate's expiry when there was one. */
 export interface RsaPublicKey {
+  /** The modulus. */
   n: bigint;
+  /** The public exponent, usually 65537. */
   e: bigint;
   /** Certificate expiry, when the input is an X.509 certificate. */
   notAfter?: Date;
 }
 
+/** One DER element: its tag, and the byte range of its contents (after the length). */
 interface Tlv {
   tag: number;
   start: number;
   end: number;
 }
 
+/** `rsaEncryption` (1.2.840.113549.1.1.1) as DER-encoded OID bytes. */
 const RSA_ENCRYPTION_OID = [0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x01];
 
+/** The DER tags this parser needs. `contextVersion` is X.509's optional `[0] version`. */
 const TAG = {
   integer: 0x02,
   bitString: 0x03,
@@ -25,10 +31,15 @@ const TAG = {
   contextVersion: 0xa0,
 } as const;
 
+/** Builds the `ValidationError` every parse failure throws, pointing at `initiator.certificate`. */
 function invalid(message: string): ValidationError {
   return new ValidationError('certificate', [{ path: 'initiator.certificate', message }]);
 }
 
+/**
+ * Reads the DER element at `offset`, which must end by `limit`. Supports short lengths and
+ * long lengths of up to 4 bytes, which covers any certificate. Throws when truncated.
+ */
 function readTlv(bytes: Uint8Array, offset: number, limit = bytes.length): Tlv {
   if (offset + 2 > limit) throw invalid('is truncated');
   const tag = bytes[offset]!;
@@ -46,18 +57,27 @@ function readTlv(bytes: Uint8Array, offset: number, limit = bytes.length): Tlv {
   return { tag, start, end };
 }
 
+/** Reads the element at `offset` and throws unless it has the expected tag. */
 function expect(bytes: Uint8Array, offset: number, tag: number, limit?: number): Tlv {
   const tlv = readTlv(bytes, offset, limit);
   if (tlv.tag !== tag) throw invalid('is not a valid X.509 certificate or public key');
   return tlv;
 }
 
+/**
+ * Reads a DER INTEGER's contents as unsigned. The leading 0x00 that DER adds to keep a
+ * modulus positive is harmless here.
+ */
 function toBigInt(bytes: Uint8Array): bigint {
   let hex = '';
   for (const b of bytes) hex += b.toString(16).padStart(2, '0');
   return hex === '' ? 0n : BigInt(`0x${hex}`);
 }
 
+/**
+ * Reads an X.509 validity time. UTCTime has a two-digit year: 50–99 means 19xx and 00–49
+ * means 20xx (RFC 5280 §4.1.2.5.1). GeneralizedTime has four digits. Both are in UTC.
+ */
 function parseTime(bytes: Uint8Array, tlv: Tlv): Date {
   const text = String.fromCharCode(...bytes.subarray(tlv.start, tlv.end));
   const m =
@@ -94,6 +114,11 @@ function readSpki(bytes: Uint8Array, spki: Tlv): { n: bigint; e: bigint } {
   };
 }
 
+/**
+ * Walks an X.509 `Certificate` to its `tbsCertificate` and reads the validity's `notAfter`
+ * and the `subjectPublicKeyInfo`. It skips everything else, so it doesn't check the
+ * signature: the certificate is trusted because the caller downloaded it from Safaricom.
+ */
 function readCertificate(bytes: Uint8Array): RsaPublicKey {
   const cert = expect(bytes, 0, TAG.sequence);
   const tbs = expect(bytes, cert.start, TAG.sequence, cert.end);
@@ -118,6 +143,10 @@ function readCertificate(bytes: Uint8Array): RsaPublicKey {
   return { ...readSpki(bytes, spki), notAfter: parseTime(bytes, notAfter) };
 }
 
+/**
+ * Decodes the first `CERTIFICATE` or `PUBLIC KEY` block in PEM text. Text around the block,
+ * such as the bag attributes some tools add, is ignored.
+ */
 function pemToDer(pem: string): { der: Uint8Array; kind: 'certificate' | 'publicKey' } {
   const m = /-----BEGIN (CERTIFICATE|PUBLIC KEY)-----([\s\S]*?)-----END \1-----/.exec(pem);
   if (!m) throw invalid('must be a PEM certificate or public key');
@@ -134,7 +163,9 @@ function pemToDer(pem: string): { der: Uint8Array; kind: 'certificate' | 'public
 /**
  * Extracts the RSA public key from a Safaricom certificate.
  *
- * Accepts a PEM `CERTIFICATE` or `PUBLIC KEY`, or DER bytes of an X.509 certificate.
+ * Accepts a PEM `CERTIFICATE` or `PUBLIC KEY`, or DER bytes of an X.509 certificate. Throws
+ * `ValidationError` for malformed input or a key that isn't RSA. An expired certificate
+ * still parses; the caller decides what to do with `notAfter`.
  */
 export function parseCertificate(input: string | Uint8Array): RsaPublicKey {
   if (typeof input === 'string') {

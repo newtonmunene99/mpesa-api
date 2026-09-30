@@ -9,6 +9,7 @@ import {
   type InitiatorResponse,
 } from './shared';
 
+/** Input for `transactionStatus.query`. Give `transactionId`, `originalConversationId`, or both. */
 export interface TransactionStatusInput {
   /** The M-Pesa receipt number (`TransactionID`). Give this or `originalConversationId`. */
   transactionId?: string;
@@ -28,6 +29,12 @@ export interface TransactionStatusInput {
   occasion?: string;
 }
 
+/**
+ * Transaction Status queries.
+ *
+ * Methods throw `ValidationError` before sending when the input or client config is invalid,
+ * and `DarajaApiError`, `AuthError` or `NetworkError` when the request fails.
+ */
 export interface TransactionStatusApi {
   /** Asks M-Pesa for a transaction's status; the answer arrives at `resultUrl`. */
   query(input: TransactionStatusInput): Promise<InitiatorResponse>;

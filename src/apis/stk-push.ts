@@ -10,6 +10,7 @@ import {
   Issues,
 } from '../core/validate';
 
+/** Input for `stkPush.send`. */
 export interface StkPushInput {
   /** The paybill or HO/store number that receives the payment (`BusinessShortCode`). */
   shortCode: number;
@@ -29,16 +30,21 @@ export interface StkPushInput {
   description?: string;
 }
 
+/** Daraja's acknowledgement of an STK push. The payment's outcome arrives at `callbackUrl`. */
 export interface StkPushResponse {
   merchantRequestId: string;
+  /** Identifies the push in `stkPush.query` and in the callback. */
   checkoutRequestId: string;
+  /** "0" when Daraja accepted the push. */
   responseCode: string;
   responseDescription: string;
+  /** A message suitable for showing to the customer. */
   customerMessage: string;
   /** Daraja's response body, unmodified. */
   raw: unknown;
 }
 
+/** Input for `stkPush.query`. */
 export interface StkQueryInput {
   /** The shortcode used for the push (`BusinessShortCode`). */
   shortCode: number;
@@ -46,6 +52,7 @@ export interface StkQueryInput {
   checkoutRequestId: string;
 }
 
+/** The state of an STK push, as reported by `stkPush.query`. */
 export interface StkQueryResponse {
   merchantRequestId: string;
   checkoutRequestId: string;
@@ -58,10 +65,20 @@ export interface StkQueryResponse {
   raw: unknown;
 }
 
+/**
+ * M-Pesa Express (STK push).
+ *
+ * Methods throw `ValidationError` before sending when the input or client config is invalid,
+ * and `DarajaApiError`, `AuthError` or `NetworkError` when the request fails.
+ */
 export interface StkPushApi {
   /** Sends an M-Pesa Express (STK push) payment prompt to the customer's phone. */
   send(input: StkPushInput): Promise<StkPushResponse>;
-  /** Checks the outcome of an STK push. */
+  /**
+   * Checks the outcome of an STK push. Queried too soon after the push (under about 30
+   * seconds in the sandbox), Daraja answers HTTP 500 `500.001.1001` "The transaction does not
+   * Exist", which throws `DarajaApiError`; retry later or rely on the callback.
+   */
   query(input: StkQueryInput): Promise<StkQueryResponse>;
 }
 
@@ -70,6 +87,10 @@ const PATHS = {
   query: '/mpesa/stkpushquery/v1/query',
 } as const;
 
+/**
+ * The `Password` and `Timestamp` pair both STK calls need: base64 of shortcode, passkey and
+ * timestamp. The timestamp is EAT, and Daraja checks the password against it.
+ */
 function password(
   ctx: Context,
   shortCode: number,

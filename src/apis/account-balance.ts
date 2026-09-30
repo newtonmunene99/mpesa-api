@@ -9,6 +9,7 @@ import {
   type InitiatorResponse,
 } from './shared';
 
+/** Input for `accountBalance.query`. */
 export interface AccountBalanceInput {
   /** The shortcode whose balance to query (`PartyA`). */
   partyA: number | string;
@@ -22,6 +23,12 @@ export interface AccountBalanceInput {
   remarks?: string;
 }
 
+/**
+ * Account Balance queries.
+ *
+ * Methods throw `ValidationError` before sending when the input or client config is invalid,
+ * and `DarajaApiError`, `AuthError` or `NetworkError` when the request fails.
+ */
 export interface AccountBalanceApi {
   /** Requests a shortcode's account balances; they arrive at `resultUrl`. */
   query(input: AccountBalanceInput): Promise<InitiatorResponse>;

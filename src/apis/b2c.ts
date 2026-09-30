@@ -3,8 +3,10 @@ import { checkInt, checkLength, checkPhone, checkShortCode } from '../core/valid
 import { initiatorRequest } from './initiator';
 import type { InitiatorResponse } from './shared';
 
+/** The kind of B2C payment (`CommandID`). Promotion payments send a congratulatory SMS. */
 export type B2CCommand = 'SalaryPayment' | 'BusinessPayment' | 'PromotionPayment';
 
+/** Input for `b2c.pay`. */
 export interface B2CInput {
   /**
    * Your unique ID for this payment, used by Daraja to reject duplicates
@@ -29,6 +31,13 @@ export interface B2CInput {
   occasion?: string;
 }
 
+/**
+ * Business to Customer (B2C) payments.
+ *
+ * Methods throw `ValidationError` before sending when the input or client config is invalid,
+ * and `DarajaApiError`, `AuthError` or `NetworkError` when the request fails. Errors from the
+ * request carry `originatorConversationId`.
+ */
 export interface B2CApi {
   /**
    * Sends money from a B2C shortcode to a customer. The acknowledgement only confirms receipt;

@@ -4,15 +4,21 @@ import { readNumber } from './shared';
 
 /** One account from a packed Daraja balance string. */
 export interface AccountBalanceEntry {
+  /** The account's name, such as "Working Account" or "Utility Account". */
   account: string;
+  /** Usually "KES". */
   currency: string;
+  /** The third field: funds available, in the account's currency (decimals kept). */
   available: number;
+  /** The fourth field: uncleared funds. */
   uncleared: number;
+  /** The fifth field: reserved funds. */
   reserved: number;
   /** The sixth field, which Daraja's docs leave unlabelled. The name is provisional. */
   unreserved: number;
 }
 
+/** Names for the four amount fields, in the order they appear in each entry. */
 const AMOUNTS = ['available', 'uncleared', 'reserved', 'unreserved'] as const;
 
 /**

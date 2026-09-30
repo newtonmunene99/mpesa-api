@@ -2,6 +2,7 @@ import type { Context } from '../client';
 import { checkInt, checkPhone, checkShortCode, checkUrl, Issues } from '../core/validate';
 import { str } from '../core/coerce';
 
+/** Input for `c2b.registerUrls`. */
 export interface C2BRegisterInput {
   /** Paybill or till (store) number (`ShortCode`). */
   shortCode: number;
@@ -13,14 +14,18 @@ export interface C2BRegisterInput {
   defaultAction: 'Completed' | 'Cancelled';
 }
 
+/** Daraja's acknowledgement of a C2B registration or simulation. */
 export interface C2BResponse {
+  /** Read from Daraja's misspelled `OriginatorCoversationID`, or the correct spelling. */
   originatorConversationId: string;
+  /** "0", or "00000000" for a successful registration. */
   responseCode: string;
   responseDescription: string;
   /** Daraja's response body, unmodified. */
   raw: unknown;
 }
 
+/** Input for `c2b.simulate`. */
 export interface C2BSimulateInput {
   /** Paybill or till number (`ShortCode`). */
   shortCode: number;
@@ -34,13 +39,24 @@ export interface C2BSimulateInput {
   billRefNumber?: string;
 }
 
+/**
+ * Customer to Business (C2B): register the URLs M-Pesa notifies about payments to your
+ * shortcode, and simulate a payment in the sandbox. Parse the notifications with
+ * `parseC2BNotification`.
+ *
+ * Methods throw `ValidationError` before sending when the input or client config is invalid,
+ * and `DarajaApiError`, `AuthError` or `NetworkError` when the request fails.
+ */
 export interface C2BApi {
   /**
    * Registers the confirmation and validation URLs for a shortcode. In production this is a
    * one-time call: delete existing URLs in the Daraja portal before registering new ones.
    */
   registerUrls(input: C2BRegisterInput): Promise<C2BResponse>;
-  /** Simulates a customer payment. Sandbox only. */
+  /**
+   * Simulates a customer payment to a registered shortcode. Sandbox only: in production it
+   * throws `ValidationError` without sending.
+   */
   simulate(input: C2BSimulateInput): Promise<C2BResponse>;
 }
 

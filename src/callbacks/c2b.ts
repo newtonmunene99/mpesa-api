@@ -7,17 +7,24 @@ import { isBlank, isRecord, readNumber, readTimestamp, requireValue } from './sh
 export interface C2BNotification {
   /** "Pay Bill" or "Buy Goods". */
   transactionType: string;
+  /** The M-Pesa receipt number. */
   transId: string;
+  /** When the payment was made (Daraja sends it in EAT). */
   transTime: Date;
+  /** The amount paid, in shillings. */
   transAmount: number;
+  /** The paybill or till number that was paid. */
   businessShortCode: string;
+  /** The account number the customer entered for a paybill payment. */
   billRefNumber: string;
   invoiceNumber: string;
   /** Absent on validation requests, where Daraja sends it blank. */
   orgAccountBalance?: number;
+  /** Your own ID, if your validation reply set `ThirdPartyTransID`. */
   thirdPartyTransId: string;
   /** Masked in C2B v2, for example "2547 ***** 126". */
   msisdn: string;
+  /** The customer's registered names; any of them may be empty. */
   firstName: string;
   middleName: string;
   lastName: string;
@@ -25,6 +32,7 @@ export interface C2BNotification {
   raw: unknown;
 }
 
+/** Fields without which a notification can't be acted on. The rest default to `''`. */
 const REQUIRED = ['TransactionType', 'TransID', 'TransTime', 'TransAmount', 'BusinessShortCode'];
 
 /**
@@ -86,6 +94,7 @@ export interface C2BValidationResponse {
   ThirdPartyTransID?: string;
 }
 
+/** Checked at runtime too, so JavaScript callers can't send a code Daraja doesn't know. */
 const REJECTION_CODES = new Set<string>([
   'C2B00011',
   'C2B00012',

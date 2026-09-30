@@ -5,27 +5,35 @@ import { flatten, isRecord, readNumber, readTimestamp, requireValue } from './sh
 
 /** The `CallbackMetadata` of a successful STK push, when Daraja sends it. */
 export interface StkCallbackMetadata {
+  /** The amount paid, in shillings. */
   amount?: number;
+  /** The M-Pesa receipt number, as shown in the customer's SMS. */
   mpesaReceiptNumber?: string;
+  /** Rarely sent; Daraja usually omits its value. */
   balance?: number;
+  /** When the payment completed (Daraja sends it in EAT). */
   transactionDate?: Date;
+  /** The paying phone number, as `2547…`. */
   phoneNumber?: string;
 }
 
 /** An M-Pesa Express (STK push) callback. */
 export interface StkCallback {
   merchantRequestId: string;
+  /** Matches `checkoutRequestId` from `stkPush.send`. */
   checkoutRequestId: string;
-  /** 0 on success; for example 1032 when the customer cancels. */
+  /** 0 on success; for example 1032 when the customer cancels, 1037 when they don't respond. */
   resultCode: number | string;
   resultDesc: string;
   /** `resultCode === 0`. */
   ok: boolean;
+  /** Present on successful payments only. */
   metadata?: StkCallbackMetadata;
   /** The callback body, unmodified. */
   raw: unknown;
 }
 
+/** Where the callback's payload sits, and the prefix for issue paths. */
 const PATH = 'Body.stkCallback';
 
 /**

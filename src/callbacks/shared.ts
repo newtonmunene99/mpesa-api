@@ -1,6 +1,7 @@
 import { parseTimestamp } from '../core/time';
 import type { Issues } from '../core/validate';
 
+/** A plain object, not `null` or an array. */
 export const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
@@ -41,6 +42,10 @@ export function flatten(list: unknown, nameKey: string): Record<string, unknown>
   return out;
 }
 
+/**
+ * A plain decimal such as `5`, `5.00` or `-1540.00`. Stricter than `Number()`, which would
+ * also accept `0x10`, `1e3`, `' 1 '` and `''` from an untrusted body.
+ */
 const DECIMAL = /^-?\d+(\.\d+)?$/;
 
 /** Reads a finite number sent as a number or a plain decimal string such as "5.00". */
