@@ -1,0 +1,5 @@
+parse-stk-callback
+
+Tests: 183/183 (9 new, using the portal's success and cancelled samples); vp check, pack, test:dist, lint:pkg pass.
+Mutation: dropping single-item handling in asList fails exactly its test.
+src/callbacks/shared.ts holds flatten/readNumber/readTimestamp/requireKey for parse-result to reuse.
