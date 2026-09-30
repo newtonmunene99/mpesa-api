@@ -1,0 +1,6 @@
+Phase 3 checkpoint: Callbacks
+
+Tests: 239/239; vp check 0 warnings; vp pack, test:dist (neutral + smoke), lint:pkg pass.
+Phase verifier: Reject (2 must-fix + 8 notes) -> fixed in 5c8388e (mutation-checked) -> Approve with 4 non-blocking notes; note 2 (__proto__ own keys and Object.assign) documented in this commit. Other notes accepted as-is: isSafeInteger clause in code() is redundant but harmless; blank Values are skipped by design; NaN/object inputs cannot come from JSON.
+Spec deviations: DarajaResult.parameters includes Date; parseBalances(value: unknown).
+Hand check: none needed (pure parsers, covered by portal samples; the sandbox run in phase 4 pins real callbacks).
