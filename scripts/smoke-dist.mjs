@@ -1,30 +1,54 @@
-// Smoke test for the built package: resolves `mpesa-api` through package.json
-// "exports" and checks the bundled certificate is found and used at runtime.
-import { Buffer } from 'node:buffer';
-import { Mpesa } from 'mpesa-api';
+// Smoke test for the built package: imports `mpesa-api` through package.json "exports",
+// makes a B2C call against a stubbed fetch, and checks the security credential decrypts
+// with the test key (a throwaway fixture, not a Safaricom certificate).
+import { constants, privateDecrypt } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { createMpesa } from 'mpesa-api';
 
-const unhandled = [];
-process.on('unhandledRejection', (error) => unhandled.push(error));
+const fixture = (name) =>
+  readFileSync(new URL(`../__tests__/fixtures/certs/${name}`, import.meta.url), 'utf8');
 
-const mpesa = new Mpesa(
-  { clientKey: 'k', clientSecret: 's', initiatorPassword: 'Safaricom999!*!' },
-  'sandbox',
-);
+const requests = [];
+const fetch = async (url, init = {}) => {
+  requests.push({ url: String(url), body: init.body ? JSON.parse(init.body) : undefined });
+  const body = String(url).includes('/oauth/')
+    ? { access_token: 'tok', expires_in: 3599 }
+    : {
+        ConversationID: 'AG_1',
+        OriginatorConversationID: 'smoke-1',
+        ResponseCode: '0',
+        ResponseDescription: 'ok',
+      };
+  return new Response(JSON.stringify(body), { status: 200 });
+};
 
-for (let i = 0; i < 50 && !Reflect.get(mpesa, 'securityCredential'); i++) {
-  await new Promise((resolve) => setTimeout(resolve, 20));
-}
+const mpesa = createMpesa({
+  environment: 'sandbox',
+  consumerKey: 'key',
+  consumerSecret: 'secret',
+  initiator: { name: 'smoke', password: 'Safaricom999!*!', certificate: fixture('test-cert.pem') },
+  fetch,
+});
 
-const securityCredential = Reflect.get(mpesa, 'securityCredential');
+const res = await mpesa.b2c.pay({
+  originatorConversationId: 'smoke-1',
+  commandId: 'BusinessPayment',
+  amount: 10,
+  shortCode: 600997,
+  phoneNumber: '254708374149',
+  remarks: 'Smoke test',
+  resultUrl: 'https://example.com/result',
+  queueTimeoutUrl: 'https://example.com/timeout',
+});
 
-// RSA-2048 PKCS#1 v1.5 ciphertext is 256 bytes.
-if (
-  unhandled.length > 0 ||
-  typeof securityCredential !== 'string' ||
-  Buffer.from(securityCredential, 'base64').length !== 256
-) {
-  console.error('smoke failed', { unhandled, securityCredential });
+const b2c = requests.find((r) => r.url.endsWith('/mpesa/b2c/v3/paymentrequest'));
+const password = privateDecrypt(
+  { key: fixture('test-key.pem'), padding: constants.RSA_PKCS1_PADDING },
+  Buffer.from(b2c?.body?.SecurityCredential ?? '', 'base64'),
+).toString('utf8');
+
+if (res.responseCode !== '0' || password !== 'Safaricom999!*!') {
+  console.error('smoke failed', { res, password });
   process.exit(1);
 }
-
 console.log('smoke ok');

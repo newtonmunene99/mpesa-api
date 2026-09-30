@@ -1,13 +1,18 @@
 {
   "name": "mpesa-api",
   "version": "3.0.2",
-  "description": "An NPM Module built with NodeJs to help you with M-Pesa Daraja API calls.",
+  "description": "Typed M-Pesa Daraja 3.0 client for Node.js, Bun, Deno and edge runtimes, with no dependencies.",
   "keywords": [
+    "daraja",
+    "edge",
+    "m-pesa",
     "mobile money",
     "money",
     "mpesa",
     "node",
-    "nodejs"
+    "nodejs",
+    "safaricom",
+    "stk-push"
   ],
   "homepage": "https://github.com/newtonmunene99/mpesa-api/",
   "bugs": {
@@ -41,7 +46,7 @@
     "build": "vp pack",
     "check": "vp check",
     "test": "vp test",
-    "test:dist": "node scripts/smoke-dist.mjs",
+    "test:dist": "node scripts/check-dist-neutral.mjs && node scripts/smoke-dist.mjs",
     "lint:pkg": "publint && attw --pack . --profile esm-only",
     "changeset": "changeset",
     "release": "vp pack && changeset publish"
