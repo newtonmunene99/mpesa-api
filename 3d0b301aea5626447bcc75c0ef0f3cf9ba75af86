@@ -1,0 +1,5 @@
+c2b-notifications
+
+Tests: 216/216 (15 new, using the portal's masked v2 sample). vp check (0 warnings), pack, test:dist, lint:pkg pass.
+c2bValidationResponse members are arrow properties so they can be destructured (the unbound-method lint flagged method syntax).
+Mutation: skipping OrgAccountBalance number validation fails exactly its test.
