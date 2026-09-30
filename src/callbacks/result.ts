@@ -1,4 +1,4 @@
-import { code, str } from '../apis/shared';
+import { code, str } from '../core/coerce';
 import { ValidationError } from '../core/errors';
 import { parseB2CDateTime } from '../core/time';
 import { Issues } from '../core/validate';

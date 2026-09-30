@@ -1,4 +1,4 @@
-import { code, str } from '../apis/shared';
+import { code, str } from '../core/coerce';
 import { ValidationError } from '../core/errors';
 import { Issues } from '../core/validate';
 import { flatten, isRecord, readNumber, readTimestamp, requireValue } from './shared';

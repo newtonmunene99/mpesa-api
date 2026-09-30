@@ -1,6 +1,6 @@
 import type { Context } from '../client';
 import { formatTimestamp } from '../core/time';
-import { code, str } from './shared';
+import { code, str } from '../core/coerce';
 import {
   checkInt,
   checkLength,

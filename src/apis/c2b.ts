@@ -1,6 +1,6 @@
 import type { Context } from '../client';
 import { checkInt, checkPhone, checkShortCode, checkUrl, Issues } from '../core/validate';
-import { str } from './shared';
+import { str } from '../core/coerce';
 
 export interface C2BRegisterInput {
   /** Paybill or till (store) number (`ShortCode`). */
