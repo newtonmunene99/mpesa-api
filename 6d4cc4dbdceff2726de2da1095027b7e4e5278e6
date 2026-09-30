@@ -1,0 +1,5 @@
+sandbox-suite
+
+Tests: 245 passed, 10 skipped (sandbox project, no MPESA_SANDBOX); pnpm test:sandbox without a .env skips all 10. vp check, pack, test:dist, lint:pkg pass. The npm tarball contains no tests or .env files.
+Deviations from the plan: redact also masks DebitPartyPublicName/CreditPartyPublicName (reversal names) and OriginatorConversationID Key/Value entries. The alternate-spelling B2C call goes through createContext().post, which shares the client's token store so it does not invalidate the client's token. Transaction Status and Reversal use MPESA_TEST_TRANSACTION_ID, falling back to the portal sample OEI2AK4Q16.
+Not yet run live: that is capture-sandbox-fixtures (hand step).
