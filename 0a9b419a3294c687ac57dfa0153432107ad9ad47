@@ -1,0 +1,4 @@
+Phase 2 verifier fixes (behaviour)
+
+2: b2c originatorConversationId is generated up front, returned (with a fallback when not echoed), and attached to MpesaError.originatorConversationId on post failure. 3: the credential memo is reset on rejection; createMpesa checks password bytes <= k-11 (maxPlaintextBytes). 4: empty Occassion/Occasion omitted; empty TransactionDesc/Remarks defaulted. 5: an initiator issue is added before throwIfAny in the 4 initiator APIs; c2b.simulate reports the environment along with the other issues. 6: a B2C retry resends the identical body (test).
+11 new tests; 136 total.
