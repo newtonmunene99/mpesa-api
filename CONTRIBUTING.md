@@ -26,13 +26,13 @@ Branch from `dev`. Pull requests target `dev`; `master` holds released code.
 
 ## Everyday commands
 
-| Command              | What it does                                                                               |
-| -------------------- | ------------------------------------------------------------------------------------------ |
-| `vp test`            | Runs the Vitest suite. It is fully offline and never calls Safaricom.                      |
-| `vp check`           | Checks formatting (Oxfmt), lint (type-aware Oxlint) and types. `vp check --fix` autofixes. |
-| `vp pack`            | Builds the package into `dist/`.                                                           |
-| `pnpm run test:dist` | Smoke test: imports the built package and checks the bundled certificates load.            |
-| `pnpm run lint:pkg`  | Validates the package with publint and arethetypeswrong.                                   |
+| Command              | What it does                                                                                                        |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `vp test`            | Runs the Vitest suite. It is fully offline and never calls Safaricom.                                               |
+| `vp check`           | Checks formatting (Oxfmt), lint (type-aware Oxlint) and types. `vp check --fix` autofixes.                          |
+| `vp pack`            | Builds the package into `dist/`.                                                                                    |
+| `pnpm run test:dist` | Checks `dist/` uses no Node built-ins, then imports the built package and makes a B2C call against a stubbed fetch. |
+| `pnpm run lint:pkg`  | Validates the package with publint and arethetypeswrong.                                                            |
 
 Before you push, run:
 

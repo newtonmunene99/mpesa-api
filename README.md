@@ -58,9 +58,10 @@ const { checkoutRequestId } = await mpesa.stkPush.send({
   type: 'paybill',
   amount: 1,
   phoneNumber: '0708374149',
-  callbackUrl: 'https://example.com/mpesa/stk',
+  callbackUrl: 'https://example.com/payments/stk',
   accountReference: 'INV-001',
 });
+console.log(checkoutRequestId);
 ```
 
 `createMpesa` makes no network calls. The access token is fetched on the first API call, cached, and refreshed before it expires.
@@ -118,8 +119,9 @@ const mpesa = createMpesa({
 Notes:
 
 - The sandbox certificate Safaricom still distributes expired in 2016. The SDK warns through `onWarning` when a certificate has expired but still uses it.
-- A B2C result with code `2001` ("The initiator information is invalid") means the name, password or encryption was rejected. If it happens with the password and certificate, try a security credential generated on the portal.
-- The shared sandbox initiator is sometimes locked (`8006`, "The security credential is locked") by other developers' failed attempts. Only Safaricom can unlock it.
+- The SDK's own encryption (RSA PKCS#1 v1.5, the same as Safaricom's libraries) is tested against OpenSSL, but has not yet been confirmed against the live sandbox: its B2C results were unavailable when 4.0 was tested. If you get a `2001` result with the password and certificate, use a security credential generated on the portal instead, and please [open an issue](https://github.com/newtonmunene99/mpesa-api/issues).
+- A B2C result with code `2001` ("The initiator information is invalid") means the name, password or encryption was rejected.
+- The shared sandbox initiator is sometimes locked (`8006`, "The security credential is locked"), probably by other developers' failed attempts. Only Safaricom can unlock it.
 
 ## M-Pesa Express (STK push)
 
@@ -131,7 +133,7 @@ const sent = await mpesa.stkPush.send({
   type: 'paybill',
   amount: 100,
   phoneNumber: '0712345678',
-  callbackUrl: 'https://example.com/mpesa/stk',
+  callbackUrl: 'https://example.com/payments/stk',
   accountReference: 'INV-001',
   description: 'Invoice 001',
 });
@@ -158,15 +160,15 @@ if (status.resultCode === 0) console.log('paid');
 
 `Password` and `Timestamp` are generated from the configured `passkey`.
 
-`stkPush.query` takes `shortCode` and `checkoutRequestId`, and returns `resultCode` (0 means paid; 1032 means the customer cancelled, 1037 that they didn't respond). Querying within about 30 seconds of the push can fail with `500.001.1001` "The transaction does not Exist"; retry later, or rely on the callback.
+`stkPush.query` takes `shortCode` (`BusinessShortCode`) and `checkoutRequestId` (`CheckoutRequestID`), and returns `resultCode` (0 means paid; 1032 means the customer cancelled, 1037 that they didn't respond). Querying within about 30 seconds of the push can fail with `500.001.1001` "The transaction does not Exist"; retry later, or rely on the callback.
 
 ## Customer to Business (C2B)
 
 ```ts
 await mpesa.c2b.registerUrls({
   shortCode: 600984,
-  confirmationUrl: 'https://example.com/mpesa/c2b/confirmation',
-  validationUrl: 'https://example.com/mpesa/c2b/validation',
+  confirmationUrl: 'https://example.com/payments/c2b/confirmation',
+  validationUrl: 'https://example.com/payments/c2b/validation',
   defaultAction: 'Completed',
 });
 
@@ -204,26 +206,28 @@ const payment = await mpesa.b2c.pay({
   shortCode: 600999,
   phoneNumber: '0712345678',
   remarks: 'Refund for order 42',
-  resultUrl: 'https://example.com/mpesa/b2c/result',
-  queueTimeoutUrl: 'https://example.com/mpesa/b2c/timeout',
+  resultUrl: 'https://example.com/payments/b2c/result',
+  queueTimeoutUrl: 'https://example.com/payments/b2c/timeout',
 });
 // Store this: it identifies the payment in the result and in status queries.
 console.log(payment.originatorConversationId);
 ```
 
-| Field                      | Daraja field               | Notes                                                             |
-| -------------------------- | -------------------------- | ----------------------------------------------------------------- |
-| `originatorConversationId` | `OriginatorConversationID` | Optional. Your unique ID; defaults to a random UUID.              |
-| `commandId`                | `CommandID`                | `'SalaryPayment'`, `'BusinessPayment'` or `'PromotionPayment'`.   |
-| `amount`                   | `Amount`                   | Whole shillings, 10 to 250 000.                                   |
-| `shortCode`                | `PartyA`                   | The B2C shortcode paying out.                                     |
-| `phoneNumber`              | `PartyB`                   | The customer's number.                                            |
-| `remarks`                  | `Remarks`                  | 2 to 100 characters.                                              |
-| `resultUrl`                | `ResultURL`                | Receives the result.                                              |
-| `queueTimeoutUrl`          | `QueueTimeOutURL`          | Receives a notice if the request times out in the queue.          |
-| `occasion`                 | `Occassion`                | Optional. 1 to 100 characters. Spelled as in the Daraja 3.0 docs. |
+| Field                      | Daraja field               | Notes                                                           |
+| -------------------------- | -------------------------- | --------------------------------------------------------------- |
+| `originatorConversationId` | `OriginatorConversationID` | Optional. Your unique ID; defaults to a random UUID.            |
+| `commandId`                | `CommandID`                | `'SalaryPayment'`, `'BusinessPayment'` or `'PromotionPayment'`. |
+| `amount`                   | `Amount`                   | Whole shillings, 10 to 250 000.                                 |
+| `shortCode`                | `PartyA`                   | The B2C shortcode paying out.                                   |
+| `phoneNumber`              | `PartyB`                   | The customer's number.                                          |
+| `remarks`                  | `Remarks`                  | 2 to 100 characters.                                            |
+| `resultUrl`                | `ResultURL`                | Receives the result.                                            |
+| `queueTimeoutUrl`          | `QueueTimeOutURL`          | Receives a notice if the request times out in the queue.        |
+| `occasion`                 | `Occassion`                | Optional. 1 to 100 characters. See the note below.              |
 
-If a request fails, the thrown error carries `originatorConversationId`. After a timeout or network error, query the payment's status with that ID before retrying, so the customer isn't paid twice.
+If the request to Daraja fails (a network error, timeout or `DarajaApiError`), the thrown error carries `originatorConversationId`. Query the payment's status with that ID before retrying, so the customer isn't paid twice. Errors thrown before sending, such as a `ValidationError`, don't carry it.
+
+`Occassion` is the spelling in the Daraja 3.0 docs and the portal simulator; Daraja 1.0 used `Occasion`. The sandbox acknowledged both when 4.0 was tested, but no result arrived to show which one Daraja reads. It is a free-text note, so a wrong spelling at worst drops it.
 
 ## Transaction Status
 
@@ -231,8 +235,8 @@ If a request fails, the thrown error carries `originatorConversationId`. After a
 await mpesa.transactionStatus.query({
   originalConversationId: 'the ID returned by b2c.pay',
   partyA: 600999,
-  resultUrl: 'https://example.com/mpesa/status/result',
-  queueTimeoutUrl: 'https://example.com/mpesa/status/timeout',
+  resultUrl: 'https://example.com/payments/status/result',
+  queueTimeoutUrl: 'https://example.com/payments/status/timeout',
 });
 ```
 
@@ -252,12 +256,12 @@ await mpesa.transactionStatus.query({
 ```ts
 await mpesa.accountBalance.query({
   partyA: 600999,
-  resultUrl: 'https://example.com/mpesa/balance/result',
-  queueTimeoutUrl: 'https://example.com/mpesa/balance/timeout',
+  resultUrl: 'https://example.com/payments/balance/result',
+  queueTimeoutUrl: 'https://example.com/payments/balance/timeout',
 });
 ```
 
-Takes `partyA` (`PartyA`), an optional `identifierType` (`IdentifierType`), `resultUrl`, `queueTimeoutUrl` and optional `remarks`. The balances arrive at `resultUrl` as one packed string; split it with [`parseBalances`](#callbacks).
+Takes `partyA` (`PartyA`), an optional `identifierType` (`IdentifierType`), `resultUrl` (`ResultURL`), `queueTimeoutUrl` (`QueueTimeOutURL`) and optional `remarks` (`Remarks`, up to 100 characters, defaults to "Account balance"). The balances arrive at `resultUrl` as one packed string; split it with [`parseBalances`](#callbacks).
 
 ## Reversal
 
@@ -269,8 +273,8 @@ await mpesa.reversal.request({
   amount: 100,
   receiverParty: 600984,
   remarks: 'Paid twice',
-  resultUrl: 'https://example.com/mpesa/reversal/result',
-  queueTimeoutUrl: 'https://example.com/mpesa/reversal/timeout',
+  resultUrl: 'https://example.com/payments/reversal/result',
+  queueTimeoutUrl: 'https://example.com/payments/reversal/timeout',
 });
 ```
 
@@ -287,13 +291,14 @@ await mpesa.reversal.request({
 
 ## Responses
 
-Every call returns camelCase fields plus `raw`, Daraja's unmodified response body. The initiator APIs return:
+Every call returns camelCase fields plus `raw`, Daraja's unmodified response body.
 
-```ts
-{
-  (conversationId, originatorConversationId, responseCode, responseDescription, raw);
-}
-```
+| Call                                                                             | Returns (type)                                                                                                                  |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `stkPush.send`                                                                   | `StkPushResponse`: `merchantRequestId`, `checkoutRequestId`, `responseCode`, `responseDescription`, `customerMessage`           |
+| `stkPush.query`                                                                  | `StkQueryResponse`: `merchantRequestId`, `checkoutRequestId`, `responseCode`, `responseDescription`, `resultCode`, `resultDesc` |
+| `c2b.registerUrls`, `c2b.simulate`                                               | `C2BResponse`: `originatorConversationId`, `responseCode`, `responseDescription`                                                |
+| `b2c.pay`, `transactionStatus.query`, `accountBalance.query`, `reversal.request` | `InitiatorResponse`: `conversationId`, `originatorConversationId`, `responseCode`, `responseDescription`                        |
 
 ## Callbacks
 
@@ -307,12 +312,20 @@ Daraja posts results to the URLs you give it. The parsers take the already-parse
 | `parseBalances(value)`       | The packed `AccountBalance` or `DebitAccountBalance` value    |
 | `c2bValidationResponse`      | Builds the reply to a C2B validation request                  |
 
-Each parsed result has `ok` (`resultCode === 0`) and `raw`. Result codes are numbers, except non-numeric ones such as `"R000002"`. `ResultParameters` are flattened into `parameters`, with dates converted to `Date`.
+What each parser returns:
+
+- `parseStkCallback` → `StkCallback`: `merchantRequestId`, `checkoutRequestId`, `resultCode`, `resultDesc`, `ok`, `raw`, and `metadata` (`StkCallbackMetadata`: `amount`, `mpesaReceiptNumber`, `balance`, `transactionDate` as a `Date`, `phoneNumber`) on success.
+- `parseResult` → `DarajaResult`: `resultType`, `resultCode`, `resultDesc`, `ok`, `originatorConversationId`, `conversationId`, `transactionId`, `parameters` (`ResultParameters` flattened by key, with the documented dates converted to `Date`), `referenceData` and `raw`.
+- `parseC2BNotification` → `C2BNotification`: `transactionType`, `transId`, `transTime` (a `Date`), `transAmount`, `businessShortCode`, `billRefNumber`, `invoiceNumber`, `orgAccountBalance` (absent on validation requests), `thirdPartyTransId`, `msisdn` (masked by Daraja), `firstName`, `middleName`, `lastName` and `raw`.
+- `parseBalances` → `AccountBalanceEntry[]`: `account`, `currency`, `available`, `uncleared`, `reserved`, `unreserved`.
+- `c2bValidationResponse.accept(thirdPartyTransId?)` and `.reject(code: C2BRejectionCode)` → `C2BValidationResponse`, the JSON body to send back.
+
+`ok` means `resultCode === 0`. Result codes are numbers, except non-numeric ones such as `"R000002"`, which stay strings.
 
 With Express:
 
 ```ts
-app.post('/mpesa/stk', (req, res) => {
+app.post('/payments/stk', (req, res) => {
   const callback = parseStkCallback(req.body);
   if (callback.ok) {
     void savePayment(callback.checkoutRequestId, callback.metadata?.mpesaReceiptNumber);
@@ -320,7 +333,7 @@ app.post('/mpesa/stk', (req, res) => {
   res.json({ ResultCode: 0, ResultDesc: 'Accepted' });
 });
 
-app.post('/mpesa/c2b/validation', (req, res) => {
+app.post('/payments/c2b/validation', (req, res) => {
   const payment = parseC2BNotification(req.body);
   res.json(
     accountExists(payment.billRefNumber)
@@ -329,9 +342,10 @@ app.post('/mpesa/c2b/validation', (req, res) => {
   );
 });
 
-app.post('/mpesa/balance/result', (req, res) => {
+app.post('/payments/balance/result', (req, res) => {
   const result = parseResult(req.body);
-  if (result.ok) console.log(parseBalances(result.parameters.AccountBalance));
+  const packed = result.parameters.AccountBalance;
+  if (result.ok && typeof packed === 'string') console.log(parseBalances(packed));
   res.json({ ResultCode: 0, ResultDesc: 'Accepted' });
 });
 ```
@@ -339,7 +353,7 @@ app.post('/mpesa/balance/result', (req, res) => {
 With Hono or any fetch-based runtime:
 
 ```ts
-app.post('/mpesa/b2c/result', async (c) => {
+app.post('/payments/b2c/result', async (c) => {
   const result = parseResult(await c.req.json());
   if (!result.ok) console.warn(result.resultCode, result.resultDesc);
   return c.json({ ResultCode: 0, ResultDesc: 'Accepted' });
@@ -352,21 +366,21 @@ C2B validation rejection codes: `C2B00011` invalid MSISDN, `C2B00012` invalid ac
 
 ## Errors
 
-Every error extends `MpesaError`.
+Every error extends `MpesaError`. `ValidationError.issues` is a list of `ValidationIssue`.
 
-| Class             | When                                                                        | Useful fields                                              |
-| ----------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `ValidationError` | Invalid input or config. Nothing was sent.                                  | `issues: { path, message }[]`                              |
-| `AuthError`       | The token request failed, usually a wrong consumer key or secret.           | `status`, `errorCode`                                      |
-| `DarajaApiError`  | Daraja rejected the request, or accepted it with a non-zero `ResponseCode`. | `status`, `errorCode`, `errorMessage`, `requestId`, `body` |
-| `NetworkError`    | No usable response: a network failure, timeout, or non-JSON body.           | `cause`                                                    |
+| Class             | When                                                                                     | Useful fields                                              |
+| ----------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `ValidationError` | Invalid input or config. Nothing was sent.                                               | `issues: { path, message }[]`                              |
+| `AuthError`       | The token request failed, usually a wrong consumer key or secret.                        | `status`, `errorCode`                                      |
+| `DarajaApiError`  | Daraja rejected the request, or accepted it with a non-zero `ResponseCode`.              | `status`, `errorCode`, `errorMessage`, `requestId`, `body` |
+| `NetworkError`    | No usable response: a network failure, a timeout, or a success response that isn't JSON. | `cause` (for network failures and timeouts)                |
 
 ```ts
 try {
   await mpesa.accountBalance.query({
     partyA: 600999,
-    resultUrl: 'https://example.com/mpesa/balance/result',
-    queueTimeoutUrl: 'https://example.com/mpesa/balance/timeout',
+    resultUrl: 'https://example.com/payments/balance/result',
+    queueTimeoutUrl: 'https://example.com/payments/balance/timeout',
   });
 } catch (error) {
   if (error instanceof ValidationError) console.error(error.issues);
@@ -381,7 +395,7 @@ A rejected token (HTTP 401 or Daraja's invalid-token codes) is refreshed and the
 
 ## Token store
 
-Each new Daraja token invalidates the previous one, so every process sharing a consumer key should share one token. By default tokens are cached in memory, per client. To share them across processes or serverless instances, pass a `TokenStore`, for example backed by Redis:
+Each new Daraja token invalidates the previous one, so every process sharing a consumer key should share one token. By default tokens are cached in a `MemoryTokenStore`, per client. To share them across processes or serverless instances, pass a `TokenStore`, for example backed by Redis:
 
 ```ts
 import { type CachedToken, type TokenStore } from 'mpesa-api';
@@ -397,11 +411,11 @@ const tokenStore: TokenStore = {
 };
 ```
 
-Keys include the environment and a hash of the consumer key, never the key itself. A failing store never fails a request; the error is reported through `onWarning`.
+Keys include the environment and a hash of the consumer key, never the key itself. A failing store never fails a request: a failed `set` is reported through `onWarning`, and a failed `get` falls back to fetching a new token. A `CachedToken` is `{ accessToken, expiresAt }`, with `expiresAt` in epoch milliseconds.
 
 ## Runtimes
 
-The package uses only web-standard APIs (`fetch`, `crypto.subtle`, `crypto.randomUUID`, `TextEncoder`), with no Node built-ins, so it runs on Node.js 22.12+, Bun, Deno and edge runtimes. Only reading a certificate file needs a file system; pass the PEM text instead on edge runtimes.
+The package uses only web-standard APIs (`fetch`, `AbortSignal.timeout`, `crypto.subtle`, `crypto.getRandomValues`, `crypto.randomUUID`, `TextEncoder`, `btoa`/`atob` and `BigInt`), with no Node built-ins, so it runs on Node.js 22.12+, Bun, Deno and edge runtimes. Only reading a certificate file needs a file system; pass the PEM text instead on edge runtimes.
 
 ## Limits
 
@@ -411,35 +425,65 @@ The package uses only web-standard APIs (`fetch`, `crypto.subtle`, `crypto.rando
 | B2C                | `amount` 10 to 250 000; `remarks` 2–100 characters               |
 | Reversal           | `remarks` 2–100 characters                                       |
 | Phone numbers      | Kenyan Safaricom numbers (`07…`, `01…`); sent as `2547…`/`2541…` |
-| Shortcodes         | 5 to 7 digits                                                    |
+| Shortcodes         | 5 to 7 digits; `partyA` and `receiverParty` accept 5 to 9        |
 | URLs in production | `https` only                                                     |
+
+## Exports
+
+| Export                                                                                                                                      | Kind     | Description                                                              |
+| ------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------ |
+| `createMpesa`                                                                                                                               | function | Creates a client (`Mpesa`) from an `MpesaConfig`.                        |
+| `MemoryTokenStore`                                                                                                                          | class    | The default in-memory `TokenStore`.                                      |
+| `parseStkCallback`, `parseResult`, `parseC2BNotification`, `parseBalances`                                                                  | function | [Callback](#callbacks) parsers.                                          |
+| `c2bValidationResponse`                                                                                                                     | object   | Builds C2B validation replies.                                           |
+| `MpesaError`, `ValidationError`, `AuthError`, `DarajaApiError`, `NetworkError`                                                              | class    | [Errors](#errors).                                                       |
+| `Mpesa`, `MpesaConfig`, `Environment`, `Initiator`                                                                                          | type     | The client, its [configuration](#configuration) and credentials.         |
+| `TokenStore`, `CachedToken`                                                                                                                 | type     | The [token store](#token-store) interface and its value.                 |
+| `StkPushApi`, `StkPushInput`, `StkPushResponse`, `StkQueryInput`, `StkQueryResponse`                                                        | type     | [M-Pesa Express](#m-pesa-express-stk-push).                              |
+| `C2BApi`, `C2BRegisterInput`, `C2BSimulateInput`, `C2BResponse`                                                                             | type     | [C2B](#customer-to-business-c2b).                                        |
+| `B2CApi`, `B2CInput`, `B2CCommand`                                                                                                          | type     | [B2C](#business-to-customer-b2c); `B2CCommand` is the `commandId` union. |
+| `TransactionStatusApi`, `TransactionStatusInput`                                                                                            | type     | [Transaction Status](#transaction-status).                               |
+| `AccountBalanceApi`, `AccountBalanceInput`                                                                                                  | type     | [Account Balance](#account-balance).                                     |
+| `ReversalApi`, `ReversalInput`                                                                                                              | type     | [Reversal](#reversal).                                                   |
+| `InitiatorResponse`                                                                                                                         | type     | The acknowledgement from the four initiator APIs.                        |
+| `IdentifierType`                                                                                                                            | type     | `'shortcode' \| 'till' \| 'msisdn'`, for `identifierType`.               |
+| `StkCallback`, `StkCallbackMetadata`, `DarajaResult`, `C2BNotification`, `AccountBalanceEntry`, `C2BValidationResponse`, `C2BRejectionCode` | type     | Callback parser results and the validation reply.                        |
+| `ValidationIssue`                                                                                                                           | type     | One entry of `ValidationError.issues`: `{ path, message }`.              |
 
 ## Migrating from 3.x
 
 4.0 is a rewrite for Daraja 3.0. Inputs and outputs are camelCase, credentials are set once on the client, and C2B and B2C use the new endpoints (C2B v2, B2C v3).
 
-| 3.x                                         | 4.x                                                 |
-| ------------------------------------------- | --------------------------------------------------- |
-| `new Mpesa(credentials, environment)`       | `createMpesa({ environment, ... })`                 |
-| `credentials.clientKey`                     | `consumerKey`                                       |
-| `credentials.clientSecret`                  | `consumerSecret`                                    |
-| `credentials.initiatorPassword`             | `initiator.password`                                |
-| `credentials.certificatePath` (a file path) | `initiator.certificate` (the PEM text or DER bytes) |
-| `credentials.securityCredential`            | `initiator.securityCredential`                      |
-| `Initiator` on each call                    | `initiator.name`, set once                          |
-| `passKey` on each STK call                  | `passkey`, set once                                 |
-| `lipaNaMpesaOnline(...)`                    | `stkPush.send(...)`                                 |
-| `lipaNaMpesaQuery(...)`                     | `stkPush.query(...)`                                |
-| `c2bRegister(...)`                          | `c2b.registerUrls(...)`                             |
-| `c2bSimulate(...)`                          | `c2b.simulate(...)`                                 |
-| `b2c(...)`                                  | `b2c.pay(...)`                                      |
-| `accountBalance(...)`                       | `accountBalance.query(...)`                         |
-| `transactionStatus(...)`                    | `transactionStatus.query(...)`                      |
-| `reversal(...)`                             | `reversal.request(...)`                             |
-| `b2b(...)`                                  | Removed (deprecated by Safaricom)                   |
-| Daraja's raw response                       | camelCase fields, with Daraja's body in `raw`       |
-| Bundled certificates                        | None; pass your own, or a `securityCredential`      |
-| `require('mpesa-api')`                      | ESM `import` only; stay on 3.x for CommonJS         |
+| 3.x                                                             | 4.x                                                 |
+| --------------------------------------------------------------- | --------------------------------------------------- |
+| `new Mpesa(credentials, environment)`                           | `createMpesa({ environment, ... })`                 |
+| `credentials.clientKey`                                         | `consumerKey`                                       |
+| `credentials.clientSecret`                                      | `consumerSecret`                                    |
+| `credentials.initiatorPassword`                                 | `initiator.password`                                |
+| `credentials.certificatePath` (a file path)                     | `initiator.certificate` (the PEM text or DER bytes) |
+| `credentials.securityCredential`                                | `initiator.securityCredential`                      |
+| `Initiator` on each call                                        | `initiator.name`, set once                          |
+| `passKey` on each STK call                                      | `passkey`, set once                                 |
+| `lipaNaMpesaOnline(...)`                                        | `stkPush.send(...)`                                 |
+| `lipaNaMpesaQuery(...)`                                         | `stkPush.query(...)`                                |
+| `c2bRegister(...)`                                              | `c2b.registerUrls(...)`                             |
+| `c2bSimulate(...)`                                              | `c2b.simulate(...)`                                 |
+| `b2c(...)`                                                      | `b2c.pay(...)`                                      |
+| `accountBalance(...)`                                           | `accountBalance.query(...)`                         |
+| `transactionStatus(...)`                                        | `transactionStatus.query(...)`                      |
+| `reversal(...)`                                                 | `reversal.request(...)`                             |
+| B2B (listed as deprecated in the 3.x README, never implemented) | Not supported                                       |
+| Daraja's raw response                                           | camelCase fields, with Daraja's body in `raw`       |
+| Bundled certificates                                            | None; pass your own, or a `securityCredential`      |
+| `require('mpesa-api')`                                          | ESM `import` only; stay on 3.x for CommonJS         |
+
+Behaviour changes on the wire:
+
+- B2C sends `Occassion` (the Daraja 3.0 spelling) instead of `Occasion`, and adds `OriginatorConversationID`.
+- Reversal's `RecieverIdentifierType` is always `"11"` (3.x defaulted to `"4"`), and Reversal no longer sends `Occasion`.
+- B2C and Reversal `remarks` are required, 2 to 100 characters. 3.x defaulted B2C `Remarks` to `"account"`.
+- `initiator` is optional; it's only needed for B2C, Transaction Status, Account Balance and Reversal. 3.x required `initiatorPassword` or `securityCredential` for every client.
+- C2B simulate no longer defaults `BillRefNumber` to `"account"`; it's required for paybill.
 
 Field names change from Daraja's PascalCase to camelCase; each API's table above lists the mapping. Derived fields (`CommandID` for Transaction Status, Account Balance and Reversal, `IdentifierType`, STK `Password` and `Timestamp`) are filled in for you. New in 4.x: the callback parsers, typed errors, input validation, a pluggable token store, and B2C's `OriginatorConversationID`.
 

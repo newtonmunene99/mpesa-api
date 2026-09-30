@@ -55,7 +55,7 @@ export async function quickStart(): Promise<void> {
     type: 'paybill',
     amount: 1,
     phoneNumber: '0708374149',
-    callbackUrl: 'https://example.com/mpesa/stk',
+    callbackUrl: 'https://example.com/payments/stk',
     accountReference: 'INV-001',
   });
   console.log(checkoutRequestId);
@@ -106,7 +106,7 @@ export async function stkPush(mpesa: Mpesa): Promise<void> {
     type: 'paybill',
     amount: 100,
     phoneNumber: '0712345678',
-    callbackUrl: 'https://example.com/mpesa/stk',
+    callbackUrl: 'https://example.com/payments/stk',
     accountReference: 'INV-001',
     description: 'Invoice 001',
   });
@@ -122,8 +122,8 @@ export async function stkPush(mpesa: Mpesa): Promise<void> {
 export async function c2b(mpesa: Mpesa): Promise<void> {
   await mpesa.c2b.registerUrls({
     shortCode: 600984,
-    confirmationUrl: 'https://example.com/mpesa/c2b/confirmation',
-    validationUrl: 'https://example.com/mpesa/c2b/validation',
+    confirmationUrl: 'https://example.com/payments/c2b/confirmation',
+    validationUrl: 'https://example.com/payments/c2b/validation',
     defaultAction: 'Completed',
   });
 
@@ -145,11 +145,10 @@ export async function b2c(mpesa: Mpesa): Promise<void> {
     shortCode: 600999,
     phoneNumber: '0712345678',
     remarks: 'Refund for order 42',
-    resultUrl: 'https://example.com/mpesa/b2c/result',
-    queueTimeoutUrl: 'https://example.com/mpesa/b2c/timeout',
+    resultUrl: 'https://example.com/payments/b2c/result',
+    queueTimeoutUrl: 'https://example.com/payments/b2c/timeout',
   });
-  // Store this before anything else: it identifies the payment in the result callback
-  // and in Transaction Status queries.
+  // Store this: it identifies the payment in the result and in status queries.
   console.log(payment.originatorConversationId);
 }
 
@@ -158,8 +157,8 @@ export async function transactionStatus(mpesa: Mpesa): Promise<void> {
   await mpesa.transactionStatus.query({
     originalConversationId: 'the ID returned by b2c.pay',
     partyA: 600999,
-    resultUrl: 'https://example.com/mpesa/status/result',
-    queueTimeoutUrl: 'https://example.com/mpesa/status/timeout',
+    resultUrl: 'https://example.com/payments/status/result',
+    queueTimeoutUrl: 'https://example.com/payments/status/timeout',
   });
 }
 
@@ -167,8 +166,8 @@ export async function transactionStatus(mpesa: Mpesa): Promise<void> {
 export async function accountBalance(mpesa: Mpesa): Promise<void> {
   await mpesa.accountBalance.query({
     partyA: 600999,
-    resultUrl: 'https://example.com/mpesa/balance/result',
-    queueTimeoutUrl: 'https://example.com/mpesa/balance/timeout',
+    resultUrl: 'https://example.com/payments/balance/result',
+    queueTimeoutUrl: 'https://example.com/payments/balance/timeout',
   });
 }
 
@@ -179,14 +178,14 @@ export async function reversal(mpesa: Mpesa): Promise<void> {
     amount: 100,
     receiverParty: 600984,
     remarks: 'Paid twice',
-    resultUrl: 'https://example.com/mpesa/reversal/result',
-    queueTimeoutUrl: 'https://example.com/mpesa/reversal/timeout',
+    resultUrl: 'https://example.com/payments/reversal/result',
+    queueTimeoutUrl: 'https://example.com/payments/reversal/timeout',
   });
 }
 
 // Callbacks: Express
 export function expressCallbacks(): void {
-  app.post('/mpesa/stk', (req, res) => {
+  app.post('/payments/stk', (req, res) => {
     const callback = parseStkCallback(req.body);
     if (callback.ok) {
       void savePayment(callback.checkoutRequestId, callback.metadata?.mpesaReceiptNumber);
@@ -194,7 +193,7 @@ export function expressCallbacks(): void {
     res.json({ ResultCode: 0, ResultDesc: 'Accepted' });
   });
 
-  app.post('/mpesa/c2b/validation', (req, res) => {
+  app.post('/payments/c2b/validation', (req, res) => {
     const payment = parseC2BNotification(req.body);
     res.json(
       accountExists(payment.billRefNumber)
@@ -203,16 +202,18 @@ export function expressCallbacks(): void {
     );
   });
 
-  app.post('/mpesa/balance/result', (req, res) => {
+  app.post('/payments/balance/result', (req, res) => {
     const result = parseResult(req.body);
-    if (result.ok) console.log(parseBalances(result.parameters.AccountBalance));
+    const packed = result.parameters.AccountBalance;
+    if (result.ok && typeof packed === 'string') console.log(parseBalances(packed));
     res.json({ ResultCode: 0, ResultDesc: 'Accepted' });
   });
 }
 
 // Callbacks: Hono and other fetch-based runtimes
 export function honoCallbacks(): void {
-  hono.post('/mpesa/b2c/result', async (c) => {
+  const app = hono;
+  app.post('/payments/b2c/result', async (c) => {
     const result = parseResult(await c.req.json());
     if (!result.ok) console.warn(result.resultCode, result.resultDesc);
     return c.json({ ResultCode: 0, ResultDesc: 'Accepted' });
@@ -224,8 +225,8 @@ export async function errors(mpesa: Mpesa): Promise<void> {
   try {
     await mpesa.accountBalance.query({
       partyA: 600999,
-      resultUrl: 'https://example.com/mpesa/balance/result',
-      queueTimeoutUrl: 'https://example.com/mpesa/balance/timeout',
+      resultUrl: 'https://example.com/payments/balance/result',
+      queueTimeoutUrl: 'https://example.com/payments/balance/timeout',
     });
   } catch (error) {
     if (error instanceof ValidationError) console.error(error.issues);
@@ -238,7 +239,7 @@ export async function errors(mpesa: Mpesa): Promise<void> {
 
 // Token store: Redis
 export function redisTokenStore(): TokenStore {
-  return {
+  const tokenStore: TokenStore = {
     async get(key) {
       const value = await redis.get(key);
       return value ? (JSON.parse(value) as CachedToken) : undefined;
@@ -247,4 +248,5 @@ export function redisTokenStore(): TokenStore {
       await redis.set(key, JSON.stringify(token), 'PXAT', token.expiresAt);
     },
   };
+  return tokenStore;
 }
