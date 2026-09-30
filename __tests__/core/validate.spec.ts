@@ -48,26 +48,30 @@ describe('checks', () => {
   });
 
   test('checkLength enforces bounds and required', () => {
-    expect(collect((i) => checkLength(i, 'accountReference', 'x'.repeat(12), 1, 12))).toEqual([]);
-    expect(collect((i) => checkLength(i, 'accountReference', 'x'.repeat(13), 1, 12))).toEqual([
-      'accountReference: must be at most 12 characters',
-    ]);
-    expect(collect((i) => checkLength(i, 'remarks', 'x', 2, 100))).toEqual([
+    expect(
+      collect((i) => checkLength(i, 'accountReference', 'x'.repeat(12), { min: 1, max: 12 })),
+    ).toEqual([]);
+    expect(
+      collect((i) => checkLength(i, 'accountReference', 'x'.repeat(13), { min: 1, max: 12 })),
+    ).toEqual(['accountReference: must be at most 12 characters']);
+    expect(collect((i) => checkLength(i, 'remarks', 'x', { min: 2, max: 100 }))).toEqual([
       'remarks: must be at least 2 characters',
     ]);
-    expect(collect((i) => checkLength(i, 'remarks', undefined, 2, 100, true))).toEqual([
-      'remarks: is required',
-    ]);
-    expect(collect((i) => checkLength(i, 'occasion', undefined, 1, 100))).toEqual([]);
+    expect(
+      collect((i) => checkLength(i, 'remarks', undefined, { min: 2, max: 100, required: true })),
+    ).toEqual(['remarks: is required']);
+    expect(collect((i) => checkLength(i, 'occasion', undefined, { min: 1, max: 100 }))).toEqual([]);
   });
 
   test('checkInt enforces integers and range', () => {
-    expect(collect((i) => checkInt(i, 'amount', 10, 10, 250_000))).toEqual([]);
-    expect(collect((i) => checkInt(i, 'amount', 1.5, 1))).toEqual(['amount: must be an integer']);
-    expect(collect((i) => checkInt(i, 'amount', 9, 10, 250_000))).toEqual([
+    expect(collect((i) => checkInt(i, 'amount', 10, { min: 10, max: 250_000 }))).toEqual([]);
+    expect(collect((i) => checkInt(i, 'amount', 1.5, { min: 1 }))).toEqual([
+      'amount: must be an integer',
+    ]);
+    expect(collect((i) => checkInt(i, 'amount', 9, { min: 10, max: 250_000 }))).toEqual([
       'amount: must be at least 10',
     ]);
-    expect(collect((i) => checkInt(i, 'amount', 250_001, 10, 250_000))).toEqual([
+    expect(collect((i) => checkInt(i, 'amount', 250_001, { min: 10, max: 250_000 }))).toEqual([
       'amount: must be at most 250000',
     ]);
   });

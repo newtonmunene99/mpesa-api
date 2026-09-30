@@ -27,11 +27,11 @@ describe('parseC2BNotification', () => {
       transactionType: 'Pay Bill',
       transId: 'RKL51ZDR4F',
       transTime: new Date('2023-11-21T09:13:25Z'),
-      transAmount: 5,
+      transAmountCents: 500,
       businessShortCode: '600966',
       billRefNumber: 'Sample Transaction',
       invoiceNumber: '',
-      orgAccountBalance: 25,
+      orgAccountBalanceCents: 2500,
       thirdPartyTransId: '',
       msisdn: '2547 ***** 126',
       firstName: 'NICHOLAS',
@@ -41,10 +41,10 @@ describe('parseC2BNotification', () => {
     });
   });
 
-  test('omits orgAccountBalance when it is blank, as on validation requests', () => {
+  test('omits orgAccountBalanceCents when it is blank, as on validation requests', () => {
     const result = parseC2BNotification({ ...fixture(), OrgAccountBalance: '' });
 
-    expect(result).not.toHaveProperty('orgAccountBalance');
+    expect(result).not.toHaveProperty('orgAccountBalanceCents');
   });
 
   test('accepts numbers where Daraja usually sends strings', () => {
@@ -55,7 +55,7 @@ describe('parseC2BNotification', () => {
       BusinessShortCode: 600966,
     });
 
-    expect(result).toMatchObject({ transAmount: 5, businessShortCode: '600966' });
+    expect(result).toMatchObject({ transAmountCents: 500, businessShortCode: '600966' });
     expect(result.transTime).toEqual(new Date('2023-11-21T09:13:25Z'));
   });
 
@@ -97,7 +97,7 @@ describe('parseC2BNotification', () => {
 
   test('omits a whitespace-only OrgAccountBalance', () => {
     expect(parseC2BNotification({ ...fixture(), OrgAccountBalance: ' ' })).not.toHaveProperty(
-      'orgAccountBalance',
+      'orgAccountBalanceCents',
     );
   });
 });

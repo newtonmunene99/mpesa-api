@@ -19,7 +19,7 @@ describe('parseStkCallback', () => {
       resultDesc: 'The service request is processed successfully.',
       ok: true,
       metadata: {
-        amount: 1,
+        amountCents: 100,
         mpesaReceiptNumber: 'NLJ7RT61SV',
         transactionDate: new Date('2019-12-19T07:21:15Z'),
         phoneNumber: '254708374149',
@@ -61,7 +61,7 @@ describe('parseStkCallback', () => {
 
     expect(result.resultCode).toBe(0);
     expect(result.ok).toBe(true);
-    expect(result.metadata).toEqual({ amount: 10.5, mpesaReceiptNumber: 'ABC' });
+    expect(result.metadata).toEqual({ amountCents: 1050, mpesaReceiptNumber: 'ABC' });
   });
 
   test('reads a Balance value when present', () => {
@@ -75,7 +75,7 @@ describe('parseStkCallback', () => {
       }),
     );
 
-    expect(result.metadata).toEqual({ balance: 250 });
+    expect(result.metadata).toEqual({ balanceCents: 25000 });
   });
 
   test('accepts a single metadata item that is not wrapped in an array', () => {
@@ -89,7 +89,7 @@ describe('parseStkCallback', () => {
       }),
     );
 
-    expect(result.metadata).toEqual({ amount: 5 });
+    expect(result.metadata).toEqual({ amountCents: 500 });
   });
 
   test.each([
@@ -186,6 +186,33 @@ describe('parseStkCallback hostile and odd input', () => {
 
     expect(result.resultCode).toBe('00');
     expect(result.ok).toBe(false);
+  });
+
+  test.each([
+    ['0.29', 29],
+    ['1.1', 110],
+    [0.29, 29],
+    [4.35, 435],
+    [-1540, -154000],
+  ])('converts %j to %i cents exactly', (value, cents) => {
+    const result = parseStkCallback(
+      callback({ ...base, CallbackMetadata: { Item: [{ Name: 'Amount', Value: value }] } }),
+    );
+
+    expect(result.metadata).toEqual({ amountCents: cents });
+  });
+
+  test.each([['1.005'], [1.005]])('rejects %j, which has more than 2 decimal places', (value) => {
+    expect(
+      parseIssues(
+        callback({ ...base, CallbackMetadata: { Item: [{ Name: 'Amount', Value: value }] } }),
+      ),
+    ).toEqual([
+      {
+        path: 'Body.stkCallback.CallbackMetadata.Amount',
+        message: 'must have at most 2 decimal places',
+      },
+    ]);
   });
 
   test.each([

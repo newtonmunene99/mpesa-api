@@ -18,14 +18,24 @@ export function formatTimestamp(date: Date): string {
   );
 }
 
+/** A calendar date and time as written, with a 1-based month. */
+interface DateParts {
+  year: number;
+  month: number;
+  day: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
+/**
+ * Converts EAT date parts to a `Date`. `Date.UTC` silently rolls impossible dates over
+ * (31 February becomes 3 March), so the parts are read back and compared; a mismatch, or an
+ * out-of-range time, throws `ValidationError` quoting `value`.
+ */
 function fromEatParts(
   value: string,
-  year: number,
-  month: number,
-  day: number,
-  hours: number,
-  minutes: number,
-  seconds: number,
+  { year, month, day, hours, minutes, seconds }: DateParts,
 ): Date {
   const utc = Date.UTC(year, month - 1, day, hours, minutes, seconds);
   const check = new Date(utc);
@@ -44,7 +54,10 @@ function fromEatParts(
   return new Date(utc - EAT_OFFSET_MS);
 }
 
-/** Parses Daraja's `YYYYMMDDHHmmss` (EAT), sent as a string or a number. */
+/**
+ * Parses Daraja's `YYYYMMDDHHmmss` (EAT), sent as a string or a number. Throws
+ * `ValidationError` for any other shape or an impossible date.
+ */
 export function parseTimestamp(value: string | number): Date {
   const text = String(value);
   const m = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/.exec(text);
@@ -53,11 +66,14 @@ export function parseTimestamp(value: string | number): Date {
       { path: 'value', message: `invalid timestamp "${text}"` },
     ]);
   }
-  const [, y, mo, d, h, mi, s] = m.map(Number);
-  return fromEatParts(text, y!, mo!, d!, h!, mi!, s!);
+  const [, year, month, day, hours, minutes, seconds] = m.map(Number);
+  return fromEatParts(text, { year, month, day, hours, minutes, seconds } as DateParts);
 }
 
-/** Parses B2C's `dd.MM.yyyy HH:mm:ss` (EAT), as in TransactionCompletedDateTime. */
+/**
+ * Parses B2C's `dd.MM.yyyy HH:mm:ss` (EAT), as in TransactionCompletedDateTime. Throws
+ * `ValidationError` for any other shape or an impossible date.
+ */
 export function parseB2CDateTime(value: string): Date {
   const m = /^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}):(\d{2})$/.exec(value);
   if (!m) {
@@ -65,6 +81,6 @@ export function parseB2CDateTime(value: string): Date {
       { path: 'value', message: `invalid timestamp "${value}"` },
     ]);
   }
-  const [, d, mo, y, h, mi, s] = m.map(Number);
-  return fromEatParts(value, y!, mo!, d!, h!, mi!, s!);
+  const [, day, month, year, hours, minutes, seconds] = m.map(Number);
+  return fromEatParts(value, { year, month, day, hours, minutes, seconds } as DateParts);
 }

@@ -1,33 +1,20 @@
+import { str } from '../core/coerce';
 import { checkPhone, type Issues } from '../core/validate';
-
-/** Reads a Daraja value as text: strings as-is, numbers and booleans stringified, else ''. */
-export const str = (value: unknown): string =>
-  typeof value === 'string'
-    ? value
-    : typeof value === 'number' || typeof value === 'boolean'
-      ? String(value)
-      : '';
-
-/**
- * Canonical integer strings ("0", "2001") become numbers; anything else, such as "R000002",
- * "00" or an integer too large to represent exactly, stays a string.
- */
-export const code = (value: unknown): number | string => {
-  const text = str(value);
-  const n = Number(text);
-  return /^-?\d+$/.test(text) && Number.isSafeInteger(n) && String(n) === text ? n : text;
-};
 
 /** The acknowledgement returned by B2C, Transaction Status, Account Balance and Reversal. */
 export interface InitiatorResponse {
+  /** M-Pesa's ID for the request; the result callback carries it too. */
   conversationId: string;
+  /** The ID sent with the request (for B2C, yours), echoed by Daraja and in the result. */
   originatorConversationId: string;
+  /** "0" when Daraja accepted the request. The outcome arrives later at `resultUrl`. */
   responseCode: string;
   responseDescription: string;
   /** Daraja's response body, unmodified. */
   raw: unknown;
 }
 
+/** Maps Daraja's acknowledgement body to `InitiatorResponse`, keeping the body in `raw`. */
 export function mapInitiatorResponse(raw: Record<string, unknown>): InitiatorResponse {
   return {
     conversationId: str(raw.ConversationID),
@@ -38,6 +25,7 @@ export function mapInitiatorResponse(raw: Record<string, unknown>): InitiatorRes
   };
 }
 
+/** What kind of party a number is: an organisation shortcode, a till number or a phone number. */
 export type IdentifierType = 'shortcode' | 'till' | 'msisdn';
 
 const IDENTIFIER_CODES: Record<IdentifierType, string> = {
@@ -46,12 +34,18 @@ const IDENTIFIER_CODES: Record<IdentifierType, string> = {
   shortcode: '4',
 };
 
-/** Daraja's `IdentifierType` code: shortcode → '4', till → '2', msisdn → '1'. */
+/**
+ * Daraja's `IdentifierType` code: shortcode → '4', till → '2', msisdn → '1'. `undefined`
+ * means shortcode. Returns `undefined` for an unknown type, which `checkIdentifierType` reports.
+ */
 export function identifierTypeCode(type: IdentifierType | undefined): string | undefined {
   return IDENTIFIER_CODES[type ?? 'shortcode'];
 }
 
-/** Validates an organisation or customer party and returns the value to send. */
+/**
+ * Validates a party and returns the value to send: a phone number normalised to `2547…` for
+ * `msisdn`, otherwise the shortcode unchanged, which must be 5 to 9 digits.
+ */
 export function checkParty(
   issues: Issues,
   path: string,
@@ -63,6 +57,7 @@ export function checkParty(
   return value;
 }
 
+/** Reports an `identifierType` outside `IdentifierType`, as plain JavaScript callers can pass one. */
 export function checkIdentifierType(issues: Issues, type: IdentifierType | undefined): void {
   if (identifierTypeCode(type) === undefined) {
     issues.add('identifierType', "must be 'shortcode', 'till' or 'msisdn'");

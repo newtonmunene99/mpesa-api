@@ -1,10 +1,17 @@
+/** One request the SDK made. */
 export interface RecordedCall {
   url: string;
   method: string;
+  /** Header names are lower-cased, as `Headers` normalises them. */
   headers: Record<string, string>;
+  /** The JSON body parsed back to a value; a non-JSON string body is kept as text. */
   body?: unknown;
 }
 
+/**
+ * A scripted reply: a status and body, an `Error` to make fetch reject (a network failure),
+ * or a function for anything else, such as a response that never settles.
+ */
 export type FakeResponse =
   | { status: number; body: unknown }
   | Error
@@ -48,6 +55,7 @@ export function fakeFetch(responses: FakeResponse[]): {
   return { fetch: fetchImpl as typeof fetch, calls };
 }
 
+/** Parses a request body as JSON, keeping it as text when it isn't JSON. */
 function tryParse(text: string): unknown {
   try {
     return JSON.parse(text);

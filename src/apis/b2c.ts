@@ -1,17 +1,12 @@
 import type { Context } from '../client';
-import { MpesaError } from '../core/errors';
-import {
-  checkInt,
-  checkLength,
-  checkPhone,
-  checkShortCode,
-  checkUrl,
-  Issues,
-} from '../core/validate';
-import { type InitiatorResponse, mapInitiatorResponse } from './shared';
+import { checkInt, checkLength, checkPhone, checkShortCode } from '../core/validate';
+import { initiatorRequest } from './initiator';
+import type { InitiatorResponse } from './shared';
 
+/** The kind of B2C payment (`CommandID`). Promotion payments send a congratulatory SMS. */
 export type B2CCommand = 'SalaryPayment' | 'BusinessPayment' | 'PromotionPayment';
 
+/** Input for `b2c.pay`. */
 export interface B2CInput {
   /**
    * Your unique ID for this payment, used by Daraja to reject duplicates
@@ -36,6 +31,13 @@ export interface B2CInput {
   occasion?: string;
 }
 
+/**
+ * Business to Customer (B2C) payments.
+ *
+ * Methods throw `ValidationError` before sending when the input or client config is invalid,
+ * and `DarajaApiError`, `AuthError` or `NetworkError` when the request fails. Errors from the
+ * request carry `originatorConversationId`.
+ */
 export interface B2CApi {
   /**
    * Sends money from a B2C shortcode to a customer. The acknowledgement only confirms receipt;
@@ -48,51 +50,41 @@ export interface B2CApi {
 const PATH = '/mpesa/b2c/v3/paymentrequest';
 const COMMANDS: readonly B2CCommand[] = ['SalaryPayment', 'BusinessPayment', 'PromotionPayment'];
 
-async function pay(ctx: Context, input: B2CInput): Promise<InitiatorResponse> {
-  const issues = new Issues();
-  const production = ctx.environment === 'production';
-  if (!ctx.config.initiator) issues.add('initiator', 'is required');
-  if (!COMMANDS.includes(input.commandId)) {
-    issues.add('commandId', "must be 'SalaryPayment', 'BusinessPayment' or 'PromotionPayment'");
-  }
-  checkInt(issues, 'amount', input.amount, 10, 250_000);
-  checkShortCode(issues, 'shortCode', input.shortCode);
-  const phone = checkPhone(issues, 'phoneNumber', input.phoneNumber);
-  checkLength(issues, 'remarks', input.remarks, 2, 100, true);
-  checkUrl(issues, 'resultUrl', input.resultUrl, { production });
-  checkUrl(issues, 'queueTimeoutUrl', input.queueTimeoutUrl, { production });
-  checkLength(issues, 'occasion', input.occasion, 1, 100);
-  if (input.originatorConversationId !== undefined) {
-    checkLength(issues, 'originatorConversationId', input.originatorConversationId, 1, 100, true);
-  }
-  issues.throwIfAny('b2c.pay');
-
-  const originatorConversationId = input.originatorConversationId || crypto.randomUUID();
-  const { name, credential } = await ctx.securityCredential('b2c.pay');
-  let raw: Record<string, unknown>;
-  try {
-    raw = await ctx.post<Record<string, unknown>>(PATH, {
-      OriginatorConversationID: originatorConversationId,
-      InitiatorName: name,
-      SecurityCredential: credential,
-      CommandID: input.commandId,
-      Amount: input.amount,
-      PartyA: input.shortCode,
-      PartyB: phone,
-      Remarks: input.remarks,
-      QueueTimeOutURL: input.queueTimeoutUrl,
-      ResultURL: input.resultUrl,
-      ...(input.occasion ? { Occassion: input.occasion } : {}),
-    });
-  } catch (error) {
-    if (error instanceof MpesaError) error.originatorConversationId = originatorConversationId;
-    throw error;
-  }
-  const response = mapInitiatorResponse(raw);
-  return {
-    ...response,
-    originatorConversationId: response.originatorConversationId || originatorConversationId,
-  };
+function pay(ctx: Context, input: B2CInput): Promise<InitiatorResponse> {
+  return initiatorRequest(ctx, {
+    api: 'b2c.pay',
+    path: PATH,
+    resultUrl: input.resultUrl,
+    queueTimeoutUrl: input.queueTimeoutUrl,
+    initiatorField: 'InitiatorName',
+    // An empty ID is reported by the check below; anything else is sent as given.
+    originatorConversationId: input.originatorConversationId || crypto.randomUUID(),
+    fields: (issues) => {
+      if (!COMMANDS.includes(input.commandId)) {
+        issues.add('commandId', "must be 'SalaryPayment', 'BusinessPayment' or 'PromotionPayment'");
+      }
+      checkInt(issues, 'amount', input.amount, { min: 10, max: 250_000 });
+      checkShortCode(issues, 'shortCode', input.shortCode);
+      const phone = checkPhone(issues, 'phoneNumber', input.phoneNumber);
+      checkLength(issues, 'remarks', input.remarks, { min: 2, max: 100, required: true });
+      checkLength(issues, 'occasion', input.occasion, { min: 1, max: 100 });
+      if (input.originatorConversationId !== undefined) {
+        checkLength(issues, 'originatorConversationId', input.originatorConversationId, {
+          min: 1,
+          max: 100,
+          required: true,
+        });
+      }
+      return {
+        CommandID: input.commandId,
+        Amount: input.amount,
+        PartyA: input.shortCode,
+        PartyB: phone,
+        Remarks: input.remarks,
+        ...(input.occasion ? { Occassion: input.occasion } : {}),
+      };
+    },
+  });
 }
 
 /** Business to Customer (B2C) payments. */

@@ -1,6 +1,6 @@
 import type { Context } from '../client';
 import { formatTimestamp } from '../core/time';
-import { code, str } from './shared';
+import { code, str } from '../core/coerce';
 import {
   checkInt,
   checkLength,
@@ -10,6 +10,7 @@ import {
   Issues,
 } from '../core/validate';
 
+/** Input for `stkPush.send`. */
 export interface StkPushInput {
   /** The paybill or HO/store number that receives the payment (`BusinessShortCode`). */
   shortCode: number;
@@ -29,16 +30,21 @@ export interface StkPushInput {
   description?: string;
 }
 
+/** Daraja's acknowledgement of an STK push. The payment's outcome arrives at `callbackUrl`. */
 export interface StkPushResponse {
   merchantRequestId: string;
+  /** Identifies the push in `stkPush.query` and in the callback. */
   checkoutRequestId: string;
+  /** "0" when Daraja accepted the push. */
   responseCode: string;
   responseDescription: string;
+  /** A message suitable for showing to the customer. */
   customerMessage: string;
   /** Daraja's response body, unmodified. */
   raw: unknown;
 }
 
+/** Input for `stkPush.query`. */
 export interface StkQueryInput {
   /** The shortcode used for the push (`BusinessShortCode`). */
   shortCode: number;
@@ -46,6 +52,7 @@ export interface StkQueryInput {
   checkoutRequestId: string;
 }
 
+/** The state of an STK push, as reported by `stkPush.query`. */
 export interface StkQueryResponse {
   merchantRequestId: string;
   checkoutRequestId: string;
@@ -58,10 +65,20 @@ export interface StkQueryResponse {
   raw: unknown;
 }
 
+/**
+ * M-Pesa Express (STK push).
+ *
+ * Methods throw `ValidationError` before sending when the input or client config is invalid,
+ * and `DarajaApiError`, `AuthError` or `NetworkError` when the request fails.
+ */
 export interface StkPushApi {
   /** Sends an M-Pesa Express (STK push) payment prompt to the customer's phone. */
   send(input: StkPushInput): Promise<StkPushResponse>;
-  /** Checks the outcome of an STK push. */
+  /**
+   * Checks the outcome of an STK push. Queried too soon after the push (under about 30
+   * seconds in the sandbox), Daraja answers HTTP 500 `500.001.1001` "The transaction does not
+   * Exist", which throws `DarajaApiError`; retry later or rely on the callback.
+   */
   query(input: StkQueryInput): Promise<StkQueryResponse>;
 }
 
@@ -70,6 +87,10 @@ const PATHS = {
   query: '/mpesa/stkpushquery/v1/query',
 } as const;
 
+/**
+ * The `Password` and `Timestamp` pair both STK calls need: base64 of shortcode, passkey and
+ * timestamp. The timestamp is EAT, and Daraja checks the password against it.
+ */
 function password(
   ctx: Context,
   shortCode: number,
@@ -88,12 +109,16 @@ async function send(ctx: Context, input: StkPushInput): Promise<StkPushResponse>
   if (input.type !== 'paybill' && input.type !== 'till') {
     issues.add('type', "must be 'paybill' or 'till'");
   }
-  checkInt(issues, 'amount', input.amount, 1);
+  checkInt(issues, 'amount', input.amount, { min: 1 });
   const phone = checkPhone(issues, 'phoneNumber', input.phoneNumber);
   if (input.partyB !== undefined) checkShortCode(issues, 'partyB', input.partyB);
   checkUrl(issues, 'callbackUrl', input.callbackUrl, { production });
-  checkLength(issues, 'accountReference', input.accountReference, 1, 12, true);
-  checkLength(issues, 'description', input.description, 1, 13);
+  checkLength(issues, 'accountReference', input.accountReference, {
+    min: 1,
+    max: 12,
+    required: true,
+  });
+  checkLength(issues, 'description', input.description, { min: 1, max: 13 });
   issues.throwIfAny('stkPush.send');
 
   const raw = await ctx.post<Record<string, unknown>>(PATHS.send, {
@@ -124,7 +149,11 @@ async function query(ctx: Context, input: StkQueryInput): Promise<StkQueryRespon
   const passkey = ctx.config.passkey;
   if (!passkey) issues.add('passkey', 'is required in the client config for stkPush');
   checkShortCode(issues, 'shortCode', input.shortCode);
-  checkLength(issues, 'checkoutRequestId', input.checkoutRequestId, 1, 100, true);
+  checkLength(issues, 'checkoutRequestId', input.checkoutRequestId, {
+    min: 1,
+    max: 100,
+    required: true,
+  });
   issues.throwIfAny('stkPush.query');
 
   const raw = await ctx.post<Record<string, unknown>>(PATHS.query, {

@@ -1,9 +1,11 @@
 import { MpesaError, ValidationError } from './errors';
 
+/** Fills and returns `bytes` with random values. Tests inject a deterministic one. */
 export type RandomFill = (bytes: Uint8Array<ArrayBuffer>) => Uint8Array<ArrayBuffer>;
 
 const defaultRandom: RandomFill = (bytes) => crypto.getRandomValues(bytes);
 
+/** The key's length in bytes (`k` in RFC 8017): the modulus rounded up to whole bytes. */
 function byteLength(n: bigint): number {
   return Math.ceil(n.toString(16).length / 2);
 }
@@ -13,12 +15,17 @@ export function maxPlaintextBytes(key: { n: bigint }): number {
   return byteLength(key.n) - 11;
 }
 
+/** Reads bytes as a big-endian unsigned integer (OS2IP in RFC 8017). */
 function bytesToBigInt(bytes: Uint8Array): bigint {
   let hex = '';
   for (const b of bytes) hex += b.toString(16).padStart(2, '0');
   return BigInt(`0x${hex}`);
 }
 
+/**
+ * Writes an integer as exactly `length` big-endian bytes, left-padded with zeros (I2OSP in
+ * RFC 8017). The ciphertext must be `k` bytes even when its leading bytes are zero.
+ */
 function bigIntToBytes(value: bigint, length: number): Uint8Array {
   const hex = value.toString(16).padStart(length * 2, '0');
   const out = new Uint8Array(length);
@@ -26,6 +33,10 @@ function bigIntToBytes(value: bigint, length: number): Uint8Array {
   return out;
 }
 
+/**
+ * `base ** exponent % modulus` by square-and-multiply. It isn't constant-time, which is fine
+ * here: the exponent is the certificate's public exponent, not a secret.
+ */
 function modPow(base: bigint, exponent: bigint, modulus: bigint): bigint {
   let result = 1n;
   let b = base % modulus;
@@ -58,7 +69,11 @@ function toBase64(bytes: Uint8Array): string {
 
 /**
  * Encrypts `plaintext` with RSAES-PKCS1-v1_5 (RFC 8017 §7.2.1), as Daraja requires for the
- * initiator security credential, and returns it base64-encoded.
+ * initiator security credential, and returns it base64-encoded. The random padding makes
+ * every call's output different.
+ *
+ * Throws `ValidationError` when `plaintext` is longer than `maxPlaintextBytes(key)`, and
+ * `MpesaError` if `random` keeps returning zeros.
  */
 export function encryptPkcs1v15(
   key: { n: bigint; e: bigint },

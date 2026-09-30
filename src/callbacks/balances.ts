@@ -1,19 +1,30 @@
 import { ValidationError } from '../core/errors';
 import { Issues } from '../core/validate';
-import { readNumber } from './shared';
+import { readCents } from './shared';
 
 /** One account from a packed Daraja balance string. */
 export interface AccountBalanceEntry {
+  /** The account's name, such as "Working Account" or "Utility Account". */
   account: string;
+  /** Usually "KES". */
   currency: string;
-  available: number;
-  uncleared: number;
-  reserved: number;
-  /** The sixth field, which Daraja's docs leave unlabelled. The name is provisional. */
-  unreserved: number;
+  /** The third field: funds available, in cents (KES 700,000.00 is 70000000). */
+  availableCents: number;
+  /** The fourth field: uncleared funds, in cents. */
+  unclearedCents: number;
+  /** The fifth field: reserved funds, in cents. */
+  reservedCents: number;
+  /** The sixth field, in cents. Daraja's docs leave it unlabelled; the name is provisional. */
+  unreservedCents: number;
 }
 
-const AMOUNTS = ['available', 'uncleared', 'reserved', 'unreserved'] as const;
+/** The four amount fields, in the order they appear in each entry, with their issue paths. */
+const AMOUNTS = [
+  ['availableCents', 'available'],
+  ['unclearedCents', 'uncleared'],
+  ['reservedCents', 'reserved'],
+  ['unreservedCents', 'unreserved'],
+] as const;
 
 /**
  * Splits the packed balance string in Account Balance's `AccountBalance` and Reversal's
@@ -40,13 +51,13 @@ export function parseBalances(value: unknown): AccountBalanceEntry[] {
       const entry: AccountBalanceEntry = {
         account: account!,
         currency: currency!,
-        available: 0,
-        uncleared: 0,
-        reserved: 0,
-        unreserved: 0,
+        availableCents: 0,
+        unclearedCents: 0,
+        reservedCents: 0,
+        unreservedCents: 0,
       };
-      AMOUNTS.forEach((name, i) => {
-        entry[name] = readNumber(issues, `[${index}].${name}`, amounts[i]) ?? 0;
+      AMOUNTS.forEach(([field, name], i) => {
+        entry[field] = readCents(issues, `[${index}].${name}`, amounts[i]) ?? 0;
       });
       entries.push(entry);
     });

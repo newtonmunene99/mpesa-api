@@ -41,6 +41,10 @@ function redactScalar(value: unknown): unknown {
   return value;
 }
 
+/**
+ * Returns a deep copy of `value` with secrets dropped and personal data masked, so a sandbox
+ * capture can be committed. Codes, amounts and timestamps are kept, as the tests need them.
+ */
 export function redact(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(redact);
   if (typeof value !== 'object' || value === null) return redactScalar(value);

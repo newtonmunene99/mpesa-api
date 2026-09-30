@@ -85,8 +85,8 @@ describe('reversal.request', () => {
       { path: 'transactionId', message: 'is required' },
       { path: 'amount', message: 'must be at least 1' },
       { path: 'receiverParty', message: 'must be a 5 to 9 digit shortcode' },
-      { path: 'queueTimeoutUrl', message: 'must be an absolute URL' },
       { path: 'remarks', message: 'must be at least 2 characters' },
+      { path: 'queueTimeoutUrl', message: 'must be an absolute URL' },
     ]);
     expect(calls).toHaveLength(0);
   });
