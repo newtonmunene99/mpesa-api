@@ -1,0 +1,3 @@
+apply-sandbox-findings follow-up: B2C result delivery per shortcode on 2026-09-30
+600978 (from the maintainer's .env) and 600992: no result callback. 600997 (docs sample) and 600999 (the portal simulator's B2C PartyA): immediate result, ResultCode 8006 'The security credential is locked.' for the shared testapi initiator, whose password matches the simulator's Safaricom123!!.
+8006 is reported before the credential or payload is validated, so Verification 2 and 5 remain unresolved; unlocking needs Safaricom.
