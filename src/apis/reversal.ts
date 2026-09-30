@@ -42,10 +42,14 @@ function request(ctx: Context, input: ReversalInput): Promise<InitiatorResponse>
     resultUrl: input.resultUrl,
     queueTimeoutUrl: input.queueTimeoutUrl,
     fields: (issues) => {
-      checkLength(issues, 'transactionId', input.transactionId, 1, 20, true);
-      checkInt(issues, 'amount', input.amount, 1);
+      checkLength(issues, 'transactionId', input.transactionId, {
+        min: 1,
+        max: 20,
+        required: true,
+      });
+      checkInt(issues, 'amount', input.amount, { min: 1 });
       checkParty(issues, 'receiverParty', input.receiverParty, 'shortcode');
-      checkLength(issues, 'remarks', input.remarks, 2, 100, true);
+      checkLength(issues, 'remarks', input.remarks, { min: 2, max: 100, required: true });
       return {
         CommandID: 'TransactionReversal',
         TransactionID: input.transactionId,

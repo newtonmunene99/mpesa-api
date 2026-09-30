@@ -18,6 +18,16 @@ export function formatTimestamp(date: Date): string {
   );
 }
 
+/** A calendar date and time as written, with a 1-based month. */
+interface DateParts {
+  year: number;
+  month: number;
+  day: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
 /**
  * Converts EAT date parts to a `Date`. `Date.UTC` silently rolls impossible dates over
  * (31 February becomes 3 March), so the parts are read back and compared; a mismatch, or an
@@ -25,12 +35,7 @@ export function formatTimestamp(date: Date): string {
  */
 function fromEatParts(
   value: string,
-  year: number,
-  month: number,
-  day: number,
-  hours: number,
-  minutes: number,
-  seconds: number,
+  { year, month, day, hours, minutes, seconds }: DateParts,
 ): Date {
   const utc = Date.UTC(year, month - 1, day, hours, minutes, seconds);
   const check = new Date(utc);
@@ -61,8 +66,8 @@ export function parseTimestamp(value: string | number): Date {
       { path: 'value', message: `invalid timestamp "${text}"` },
     ]);
   }
-  const [, y, mo, d, h, mi, s] = m.map(Number);
-  return fromEatParts(text, y!, mo!, d!, h!, mi!, s!);
+  const [, year, month, day, hours, minutes, seconds] = m.map(Number);
+  return fromEatParts(text, { year, month, day, hours, minutes, seconds } as DateParts);
 }
 
 /**
@@ -76,6 +81,6 @@ export function parseB2CDateTime(value: string): Date {
       { path: 'value', message: `invalid timestamp "${value}"` },
     ]);
   }
-  const [, d, mo, y, h, mi, s] = m.map(Number);
-  return fromEatParts(value, y!, mo!, d!, h!, mi!, s!);
+  const [, day, month, year, hours, minutes, seconds] = m.map(Number);
+  return fromEatParts(value, { year, month, day, hours, minutes, seconds } as DateParts);
 }

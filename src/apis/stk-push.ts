@@ -109,12 +109,16 @@ async function send(ctx: Context, input: StkPushInput): Promise<StkPushResponse>
   if (input.type !== 'paybill' && input.type !== 'till') {
     issues.add('type', "must be 'paybill' or 'till'");
   }
-  checkInt(issues, 'amount', input.amount, 1);
+  checkInt(issues, 'amount', input.amount, { min: 1 });
   const phone = checkPhone(issues, 'phoneNumber', input.phoneNumber);
   if (input.partyB !== undefined) checkShortCode(issues, 'partyB', input.partyB);
   checkUrl(issues, 'callbackUrl', input.callbackUrl, { production });
-  checkLength(issues, 'accountReference', input.accountReference, 1, 12, true);
-  checkLength(issues, 'description', input.description, 1, 13);
+  checkLength(issues, 'accountReference', input.accountReference, {
+    min: 1,
+    max: 12,
+    required: true,
+  });
+  checkLength(issues, 'description', input.description, { min: 1, max: 13 });
   issues.throwIfAny('stkPush.send');
 
   const raw = await ctx.post<Record<string, unknown>>(PATHS.send, {
@@ -145,7 +149,11 @@ async function query(ctx: Context, input: StkQueryInput): Promise<StkQueryRespon
   const passkey = ctx.config.passkey;
   if (!passkey) issues.add('passkey', 'is required in the client config for stkPush');
   checkShortCode(issues, 'shortCode', input.shortCode);
-  checkLength(issues, 'checkoutRequestId', input.checkoutRequestId, 1, 100, true);
+  checkLength(issues, 'checkoutRequestId', input.checkoutRequestId, {
+    min: 1,
+    max: 100,
+    required: true,
+  });
   issues.throwIfAny('stkPush.query');
 
   const raw = await ctx.post<Record<string, unknown>>(PATHS.query, {

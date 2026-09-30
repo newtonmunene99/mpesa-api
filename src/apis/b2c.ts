@@ -63,20 +63,17 @@ function pay(ctx: Context, input: B2CInput): Promise<InitiatorResponse> {
       if (!COMMANDS.includes(input.commandId)) {
         issues.add('commandId', "must be 'SalaryPayment', 'BusinessPayment' or 'PromotionPayment'");
       }
-      checkInt(issues, 'amount', input.amount, 10, 250_000);
+      checkInt(issues, 'amount', input.amount, { min: 10, max: 250_000 });
       checkShortCode(issues, 'shortCode', input.shortCode);
       const phone = checkPhone(issues, 'phoneNumber', input.phoneNumber);
-      checkLength(issues, 'remarks', input.remarks, 2, 100, true);
-      checkLength(issues, 'occasion', input.occasion, 1, 100);
+      checkLength(issues, 'remarks', input.remarks, { min: 2, max: 100, required: true });
+      checkLength(issues, 'occasion', input.occasion, { min: 1, max: 100 });
       if (input.originatorConversationId !== undefined) {
-        checkLength(
-          issues,
-          'originatorConversationId',
-          input.originatorConversationId,
-          1,
-          100,
-          true,
-        );
+        checkLength(issues, 'originatorConversationId', input.originatorConversationId, {
+          min: 1,
+          max: 100,
+          required: true,
+        });
       }
       return {
         CommandID: input.commandId,

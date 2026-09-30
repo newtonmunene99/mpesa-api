@@ -45,7 +45,7 @@ function query(ctx: Context, input: AccountBalanceInput): Promise<InitiatorRespo
     fields: (issues) => {
       checkIdentifierType(issues, input.identifierType);
       const partyA = checkParty(issues, 'partyA', input.partyA, input.identifierType);
-      checkLength(issues, 'remarks', input.remarks, 1, 100);
+      checkLength(issues, 'remarks', input.remarks, { min: 1, max: 100 });
       return {
         CommandID: 'AccountBalance',
         PartyA: partyA,

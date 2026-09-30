@@ -105,7 +105,7 @@ async function simulate(ctx: Context, input: C2BSimulateInput): Promise<C2BRespo
   if (input.type !== 'paybill' && input.type !== 'till') {
     issues.add('type', "must be 'paybill' or 'till'");
   }
-  checkInt(issues, 'amount', input.amount, 1);
+  checkInt(issues, 'amount', input.amount, { min: 1 });
   const phone = checkPhone(issues, 'phoneNumber', input.phoneNumber);
   if (input.type === 'paybill' && !input.billRefNumber) {
     issues.add('billRefNumber', 'is required for paybill payments');

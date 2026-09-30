@@ -54,8 +54,8 @@ function query(ctx: Context, input: TransactionStatusInput): Promise<InitiatorRe
       }
       checkIdentifierType(issues, input.identifierType);
       const partyA = checkParty(issues, 'partyA', input.partyA, input.identifierType);
-      checkLength(issues, 'remarks', input.remarks, 1, 100);
-      checkLength(issues, 'occasion', input.occasion, 1, 100);
+      checkLength(issues, 'remarks', input.remarks, { min: 1, max: 100 });
+      checkLength(issues, 'occasion', input.occasion, { min: 1, max: 100 });
       return {
         CommandID: 'TransactionStatusQuery',
         ...(input.transactionId ? { TransactionID: input.transactionId } : {}),

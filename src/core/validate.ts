@@ -52,9 +52,7 @@ export function checkLength(
   issues: Issues,
   path: string,
   value: string | undefined,
-  min: number,
-  max: number,
-  required = false,
+  { min, max, required = false }: { min: number; max: number; required?: boolean },
 ): void {
   if (value === undefined || value === '') {
     if (required) issues.add(path, 'is required');
@@ -72,8 +70,7 @@ export function checkInt(
   issues: Issues,
   path: string,
   value: number,
-  min: number,
-  max?: number,
+  { min, max }: { min: number; max?: number },
 ): void {
   if (!Number.isInteger(value)) {
     issues.add(path, 'must be an integer');
