@@ -28,6 +28,30 @@ const config: ViteUserConfig = defineConfig({
       typeAware: true,
       typeCheck: true,
     },
+    // Complexity gate. Cyclomatic complexity sizes test effort; cognitive complexity and
+    // nesting depth are the readability signals. Exceed a limit only with an
+    // `oxlint-disable-next-line <rule> -- <reason>` comment explaining why.
+    jsPlugins: ['eslint-plugin-sonarjs'],
+    rules: {
+      // 'modified' counts a whole switch as one branch, so dispatch tables don't trip it.
+      complexity: ['error', { max: 15, variant: 'modified' }],
+      'sonarjs/cognitive-complexity': ['error', 15],
+      'max-depth': ['error', 4],
+      'max-lines-per-function': ['warn', { max: 80, skipBlankLines: true, skipComments: true }],
+      'max-params': ['warn', 4],
+      'max-nested-callbacks': ['warn', 4],
+    },
+    overrides: [
+      {
+        // describe/test blocks legitimately nest and run long.
+        files: ['__tests__/**'],
+        rules: {
+          'max-lines-per-function': 'off',
+          'max-nested-callbacks': 'off',
+          'sonarjs/cognitive-complexity': 'off',
+        },
+      },
+    ],
   },
   fmt: {
     singleQuote: true,
