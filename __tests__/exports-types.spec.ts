@@ -1,7 +1,8 @@
 import { expectTypeOf, test } from 'vite-plus/test';
-import { parseStkCallback } from '../src/index';
+import { parseBalances, parseResult, parseStkCallback } from '../src/index';
 import type {
   AccountBalanceApi,
+  AccountBalanceEntry,
   AccountBalanceInput,
   B2CApi,
   B2CCommand,
@@ -11,6 +12,7 @@ import type {
   C2BResponse,
   C2BSimulateInput,
   CachedToken,
+  DarajaResult,
   Environment,
   IdentifierType,
   Initiator,
@@ -62,5 +64,7 @@ test('public types stay exported and wired to the client', () => {
   expectTypeOf<Awaited<ReturnType<TokenStore['get']>>>().toEqualTypeOf<CachedToken | undefined>();
   expectTypeOf(parseStkCallback).returns.toEqualTypeOf<StkCallback>();
   expectTypeOf<StkCallback['metadata']>().toEqualTypeOf<StkCallbackMetadata | undefined>();
+  expectTypeOf(parseResult).returns.toEqualTypeOf<DarajaResult>();
+  expectTypeOf(parseBalances).returns.toEqualTypeOf<AccountBalanceEntry[]>();
   expectTypeOf<ValidationIssue>().toEqualTypeOf<{ path: string; message: string }>();
 });
