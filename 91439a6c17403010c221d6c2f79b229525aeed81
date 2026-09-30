@@ -1,0 +1,5 @@
+capture-sandbox-fixtures (hand step with the maintainer)
+
+Sandbox app with Lipa Na M-Pesa and M-Pesa Sandbox products; certificate from the portal (apicrypt.safaricom.co.ke, notAfter 2016-11-11, still what the portal serves). Callbacks received through a cloudflared quick tunnel into the gitignored raw/ folder.
+Received: all 11 acknowledgements; STK callback only. No result callbacks after 10+ minutes, so Verification 2 (Occasion spelling) and 5 (SDK encryption accepted, no 2001) are not observable from this run.
+Findings: C2B register succeeds with ResponseCode '00000000' (SDK threw); STK query needs longer than 20 s and returns ResultCode as a string; Transaction Status accepts either ID or both.
