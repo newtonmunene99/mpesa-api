@@ -47,6 +47,9 @@ describe('redact', () => {
     expect(out.Result.TransactionID).toBe('XXXXXXXXXX');
     expect(out.Result.ConversationID).toBe('AG_REDACTED');
     expect(out.Result.OriginatorConversationID).toBe('<redacted-id>');
+    expect(redact({ OriginatorCoversationID: '6e06-4e59-9dc9' })).toEqual({
+      OriginatorCoversationID: '<redacted-id>',
+    });
     expect(redact({ CheckoutRequestID: 'ws_CO_191220191020363925' })).toEqual({
       CheckoutRequestID: 'ws_CO_REDACTED',
     });

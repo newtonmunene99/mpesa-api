@@ -75,15 +75,19 @@ describe.skipIf(!enabled)('Daraja sandbox', () => {
     consumerKey: need('MPESA_CONSUMER_KEY'),
     consumerSecret: need('MPESA_CONSUMER_SECRET'),
     passkey: need('MPESA_PASSKEY'),
-    // The portal's Test Credentials page generates a SecurityCredential; a certificate is only
-    // needed to check the SDK's own encryption (Verification 5).
-    initiator: env.MPESA_SECURITY_CREDENTIAL
-      ? { name: need('MPESA_INITIATOR_NAME'), securityCredential: env.MPESA_SECURITY_CREDENTIAL }
-      : {
-          name: need('MPESA_INITIATOR_NAME'),
-          password: need('MPESA_INITIATOR_PASSWORD'),
-          certificate: certificateText(),
-        },
+    // Prefer the password and certificate so the SDK's own encryption is tested
+    // (Verification 5); otherwise use a SecurityCredential generated on the portal.
+    initiator:
+      env.MPESA_INITIATOR_PASSWORD && env.MPESA_CERTIFICATE_PATH
+        ? {
+            name: need('MPESA_INITIATOR_NAME'),
+            password: need('MPESA_INITIATOR_PASSWORD'),
+            certificate: certificateText(),
+          }
+        : {
+            name: need('MPESA_INITIATOR_NAME'),
+            securityCredential: need('MPESA_SECURITY_CREDENTIAL'),
+          },
     tokenStore,
     onWarning: (message) => console.warn(`[sandbox] ${message}`),
   });
@@ -154,7 +158,7 @@ describe.skipIf(!enabled)('Daraja sandbox', () => {
         shortCode: org(),
         phoneNumber: msisdn(),
         remarks: 'SDK sandbox test',
-        resultUrl: url('b2c/result'),
+        resultUrl: url('b2c/occassion/result'),
         queueTimeoutUrl: url('b2c/timeout'),
         occasion: 'Sandbox',
       }),
@@ -176,7 +180,7 @@ describe.skipIf(!enabled)('Daraja sandbox', () => {
         PartyB: msisdn(),
         Remarks: 'SDK sandbox test',
         QueueTimeOutURL: url('b2c/timeout'),
-        ResultURL: url('b2c/result'),
+        ResultURL: url('b2c/occasion/result'),
         Occasion: 'Sandbox',
       }),
     }));

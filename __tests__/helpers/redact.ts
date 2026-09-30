@@ -10,6 +10,8 @@ const DROP = new Set([
   'access_token',
   'InitiatorName',
 ]);
+// C2B responses misspell it OriginatorCoversationID.
+const ID_KEYS = new Set(['OriginatorConversationID', 'OriginatorCoversationID']);
 const NAMES = new Set(['FirstName', 'MiddleName', 'LastName']);
 const SENSITIVE_ENTRIES = new Set([
   'ReceiverPartyPublicName',
@@ -47,7 +49,7 @@ export function redact(value: unknown): unknown {
   for (const [key, inner] of Object.entries(record)) {
     if (DROP.has(key)) out[key] = '<redacted>';
     else if (NAMES.has(key)) out[key] = inner ? '<name>' : inner;
-    else if (key === 'OriginatorConversationID') out[key] = '<redacted-id>';
+    else if (ID_KEYS.has(key)) out[key] = '<redacted-id>';
     else if (key === 'Value' && typeof label === 'string' && SENSITIVE_ENTRIES.has(label)) {
       out[key] = '<redacted>';
     } else out[key] = redact(inner);
