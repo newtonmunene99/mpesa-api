@@ -12,3 +12,4 @@ Callback bodies copied from the sample payloads in the signed-in Daraja portal d
 | balance-result.json          | Account Balance            | Callback Result Payload (QueueTimeoutURL is a placeholder)                                                                                           |
 | reversal-result-success.json | Reversal                   | Successful Callback (QueueTimeoutURL is a placeholder)                                                                                               |
 | reversal-result-failure.json | Reversal                   | Unsuccessful Callback (QueueTimeoutURL is a placeholder)                                                                                             |
+| c2b-v2-notification.json     | Customer To Business (C2B) | Callback Payload (masked version)                                                                                                                    |

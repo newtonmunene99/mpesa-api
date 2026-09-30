@@ -1,5 +1,11 @@
 import { expectTypeOf, test } from 'vite-plus/test';
-import { parseBalances, parseResult, parseStkCallback } from '../src/index';
+import {
+  c2bValidationResponse,
+  parseBalances,
+  parseC2BNotification,
+  parseResult,
+  parseStkCallback,
+} from '../src/index';
 import type {
   AccountBalanceApi,
   AccountBalanceEntry,
@@ -8,9 +14,12 @@ import type {
   B2CCommand,
   B2CInput,
   C2BApi,
+  C2BNotification,
+  C2BRejectionCode,
   C2BRegisterInput,
   C2BResponse,
   C2BSimulateInput,
+  C2BValidationResponse,
   CachedToken,
   DarajaResult,
   Environment,
@@ -66,5 +75,8 @@ test('public types stay exported and wired to the client', () => {
   expectTypeOf<StkCallback['metadata']>().toEqualTypeOf<StkCallbackMetadata | undefined>();
   expectTypeOf(parseResult).returns.toEqualTypeOf<DarajaResult>();
   expectTypeOf(parseBalances).returns.toEqualTypeOf<AccountBalanceEntry[]>();
+  expectTypeOf(parseC2BNotification).returns.toEqualTypeOf<C2BNotification>();
+  expectTypeOf(c2bValidationResponse.reject).parameters.toEqualTypeOf<[C2BRejectionCode]>();
+  expectTypeOf(c2bValidationResponse.accept).returns.toEqualTypeOf<C2BValidationResponse>();
   expectTypeOf<ValidationIssue>().toEqualTypeOf<{ path: string; message: string }>();
 });

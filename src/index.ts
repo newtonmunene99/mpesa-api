@@ -16,8 +16,13 @@ export {
 } from './core/errors';
 export {
   type AccountBalanceEntry,
+  type C2BNotification,
+  type C2BRejectionCode,
+  type C2BValidationResponse,
+  c2bValidationResponse,
   type DarajaResult,
   parseBalances,
+  parseC2BNotification,
   parseResult,
   parseStkCallback,
   type StkCallback,
