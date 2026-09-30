@@ -1,0 +1,6 @@
+Phase 5 checkpoint: Docs
+
+Gate: vp check clean (README examples type-checked), 266 passed / 15 skipped (sandbox, opt-in), pack, test:dist, lint:pkg.
+Phase verifier: Reject (7 must-fix + 10 notes) -> fixed in 54a0720 -> Approve with 4 optional notes; notes 1 and 3 applied in this commit (3.x Remarks defaults checked in b8d0bf1^), notes 2 and 4 accepted as-is.
+Conductor context (local): product guideline camelCase rule, tech-stack structure, workflow test:sandbox.
+Hand check: none needed (docs); the README states the open sandbox items (SDK encryption and B2C Occassion unconfirmed).
