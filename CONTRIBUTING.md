@@ -44,9 +44,11 @@ CI runs the same checks on Node 22, 24 and 26.
 
 ## Tests
 
-- Tests live in `__tests__/src/` and import from `vite-plus/test`.
-- Fake the `HttpService` boundary (see `index.spec.ts`), or use a local `node:http` server (see `http.service.spec.ts`). **Tests must never call the Daraja API.**
-- Assert literal expected values: the exact route, headers and request body.
+- Tests live in `__tests__/` (mirroring `src/`) and import from `vite-plus/test`.
+- Pass the injected fake `fetch` from `__tests__/helpers/fake-fetch.ts` to `createMpesa` or `createContext`. It records every request and replays canned responses. **Unit tests must never call the Daraja API.**
+- Assert literal expected values: the exact URL, headers and request body, and the mapped response.
+- Crypto tests use the throwaway key pair in `__tests__/fixtures/certs/`. Callback parser tests use the portal's sample payloads in `__tests__/fixtures/daraja/`.
+- `pnpm test:sandbox` runs an opt-in suite against the live Daraja sandbox (see `.env.example`). It only runs with `MPESA_SANDBOX=1`, writes redacted captures to `__tests__/fixtures/sandbox/`, and never runs in CI. Review `git diff` for personal data before committing captures.
 - **Never commit real credentials**, tokens or personal phone numbers. Use obvious placeholders.
 
 ## Commits and changesets
