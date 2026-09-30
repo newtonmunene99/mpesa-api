@@ -116,9 +116,10 @@ describe.skipIf(!enabled)('Daraja sandbox', () => {
     state.checkoutRequestId = res?.checkoutRequestId;
   });
 
-  test('stkPush.query after 20 s (Verification 6)', async () => {
+  test('stkPush.query after 30 s (Verification 6)', async () => {
     if (!state.checkoutRequestId) return console.info('[sandbox] no CheckoutRequestID; skipped');
-    await sleep(20_000);
+    // After 20 s the sandbox still answered 500.001.1001 "The transaction does not Exist".
+    await sleep(30_000);
     await capture('stk-query', () =>
       createMpesa(config()).stkPush.query({
         shortCode: Number(need('MPESA_SHORTCODE')),
