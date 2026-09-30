@@ -1,0 +1,3 @@
+fix-p5-1 (phase 5 verifier round 1: 7 must-fix + 10 notes, all addressed)
+Checks: every src/index.ts export named in the README Exports table (scripted); all README anchors resolve; every README code line appears in readme-examples.ts except imports (scripted); 3.x facts checked in b8d0bf1^ (no b2b(); RecieverIdentifierType default '4'; B2C Remarks and C2B BillRefNumber default 'account').
+Gate: vp check clean, 266 tests, pack, test:dist, lint:pkg.
