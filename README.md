@@ -227,7 +227,7 @@ console.log(payment.originatorConversationId);
 
 If the request to Daraja fails (a network error, timeout or `DarajaApiError`), the thrown error carries `originatorConversationId`. Query the payment's status with that ID before retrying, so the customer isn't paid twice. Errors thrown before sending, such as a `ValidationError`, don't carry it.
 
-`Occassion` is the spelling in the Daraja 3.0 docs and the portal simulator; Daraja 1.0 used `Occasion`. The sandbox acknowledged both when 4.0 was tested, but no result arrived to show which one Daraja reads. It is a free-text note, so a wrong spelling at worst drops it.
+`Occassion` is the spelling in the Daraja 3.0 docs and the portal simulator; B2C v1 used `Occasion`. The sandbox acknowledged both when 4.0 was tested, but no result arrived to show which one Daraja reads. It is a free-text note, so a wrong spelling probably at worst drops it.
 
 ## Transaction Status
 
@@ -481,7 +481,7 @@ Behaviour changes on the wire:
 
 - B2C sends `Occassion` (the Daraja 3.0 spelling) instead of `Occasion`, and adds `OriginatorConversationID`.
 - Reversal's `RecieverIdentifierType` is always `"11"` (3.x defaulted to `"4"`), and Reversal no longer sends `Occasion`.
-- B2C and Reversal `remarks` are required, 2 to 100 characters. 3.x defaulted B2C `Remarks` to `"account"`.
+- B2C and Reversal `remarks` are required, 2 to 100 characters. 3.x defaulted B2C `Remarks` to `"account"` and Reversal's to `"Transaction Reversal"`. Transaction Status still defaults `remarks` (now "Transaction status") but no longer sends a default `Occasion`.
 - `initiator` is optional; it's only needed for B2C, Transaction Status, Account Balance and Reversal. 3.x required `initiatorPassword` or `securityCredential` for every client.
 - C2B simulate no longer defaults `BillRefNumber` to `"account"`; it's required for paybill.
 
