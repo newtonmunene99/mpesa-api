@@ -61,27 +61,36 @@ export function parseStkCallback(body: unknown): StkCallback {
   };
 
   if (isRecord(stk.CallbackMetadata)) {
-    const items = flatten(stk.CallbackMetadata.Item, 'Name');
-    const path = `${PATH}.CallbackMetadata`;
-    const metadata: StkCallbackMetadata = {};
-    if (Object.hasOwn(items, 'Amount')) {
-      const amount = readNumber(issues, `${path}.Amount`, items.Amount);
-      if (amount !== undefined) metadata.amount = amount;
-    }
-    if (Object.hasOwn(items, 'MpesaReceiptNumber'))
-      metadata.mpesaReceiptNumber = str(items.MpesaReceiptNumber);
-    if (Object.hasOwn(items, 'Balance')) {
-      const balance = readNumber(issues, `${path}.Balance`, items.Balance);
-      if (balance !== undefined) metadata.balance = balance;
-    }
-    if (Object.hasOwn(items, 'TransactionDate')) {
-      const date = readTimestamp(issues, `${path}.TransactionDate`, items.TransactionDate);
-      if (date) metadata.transactionDate = date;
-    }
-    if (Object.hasOwn(items, 'PhoneNumber')) metadata.phoneNumber = str(items.PhoneNumber);
-    result.metadata = metadata;
+    result.metadata = readMetadata(stk.CallbackMetadata, issues);
   }
 
   issues.throwIfAny('parseStkCallback');
   return result;
+}
+
+/**
+ * Reads the items Daraja sends in `CallbackMetadata`. Items without a value are skipped;
+ * malformed amounts and dates are recorded in `issues`.
+ */
+function readMetadata(raw: Record<string, unknown>, issues: Issues): StkCallbackMetadata {
+  const items = flatten(raw.Item, 'Name');
+  const path = `${PATH}.CallbackMetadata`;
+  const metadata: StkCallbackMetadata = {};
+  if (Object.hasOwn(items, 'Amount')) {
+    const amount = readNumber(issues, `${path}.Amount`, items.Amount);
+    if (amount !== undefined) metadata.amount = amount;
+  }
+  if (Object.hasOwn(items, 'MpesaReceiptNumber')) {
+    metadata.mpesaReceiptNumber = str(items.MpesaReceiptNumber);
+  }
+  if (Object.hasOwn(items, 'Balance')) {
+    const balance = readNumber(issues, `${path}.Balance`, items.Balance);
+    if (balance !== undefined) metadata.balance = balance;
+  }
+  if (Object.hasOwn(items, 'TransactionDate')) {
+    const date = readTimestamp(issues, `${path}.TransactionDate`, items.TransactionDate);
+    if (date) metadata.transactionDate = date;
+  }
+  if (Object.hasOwn(items, 'PhoneNumber')) metadata.phoneNumber = str(items.PhoneNumber);
+  return metadata;
 }

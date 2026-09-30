@@ -41,6 +41,21 @@ function parse(text: string): { json: true; value: unknown } | { json: false; va
 }
 
 /**
+ * Builds the error for a non-2xx response, reading Daraja's gateway fields
+ * (`requestId`, `errorCode`, `errorMessage`) when the body is a JSON object.
+ */
+function rejection(status: number, body: unknown): DarajaApiError {
+  if (!isRecord(body)) return new DarajaApiError({ status, body });
+  return new DarajaApiError({
+    status,
+    body,
+    requestId: asString(body.requestId),
+    errorCode: asString(body.errorCode),
+    errorMessage: asString(body.errorMessage),
+  });
+}
+
+/**
  * Sends one request to Daraja and returns the parsed JSON body.
  *
  * Throws `DarajaApiError` for non-2xx responses, and for 2xx responses whose `ResponseCode`
@@ -80,20 +95,7 @@ export async function request<T>(transport: Transport, init: RequestInit): Promi
   }
   const parsed = parse(text);
 
-  if (!response.ok) {
-    const body = parsed.value;
-    throw new DarajaApiError({
-      status: response.status,
-      body,
-      ...(isRecord(body)
-        ? {
-            requestId: asString(body.requestId),
-            errorCode: asString(body.errorCode),
-            errorMessage: asString(body.errorMessage),
-          }
-        : {}),
-    });
-  }
+  if (!response.ok) throw rejection(response.status, parsed.value);
 
   if (!parsed.json) {
     throw new NetworkError(

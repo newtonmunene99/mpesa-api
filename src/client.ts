@@ -105,39 +105,51 @@ function validateConfig(config: MpesaConfig): RsaPublicKey | undefined {
   }
   if (!config.consumerKey) issues.add('consumerKey', 'is required');
   if (!config.consumerSecret) issues.add('consumerSecret', 'is required');
-
   const initiator = config.initiator as Record<string, unknown> | undefined;
-  let key: RsaPublicKey | undefined;
-  if (initiator !== undefined) {
-    if (!initiator.name) issues.add('initiator.name', 'is required');
-    if ('securityCredential' in initiator) {
-      if (!initiator.securityCredential) issues.add('initiator.securityCredential', 'is required');
-    } else if (!initiator.password) {
-      issues.add('initiator', 'needs either password and certificate, or securityCredential');
-    } else if (!initiator.certificate) {
-      issues.add('initiator.certificate', 'is required when initiator.password is set');
-    }
-  }
+  if (initiator !== undefined) checkInitiator(issues, initiator);
   issues.throwIfAny('createMpesa');
 
   if (initiator && 'password' in initiator && initiator.certificate) {
-    try {
-      key = parseCertificate(initiator.certificate as string | Uint8Array);
-    } catch (error) {
-      if (error instanceof ValidationError) {
-        throw new ValidationError('createMpesa', error.issues);
-      }
-      throw error;
-    }
-    const limit = maxPlaintextBytes(key);
-    if (new TextEncoder().encode(String(initiator.password)).length > limit) {
-      throw new ValidationError('createMpesa', [
-        {
-          path: 'initiator.password',
-          message: `must be at most ${limit} bytes for this certificate`,
-        },
-      ]);
-    }
+    return loadInitiatorKey(
+      initiator.certificate as string | Uint8Array,
+      String(initiator.password),
+    );
+  }
+  return undefined;
+}
+
+/** Reports a missing name, and an initiator with neither a password and certificate nor a credential. */
+function checkInitiator(issues: Issues, initiator: Record<string, unknown>): void {
+  if (!initiator.name) issues.add('initiator.name', 'is required');
+  if ('securityCredential' in initiator) {
+    if (!initiator.securityCredential) issues.add('initiator.securityCredential', 'is required');
+  } else if (!initiator.password) {
+    issues.add('initiator', 'needs either password and certificate, or securityCredential');
+  } else if (!initiator.certificate) {
+    issues.add('initiator.certificate', 'is required when initiator.password is set');
+  }
+}
+
+/**
+ * Parses the initiator's certificate and checks the password fits its key. Certificate errors
+ * are rethrown with the `createMpesa` context.
+ */
+function loadInitiatorKey(certificate: string | Uint8Array, password: string): RsaPublicKey {
+  let key: RsaPublicKey;
+  try {
+    key = parseCertificate(certificate);
+  } catch (error) {
+    if (error instanceof ValidationError) throw new ValidationError('createMpesa', error.issues);
+    throw error;
+  }
+  const limit = maxPlaintextBytes(key);
+  if (new TextEncoder().encode(password).length > limit) {
+    throw new ValidationError('createMpesa', [
+      {
+        path: 'initiator.password',
+        message: `must be at most ${limit} bytes for this certificate`,
+      },
+    ]);
   }
   return key;
 }

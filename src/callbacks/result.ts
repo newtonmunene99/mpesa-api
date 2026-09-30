@@ -67,27 +67,7 @@ export function parseResult(body: unknown): DarajaResult {
     issues.add('Result.ResultType', 'must be a number');
   }
 
-  const parameters: Record<string, string | number | Date> = {};
-  const flat = isRecord(result.ResultParameters)
-    ? flatten(result.ResultParameters.ResultParameter, 'Key')
-    : {};
-  for (const [key, value] of Object.entries(flat)) {
-    const path = `Result.ResultParameters.${key}`;
-    if (TIMESTAMP_KEYS.has(key)) {
-      const date = readTimestamp(issues, path, value);
-      if (date) setOwn(parameters, key, date);
-    } else if (B2C_DATETIME_KEYS.has(key)) {
-      try {
-        setOwn(parameters, key, parseB2CDateTime(str(value)));
-      } catch {
-        issues.add(path, 'must be a dd.MM.yyyy HH:mm:ss timestamp');
-      }
-    } else if (typeof value === 'number' || typeof value === 'string') {
-      setOwn(parameters, key, value);
-    } else if (typeof value === 'boolean') {
-      setOwn(parameters, key, String(value));
-    }
-  }
+  const parameters = readParameters(result.ResultParameters, issues);
 
   const referenceData: Record<string, string> = {};
   const refs = isRecord(result.ReferenceData)
@@ -110,4 +90,38 @@ export function parseResult(body: unknown): DarajaResult {
     referenceData,
     raw: body,
   };
+}
+
+type ParameterValue = string | number | Date;
+
+/** Flattens `ResultParameters` by `Key`, converting each value with `readParameter`. */
+function readParameters(raw: unknown, issues: Issues): Record<string, ParameterValue> {
+  const parameters: Record<string, ParameterValue> = {};
+  const flat = isRecord(raw) ? flatten(raw.ResultParameter, 'Key') : {};
+  for (const [key, value] of Object.entries(flat)) {
+    const converted = readParameter(issues, key, value);
+    if (converted !== undefined) setOwn(parameters, key, converted);
+  }
+  return parameters;
+}
+
+/**
+ * Converts one parameter: documented date keys become `Date`, strings and numbers are kept,
+ * booleans become strings, and anything else is dropped. A malformed date is recorded in
+ * `issues` and dropped.
+ */
+function readParameter(issues: Issues, key: string, value: unknown): ParameterValue | undefined {
+  const path = `Result.ResultParameters.${key}`;
+  if (TIMESTAMP_KEYS.has(key)) return readTimestamp(issues, path, value);
+  if (B2C_DATETIME_KEYS.has(key)) {
+    try {
+      return parseB2CDateTime(str(value));
+    } catch {
+      issues.add(path, 'must be a dd.MM.yyyy HH:mm:ss timestamp');
+      return undefined;
+    }
+  }
+  if (typeof value === 'number' || typeof value === 'string') return value;
+  if (typeof value === 'boolean') return String(value);
+  return undefined;
 }
