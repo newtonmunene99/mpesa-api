@@ -1,4 +1,5 @@
 import { expectTypeOf, test } from 'vite-plus/test';
+import { parseStkCallback } from '../src/index';
 import type {
   AccountBalanceApi,
   AccountBalanceInput,
@@ -18,6 +19,8 @@ import type {
   MpesaConfig,
   ReversalApi,
   ReversalInput,
+  StkCallback,
+  StkCallbackMetadata,
   StkPushApi,
   StkPushInput,
   StkPushResponse,
@@ -57,5 +60,7 @@ test('public types stay exported and wired to the client', () => {
   expectTypeOf<MpesaConfig['initiator']>().toEqualTypeOf<Initiator | undefined>();
   expectTypeOf<MpesaConfig['tokenStore']>().toEqualTypeOf<TokenStore | undefined>();
   expectTypeOf<Awaited<ReturnType<TokenStore['get']>>>().toEqualTypeOf<CachedToken | undefined>();
+  expectTypeOf(parseStkCallback).returns.toEqualTypeOf<StkCallback>();
+  expectTypeOf<StkCallback['metadata']>().toEqualTypeOf<StkCallbackMetadata | undefined>();
   expectTypeOf<ValidationIssue>().toEqualTypeOf<{ path: string; message: string }>();
 });

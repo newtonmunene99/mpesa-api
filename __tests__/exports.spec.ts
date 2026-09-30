@@ -11,6 +11,7 @@ test('exports exactly the 4.0 runtime API', () => {
       'NetworkError',
       'ValidationError',
       'createMpesa',
+      'parseStkCallback',
     ].sort(),
   );
 });
