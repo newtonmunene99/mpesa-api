@@ -1,0 +1,21 @@
+{
+  "Result": {
+    "ConversationID": "AG_20180223_0000493344ae97d86f75",
+    "OriginatorConversationID": "3213-416199-2",
+    "ResultParameters": {
+      "ResultParameter": [
+        { "Key": "DebitAccountType", "Value": "Utility Account" },
+        { "Key": "DebitPartyCharges", "Value": "Fee For B2C Payment|KES|22.40" },
+        { "Key": "TransactionReason" },
+        { "Key": "ReasonType", "Value": "Business Payment to Customer via API" },
+        { "Key": "TransactionStatus", "Value": "Completed" },
+        { "Key": "FinalisedTime", "Value": "20180223054112" },
+        { "Key": "Amount", "Value": "300" },
+        { "Key": "ConversationID", "Value": "AG_20180223_000041b09c22e613d6c9" },
+        { "Key": "ReceiptNo", "Value": "MBN31H462N" }
+      ]
+    },
+    "ResultType": 0,
+    "TransactionID": "MBN0000000"
+  }
+}

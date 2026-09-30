@@ -1,0 +1,10 @@
+{
+  "status": 200,
+  "response": {
+    "MerchantRequestID": "ac7b-470b-8df7-23ab3cef38271071873",
+    "CheckoutRequestID": "ws_CO_REDACTED",
+    "ResponseCode": "0",
+    "ResponseDescription": "Success. Request accepted for processing",
+    "CustomerMessage": "Success. Request accepted for processing"
+  }
+}

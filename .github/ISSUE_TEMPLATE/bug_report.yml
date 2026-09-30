@@ -35,14 +35,16 @@ body:
       label: API
       options:
         - OAuth / authentication
-        - lipaNaMpesaOnline (STK Push)
-        - lipaNaMpesaQuery (STK Push query)
-        - c2bRegister
-        - c2bSimulate
-        - b2c
-        - accountBalance
-        - transactionStatus
-        - reversal
+        - stkPush.send
+        - stkPush.query
+        - c2b.registerUrls
+        - c2b.simulate
+        - b2c.pay
+        - accountBalance.query
+        - transactionStatus.query
+        - reversal.request
+        - Callback parsers (parseStkCallback, parseResult, parseC2BNotification, parseBalances)
+        - Version 3.x (please say which method)
         - Installation / types / packaging
         - Other
     validations:

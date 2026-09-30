@@ -26,13 +26,13 @@ Branch from `dev`. Pull requests target `dev`; `master` holds released code.
 
 ## Everyday commands
 
-| Command              | What it does                                                                               |
-| -------------------- | ------------------------------------------------------------------------------------------ |
-| `vp test`            | Runs the Vitest suite. It is fully offline and never calls Safaricom.                      |
-| `vp check`           | Checks formatting (Oxfmt), lint (type-aware Oxlint) and types. `vp check --fix` autofixes. |
-| `vp pack`            | Builds the package into `dist/`.                                                           |
-| `pnpm run test:dist` | Smoke test: imports the built package and checks the bundled certificates load.            |
-| `pnpm run lint:pkg`  | Validates the package with publint and arethetypeswrong.                                   |
+| Command              | What it does                                                                                                        |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `vp test`            | Runs the Vitest suite. It is fully offline and never calls Safaricom.                                               |
+| `vp check`           | Checks formatting (Oxfmt), lint (type-aware Oxlint) and types. `vp check --fix` autofixes.                          |
+| `vp pack`            | Builds the package into `dist/`.                                                                                    |
+| `pnpm run test:dist` | Checks `dist/` uses no Node built-ins, then imports the built package and makes a B2C call against a stubbed fetch. |
+| `pnpm run lint:pkg`  | Validates the package with publint and arethetypeswrong.                                                            |
 
 Before you push, run:
 
@@ -44,9 +44,11 @@ CI runs the same checks on Node 22, 24 and 26.
 
 ## Tests
 
-- Tests live in `__tests__/src/` and import from `vite-plus/test`.
-- Fake the `HttpService` boundary (see `index.spec.ts`), or use a local `node:http` server (see `http.service.spec.ts`). **Tests must never call the Daraja API.**
-- Assert literal expected values: the exact route, headers and request body.
+- Tests live in `__tests__/` (mirroring `src/`) and import from `vite-plus/test`.
+- Pass the injected fake `fetch` from `__tests__/helpers/fake-fetch.ts` to `createMpesa` or `createContext`. It records every request and replays canned responses. **Unit tests must never call the Daraja API.**
+- Assert literal expected values: the exact URL, headers and request body, and the mapped response.
+- Crypto tests use the throwaway key pair in `__tests__/fixtures/certs/`. Callback parser tests use the portal's sample payloads in `__tests__/fixtures/daraja/`.
+- `pnpm test:sandbox` runs an opt-in suite against the live Daraja sandbox (see `.env.example`). It only runs with `MPESA_SANDBOX=1`, writes redacted captures to `__tests__/fixtures/sandbox/`, and never runs in CI. Review `git diff` for personal data before committing captures.
 - **Never commit real credentials**, tokens or personal phone numbers. Use obvious placeholders.
 
 ## Commits and changesets

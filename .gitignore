@@ -55,3 +55,8 @@ typings/
 
 # dotenv environment variables file
 .env
+.env.*
+!.env.example
+
+# Raw sandbox callbacks pasted in by the maintainer (unredacted)
+__tests__/fixtures/sandbox/callbacks/raw/

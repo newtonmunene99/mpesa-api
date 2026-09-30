@@ -1,0 +1,25 @@
+{
+  "Result": {
+    "ResultType": "0",
+    "ResultCode": "0",
+    "ResultDesc": "The service request is processed successfully",
+    "OriginatorConversationID": "16917-22577599-3",
+    "ConversationID": "AG_20200206_00005e091a8ec6b9eac5",
+    "TransactionID": "OA90000000",
+    "ResultParameters": {
+      "ResultParameter": [
+        {
+          "Key": "AccountBalance",
+          "Value": "Working Account|KES|700000.00|700000.00|0.00|0.00&Float Account|KES|0.00|0.00|0.00|0.00&Utility Account|KES|228037.00|228037.00|0.00|0.00&Charges Paid Account|KES|-1540.00|-1540.00|0.00|0.00&Organization Settlement Account|KES|0.00|0.00|0.00|0.00"
+        },
+        { "Key": "BOCompletedTime", "Value": "20200109125710" }
+      ]
+    },
+    "ReferenceData": {
+      "ReferenceItem": {
+        "Key": "QueueTimeoutURL",
+        "Value": "https://internalsandbox.safaricom.co.ke/mpesa/abresults/v1/submit"
+      }
+    }
+  }
+}
