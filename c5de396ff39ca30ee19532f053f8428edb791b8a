@@ -1,0 +1,2 @@
+apply-sandbox-findings: contradicted item (C2B register ResponseCode)
+Mutation: restoring the !== '0' check fails the transport test and the capture test.
