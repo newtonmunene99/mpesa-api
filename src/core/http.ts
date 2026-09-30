@@ -31,7 +31,7 @@ function parse(text: string): { json: true; value: unknown } | { json: false; va
  * Sends one request to Daraja and returns the parsed JSON body.
  *
  * Throws `DarajaApiError` for non-2xx responses and for 2xx responses whose `ResponseCode` is
- * not "0", and `NetworkError` when no usable response arrives (fetch failure, timeout or a
+ * not all zeros ("0", or "00000000" from C2B registration), and `NetworkError` when no usable response arrives (fetch failure, timeout or a
  * non-JSON success body). Header values, including the bearer token, never appear in errors.
  */
 export async function request<T>(transport: Transport, init: RequestInit): Promise<T> {
@@ -88,7 +88,8 @@ export async function request<T>(transport: Transport, init: RequestInit): Promi
   }
 
   const body = parsed.value;
-  if (isRecord(body) && 'ResponseCode' in body && String(body.ResponseCode) !== '0') {
+  // Most APIs answer "0"; C2B URL registration answers "00000000".
+  if (isRecord(body) && 'ResponseCode' in body && !/^0+$/.test(String(body.ResponseCode))) {
     throw new DarajaApiError({
       status: response.status,
       body,

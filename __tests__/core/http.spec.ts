@@ -85,6 +85,14 @@ describe('request', () => {
     expect(error).toMatchObject({ status: 400, body: 'bad', errorCode: undefined });
   });
 
+  test.each(['00000000', 0])('treats ResponseCode %s as success', async (code) => {
+    const { fetch } = fakeFetch([{ status: 200, body: { ResponseCode: code } }]);
+
+    await expect(
+      request(transport(fetch), { method: 'POST', path: '/p', body: {} }),
+    ).resolves.toEqual({ ResponseCode: code });
+  });
+
   test('treats a 2xx with a non-zero ResponseCode as DarajaApiError', async () => {
     const { fetch } = fakeFetch([
       { status: 200, body: { ResponseCode: '1', ResponseDescription: 'Rejected' } },

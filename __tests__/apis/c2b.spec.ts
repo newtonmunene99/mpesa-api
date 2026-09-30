@@ -3,6 +3,7 @@ import { c2b } from '../../src/apis/c2b';
 import { createContext, createMpesa, type Environment } from '../../src/client';
 import { ValidationError } from '../../src/core/errors';
 import { fakeFetch, type FakeResponse } from '../helpers/fake-fetch';
+import { sandboxCapture } from '../helpers/sandbox-capture';
 
 const token: FakeResponse = { status: 200, body: { access_token: 'tok', expires_in: 3599 } };
 
@@ -255,5 +256,35 @@ describe('c2b validation rules', () => {
 
     expect((error as ValidationError).issues).toEqual([{ path, message }]);
     expect(calls).toHaveLength(0);
+  });
+});
+
+describe('c2b sandbox captures', () => {
+  // __tests__/fixtures/sandbox/c2b-register.json: a successful registration answers
+  // ResponseCode "00000000", not "0".
+  test('a registration answered with ResponseCode 00000000 succeeds', async () => {
+    const { status, response } = sandboxCapture('c2b-register');
+    const { api } = setup([token, { status, body: response }]);
+
+    await expect(api.registerUrls(registration)).resolves.toMatchObject({
+      responseCode: '00000000',
+      responseDescription: 'Success',
+    });
+  });
+
+  // __tests__/fixtures/sandbox/c2b-simulate.json
+  test('maps the captured simulate acknowledgement', async () => {
+    const { status, response } = sandboxCapture('c2b-simulate');
+    const { api } = setup([token, { status, body: response }]);
+
+    await expect(
+      api.simulate({
+        shortCode: 600984,
+        type: 'paybill',
+        amount: 1,
+        phoneNumber: '0708374149',
+        billRefNumber: 'x',
+      }),
+    ).resolves.toMatchObject({ originatorConversationId: '<redacted-id>', responseCode: '0' });
   });
 });
