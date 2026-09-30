@@ -1,0 +1,5 @@
+parse-result
+
+Tests: 201/201 (18 new, using all six portal result samples; the partial status sample gets a ResultCode in the test). vp check, pack, test:dist, lint:pkg pass.
+Spec deviation: parameters is Record<string, string | number | Date> (the spec said string | number but also that dates become Date).
+Mutations: dropping BOCompletedTime from the date keys and loosening the 6-field check each fail exactly one test.
