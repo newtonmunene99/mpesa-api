@@ -43,24 +43,36 @@ export function flatten(list: unknown, nameKey: string): Record<string, unknown>
 }
 
 /**
- * A plain decimal such as `5`, `5.00` or `-1540.00`. Stricter than `Number()`, which would
- * also accept `0x10`, `1e3`, `' 1 '` and `''` from an untrusted body.
+ * A plain decimal amount with at most two decimal places, such as `5`, `5.00` or `-1540.00`.
+ * Stricter than `Number()`, which would also accept `0x10`, `1e3`, `' 1 '` and `''` from an
+ * untrusted body.
  */
-const DECIMAL = /^-?\d+(\.\d+)?$/;
+const AMOUNT = /^(-?)(\d+)(?:\.(\d+))?$/;
 
-/** Reads a finite number sent as a number or a plain decimal string such as "5.00". */
-export function readNumber(issues: Issues, path: string, value: unknown): number | undefined {
-  const n =
-    typeof value === 'number'
-      ? value
-      : typeof value === 'string' && DECIMAL.test(value)
-        ? Number(value)
-        : NaN;
-  if (!Number.isFinite(n)) {
+/**
+ * Reads a money amount as integer cents, so sums stay exact. Daraja sends amounts as numbers
+ * (`1.0`) or decimal strings (`"5.00"`). A number is read through its shortest string form,
+ * so `4.35` becomes 435 rather than `4.35 * 100` = 434.99999999999994. Records an issue and
+ * returns `undefined` for anything else, including more than two decimal places.
+ */
+export function readCents(issues: Issues, path: string, value: unknown): number | undefined {
+  const text = typeof value === 'number' ? String(value) : value;
+  const m = typeof text === 'string' ? AMOUNT.exec(text) : null;
+  if (!m) {
     issues.add(path, 'must be a number');
     return undefined;
   }
-  return n;
+  const [, sign, whole, fraction = ''] = m;
+  if (fraction.length > 2) {
+    issues.add(path, 'must have at most 2 decimal places');
+    return undefined;
+  }
+  const cents = Number(whole) * 100 + Number(fraction.padEnd(2, '0'));
+  if (!Number.isSafeInteger(cents)) {
+    issues.add(path, 'must be a number');
+    return undefined;
+  }
+  return sign === '-' ? -cents : cents;
 }
 
 /** Reads an EAT `YYYYMMDDHHmmss` timestamp sent as a string or a number. */

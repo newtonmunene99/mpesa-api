@@ -1,16 +1,16 @@
 import { code, str } from '../core/coerce';
 import { ValidationError } from '../core/errors';
 import { Issues } from '../core/validate';
-import { flatten, isRecord, readNumber, readTimestamp, requireValue } from './shared';
+import { flatten, isRecord, readCents, readTimestamp, requireValue } from './shared';
 
 /** The `CallbackMetadata` of a successful STK push, when Daraja sends it. */
 export interface StkCallbackMetadata {
-  /** The amount paid, in shillings. */
-  amount?: number;
+  /** The amount paid, in cents (KES 100 is 10000). */
+  amountCents?: number;
   /** The M-Pesa receipt number, as shown in the customer's SMS. */
   mpesaReceiptNumber?: string;
-  /** Rarely sent; Daraja usually omits its value. */
-  balance?: number;
+  /** In cents. Rarely sent; Daraja usually omits its value. */
+  balanceCents?: number;
   /** When the payment completed (Daraja sends it in EAT). */
   transactionDate?: Date;
   /** The paying phone number, as `2547…`. */
@@ -77,15 +77,15 @@ function readMetadata(raw: Record<string, unknown>, issues: Issues): StkCallback
   const path = `${PATH}.CallbackMetadata`;
   const metadata: StkCallbackMetadata = {};
   if (Object.hasOwn(items, 'Amount')) {
-    const amount = readNumber(issues, `${path}.Amount`, items.Amount);
-    if (amount !== undefined) metadata.amount = amount;
+    const amount = readCents(issues, `${path}.Amount`, items.Amount);
+    if (amount !== undefined) metadata.amountCents = amount;
   }
   if (Object.hasOwn(items, 'MpesaReceiptNumber')) {
     metadata.mpesaReceiptNumber = str(items.MpesaReceiptNumber);
   }
   if (Object.hasOwn(items, 'Balance')) {
-    const balance = readNumber(issues, `${path}.Balance`, items.Balance);
-    if (balance !== undefined) metadata.balance = balance;
+    const balance = readCents(issues, `${path}.Balance`, items.Balance);
+    if (balance !== undefined) metadata.balanceCents = balance;
   }
   if (Object.hasOwn(items, 'TransactionDate')) {
     const date = readTimestamp(issues, `${path}.TransactionDate`, items.TransactionDate);

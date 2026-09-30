@@ -61,4 +61,5 @@ When a function goes over, split it along its own job boundaries (a parser's fie
 - Timestamps are East Africa Time (UTC+3), `YYYYMMDDHHmmss`; use `core/time.ts`, not `toISOString()`.
 - Each new access token invalidates the previous one, so tokens are shared through the `TokenStore`.
 - Success is `ResponseCode` "0", but C2B URL registration answers "00000000".
+- Money read from Daraja is integer cents in fields ending in `Cents` (`readCents` in `callbacks/shared.ts`); amounts sent to Daraja are whole shillings. Never do money arithmetic on float shillings.
 - Result codes arrive as numbers or strings, and some are non-numeric ("R000002"); use `code()` from `core/coerce.ts`.

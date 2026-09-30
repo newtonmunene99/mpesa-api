@@ -314,13 +314,15 @@ Daraja posts results to the URLs you give it. The parsers take the already-parse
 
 What each parser returns:
 
-- `parseStkCallback` → `StkCallback`: `merchantRequestId`, `checkoutRequestId`, `resultCode`, `resultDesc`, `ok`, `raw`, and `metadata` (`StkCallbackMetadata`: `amount`, `mpesaReceiptNumber`, `balance`, `transactionDate` as a `Date`, `phoneNumber`) on success.
+- `parseStkCallback` → `StkCallback`: `merchantRequestId`, `checkoutRequestId`, `resultCode`, `resultDesc`, `ok`, `raw`, and `metadata` (`StkCallbackMetadata`: `amountCents`, `mpesaReceiptNumber`, `balanceCents`, `transactionDate` as a `Date`, `phoneNumber`) on success.
 - `parseResult` → `DarajaResult`: `resultType`, `resultCode`, `resultDesc`, `ok`, `originatorConversationId`, `conversationId`, `transactionId`, `parameters` (`ResultParameters` flattened by key, with the documented dates converted to `Date`), `referenceData` and `raw`.
-- `parseC2BNotification` → `C2BNotification`: `transactionType`, `transId`, `transTime` (a `Date`), `transAmount`, `businessShortCode`, `billRefNumber`, `invoiceNumber`, `orgAccountBalance` (absent on validation requests), `thirdPartyTransId`, `msisdn` (masked by Daraja), `firstName`, `middleName`, `lastName` and `raw`.
-- `parseBalances` → `AccountBalanceEntry[]`: `account`, `currency`, `available`, `uncleared`, `reserved`, `unreserved`.
+- `parseC2BNotification` → `C2BNotification`: `transactionType`, `transId`, `transTime` (a `Date`), `transAmountCents`, `businessShortCode`, `billRefNumber`, `invoiceNumber`, `orgAccountBalanceCents` (absent on validation requests), `thirdPartyTransId`, `msisdn` (masked by Daraja), `firstName`, `middleName`, `lastName` and `raw`.
+- `parseBalances` → `AccountBalanceEntry[]`: `account`, `currency`, `availableCents`, `unclearedCents`, `reservedCents`, `unreservedCents`.
 - `c2bValidationResponse.accept(thirdPartyTransId?)` and `.reject(code: C2BRejectionCode)` → `C2BValidationResponse`, the JSON body to send back.
 
 `ok` means `resultCode === 0`. Result codes are numbers, except non-numeric ones such as `"R000002"`, which stay strings.
+
+Amounts the parsers read are integer cents, in fields ending in `Cents`: KES 1,540.50 is `154050`. Integers add up exactly, where floating-point shillings would not (`0.1 + 0.2`). Divide by 100 to display them. Amounts you pass in, such as `stkPush.send`'s `amount`, stay in whole shillings, as Daraja requires. `DarajaResult.parameters` keeps Daraja's own values.
 
 With Express:
 

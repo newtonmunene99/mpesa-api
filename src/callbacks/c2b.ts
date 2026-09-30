@@ -1,7 +1,7 @@
 import { str } from '../core/coerce';
 import { ValidationError } from '../core/errors';
 import { Issues } from '../core/validate';
-import { isBlank, isRecord, readNumber, readTimestamp, requireValue } from './shared';
+import { isBlank, isRecord, readCents, readTimestamp, requireValue } from './shared';
 
 /** A C2B validation or confirmation request, as Daraja POSTs it to your registered URLs. */
 export interface C2BNotification {
@@ -11,15 +11,15 @@ export interface C2BNotification {
   transId: string;
   /** When the payment was made (Daraja sends it in EAT). */
   transTime: Date;
-  /** The amount paid, in shillings. */
-  transAmount: number;
+  /** The amount paid, in cents (KES 5.00 is 500). */
+  transAmountCents: number;
   /** The paybill or till number that was paid. */
   businessShortCode: string;
   /** The account number the customer entered for a paybill payment. */
   billRefNumber: string;
   invoiceNumber: string;
-  /** Absent on validation requests, where Daraja sends it blank. */
-  orgAccountBalance?: number;
+  /** Your account balance after the payment, in cents. Absent on validation requests, where Daraja sends it blank. */
+  orgAccountBalanceCents?: number;
   /** Your own ID, if your validation reply set `ThirdPartyTransID`. */
   thirdPartyTransId: string;
   /** Masked in C2B v2, for example "2547 ***** 126". */
@@ -49,22 +49,22 @@ export function parseC2BNotification(body: unknown): C2BNotification {
     ? readTimestamp(issues, 'TransTime', body.TransTime)
     : undefined;
   const transAmount = usable.has('TransAmount')
-    ? readNumber(issues, 'TransAmount', body.TransAmount)
+    ? readCents(issues, 'TransAmount', body.TransAmount)
     : undefined;
   const orgAccountBalance = isBlank(body.OrgAccountBalance)
     ? undefined
-    : readNumber(issues, 'OrgAccountBalance', body.OrgAccountBalance);
+    : readCents(issues, 'OrgAccountBalance', body.OrgAccountBalance);
   issues.throwIfAny('parseC2BNotification');
 
   return {
     transactionType: str(body.TransactionType),
     transId: str(body.TransID),
     transTime: transTime!,
-    transAmount: transAmount!,
+    transAmountCents: transAmount!,
     businessShortCode: str(body.BusinessShortCode),
     billRefNumber: str(body.BillRefNumber),
     invoiceNumber: str(body.InvoiceNumber),
-    ...(orgAccountBalance === undefined ? {} : { orgAccountBalance }),
+    ...(orgAccountBalance === undefined ? {} : { orgAccountBalanceCents: orgAccountBalance }),
     thirdPartyTransId: str(body.ThirdPartyTransID),
     msisdn: str(body.MSISDN),
     firstName: str(body.FirstName),
