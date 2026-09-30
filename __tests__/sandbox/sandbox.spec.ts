@@ -14,14 +14,19 @@ import { DarajaApiError } from '../../src/core/errors';
 import { createMpesa, MemoryTokenStore } from '../../src/index';
 import { redact } from '../helpers/redact';
 
-try {
-  process.loadEnvFile?.('.env');
-} catch {
-  // No .env file: the suite is skipped below unless the variables are set another way.
+// Read the opt-in flag before loading .env, so a .env that sets MPESA_SANDBOX can never make
+// a plain `vp test` call the live sandbox. `pnpm test:sandbox` sets it on the command line.
+const optIn = process.env.MPESA_SANDBOX === '1';
+if (optIn) {
+  try {
+    process.loadEnvFile?.('.env');
+  } catch {
+    // No .env file: the variables must be set another way.
+  }
 }
 
 const env = process.env;
-const enabled = env.MPESA_SANDBOX === '1' && Boolean(env.MPESA_CONSUMER_KEY);
+const enabled = optIn && Boolean(env.MPESA_CONSUMER_KEY);
 const OUT = new URL('../fixtures/sandbox/', import.meta.url);
 
 function save(name: string, status: number, response: unknown): void {

@@ -13,6 +13,8 @@ const DROP = new Set([
 // C2B responses misspell it OriginatorCoversationID.
 const ID_KEYS = new Set(['OriginatorConversationID', 'OriginatorCoversationID']);
 const NAMES = new Set(['FirstName', 'MiddleName', 'LastName']);
+// C2B notifications: MSISDN may be masked, hashed or plain; BillRefNumber is free text.
+const MASK = new Set(['MSISDN', 'BillRefNumber']);
 const SENSITIVE_ENTRIES = new Set([
   'ReceiverPartyPublicName',
   'DebitPartyName',
@@ -49,6 +51,7 @@ export function redact(value: unknown): unknown {
   for (const [key, inner] of Object.entries(record)) {
     if (DROP.has(key)) out[key] = '<redacted>';
     else if (NAMES.has(key)) out[key] = inner ? '<name>' : inner;
+    else if (MASK.has(key)) out[key] = inner ? '<redacted>' : inner;
     else if (ID_KEYS.has(key)) out[key] = '<redacted-id>';
     else if (key === 'Value' && typeof label === 'string' && SENSITIVE_ENTRIES.has(label)) {
       out[key] = '<redacted>';

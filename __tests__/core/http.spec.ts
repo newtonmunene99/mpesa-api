@@ -93,6 +93,17 @@ describe('request', () => {
     ).resolves.toEqual({ ResponseCode: code });
   });
 
+  test.each(['10', '00000001', '', ' 0', '1'])(
+    'treats ResponseCode %j as a rejection',
+    async (code) => {
+      const { fetch } = fakeFetch([{ status: 200, body: { ResponseCode: code } }]);
+
+      await expect(
+        request(transport(fetch), { method: 'POST', path: '/p', body: {} }),
+      ).rejects.toBeInstanceOf(DarajaApiError);
+    },
+  );
+
   test('treats a 2xx with a non-zero ResponseCode as DarajaApiError', async () => {
     const { fetch } = fakeFetch([
       { status: 200, body: { ResponseCode: '1', ResponseDescription: 'Rejected' } },

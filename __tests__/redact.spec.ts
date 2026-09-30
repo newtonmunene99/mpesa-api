@@ -55,6 +55,13 @@ describe('redact', () => {
     });
   });
 
+  test('masks C2B MSISDN in any format and the free-text BillRefNumber', () => {
+    expect(
+      redact({ MSISDN: '2547 ***** 126', BillRefNumber: 'Jane account', InvoiceNumber: '' }),
+    ).toEqual({ MSISDN: '<redacted>', BillRefNumber: '<redacted>', InvoiceNumber: '' });
+    expect(redact({ MSISDN: 'a'.repeat(64) })).toEqual({ MSISDN: '<redacted>' });
+  });
+
   test('masks customer names', () => {
     expect(redact({ FirstName: 'NICHOLAS', MiddleName: '', LastName: 'SONGOK' })).toEqual({
       FirstName: '<name>',
