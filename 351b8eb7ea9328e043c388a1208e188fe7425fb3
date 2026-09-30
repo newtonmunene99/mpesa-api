@@ -1,0 +1,6 @@
+Phase 4 checkpoint: Sandbox
+
+Tests: 265 passed, 11 skipped (sandbox project, opt-in); vp check clean; pack, test:dist, lint:pkg pass.
+Phase verifier: Approve, no must-fix. Notes 1-4 applied in this commit (mutation: unanchored /0+/ now fails 3 tests); note 5 (certificate dates) checked with openssl during capture; note 6 = Verification 2 and 5 open.
+Hand check: done with the maintainer (sandbox app, .env, certificate, cloudflared tunnel), 2026-09-30.
+OPEN: Verification 2 (Occasion spelling) and 5 (SDK credential accepted, no 2001) need result callbacks, which the sandbox did not deliver. Acceptance criterion 9 is partly met; the maintainer decides whether to retry or accept.
