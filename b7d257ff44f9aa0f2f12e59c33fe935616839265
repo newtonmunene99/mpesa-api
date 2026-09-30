@@ -1,0 +1,4 @@
+readme-4-0
+Gate: vp check clean (README examples type-checked), 266 tests, pack, test:dist, lint:pkg pass.
+README claims checked against code: NetworkError cause, token store warnings, single token retry, web APIs used.
+Honest about the sandbox: the expired sandbox certificate, 2001/8006, and the portal securityCredential fallback. B2C Occassion noted as the Daraja 3.0 docs' spelling.
