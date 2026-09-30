@@ -1,0 +1,1 @@
+changeset-client-api: major; summarises createMpesa, C2B v2 and B2C v3, camelCase with raw, no bundled certificates, the new parsers and errors, runtimes; points to the README migration table.
