@@ -116,3 +116,42 @@ describe('reversal.request', () => {
     expect(typeof mpesa.reversal.request).toBe('function');
   });
 });
+
+describe('reversal.request validation rules', () => {
+  test.each([
+    ['non-integer amount', { amount: 1.5 }, 'amount', 'must be an integer'],
+    [
+      'transactionId over 20 characters',
+      { transactionId: 'T'.repeat(21) },
+      'transactionId',
+      'must be at most 20 characters',
+    ],
+    [
+      'remarks over 100 characters',
+      { remarks: 'r'.repeat(101) },
+      'remarks',
+      'must be at most 100 characters',
+    ],
+    ['relative result URL', { resultUrl: 'result' }, 'resultUrl', 'must be an absolute URL'],
+  ])('%s', async (_, override, path, message) => {
+    const { api, calls } = setup([]);
+
+    const error = await api.request({ ...input, ...override }).catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([{ path, message }]);
+    expect(calls).toHaveLength(0);
+  });
+
+  test('requires https in production', async () => {
+    const { api, calls } = setup([], { environment: 'production' });
+
+    const error = await api
+      .request({ ...input, queueTimeoutUrl: 'http://example.com/timeout' })
+      .catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([
+      { path: 'queueTimeoutUrl', message: 'must use https in production' },
+    ]);
+    expect(calls).toHaveLength(0);
+  });
+});

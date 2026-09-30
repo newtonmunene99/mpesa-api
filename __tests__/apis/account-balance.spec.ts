@@ -109,3 +109,36 @@ describe('accountBalance.query empty optionals', () => {
     expect(calls[1]?.body).toMatchObject({ Remarks: 'Account balance' });
   });
 });
+
+describe('accountBalance.query validation rules', () => {
+  test.each([
+    [
+      'unknown identifier type',
+      { identifierType: 'bank' as never },
+      'identifierType',
+      "must be 'shortcode', 'till' or 'msisdn'",
+    ],
+    ['shortcode that is too short', { partyA: 1234 }, 'partyA', 'must be a 5 to 9 digit shortcode'],
+    [
+      'relative timeout URL',
+      { queueTimeoutUrl: 'timeout' },
+      'queueTimeoutUrl',
+      'must be an absolute URL',
+    ],
+  ])('%s', async (_, override, path, message) => {
+    const { api, calls } = setup([]);
+
+    const error = await api.query({ ...input, ...override }).catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([{ path, message }]);
+    expect(calls).toHaveLength(0);
+  });
+
+  test('accepts and normalises an msisdn party', async () => {
+    const { api, calls } = setup([token, { status: 200, body: accepted }]);
+
+    await api.query({ ...input, partyA: '0708374149', identifierType: 'msisdn' });
+
+    expect(calls[1]?.body).toMatchObject({ PartyA: '254708374149', IdentifierType: '1' });
+  });
+});

@@ -219,3 +219,56 @@ describe('b2c.pay input edge cases', () => {
     expect(calls).toHaveLength(0);
   });
 });
+
+describe('b2c.pay validation rules', () => {
+  test.each([
+    ['amount above 250 000', { amount: 250_001 }, 'amount', 'must be at most 250000'],
+    ['non-integer amount', { amount: 10.5 }, 'amount', 'must be an integer'],
+    ['shortCode too short', { shortCode: 1234 }, 'shortCode', 'must be a 5 to 7 digit shortcode'],
+    [
+      'invalid phone',
+      { phoneNumber: '0812345678' },
+      'phoneNumber',
+      'must be a Safaricom number like 2547XXXXXXXX or 07XXXXXXXX',
+    ],
+    [
+      'remarks over 100 characters',
+      { remarks: 'r'.repeat(101) },
+      'remarks',
+      'must be at most 100 characters',
+    ],
+    ['relative result URL', { resultUrl: '/result' }, 'resultUrl', 'must be an absolute URL'],
+    [
+      'relative timeout URL',
+      { queueTimeoutUrl: 'timeout' },
+      'queueTimeoutUrl',
+      'must be an absolute URL',
+    ],
+    [
+      'ID over 100 characters',
+      { originatorConversationId: 'i'.repeat(101) },
+      'originatorConversationId',
+      'must be at most 100 characters',
+    ],
+  ])('%s', async (_, override, path, message) => {
+    const { api, calls } = setup([]);
+
+    const error = await api.pay({ ...input, ...override }).catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([{ path, message }]);
+    expect(calls).toHaveLength(0);
+  });
+
+  test('requires https in production', async () => {
+    const { api, calls } = setup([], { environment: 'production' });
+
+    const error = await api
+      .pay({ ...input, resultUrl: 'http://example.com/result' })
+      .catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([
+      { path: 'resultUrl', message: 'must use https in production' },
+    ]);
+    expect(calls).toHaveLength(0);
+  });
+});

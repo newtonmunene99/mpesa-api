@@ -198,3 +198,46 @@ describe('stkPush.send empty optionals', () => {
     expect(calls[1]?.body).toMatchObject({ TransactionDesc: 'Payment' });
   });
 });
+
+describe('stkPush.send validation rules', () => {
+  test.each([
+    ['shortCode too short', { shortCode: 1234 }, 'shortCode', 'must be a 5 to 7 digit shortcode'],
+    [
+      'shortCode too long',
+      { shortCode: 12345678 },
+      'shortCode',
+      'must be a 5 to 7 digit shortcode',
+    ],
+    ['unknown type', { type: 'bank' as never }, 'type', "must be 'paybill' or 'till'"],
+    ['non-integer amount', { amount: 1.5 }, 'amount', 'must be an integer'],
+    [
+      'invalid phone',
+      { phoneNumber: '254812345678' },
+      'phoneNumber',
+      'must be a Safaricom number like 2547XXXXXXXX or 07XXXXXXXX',
+    ],
+    ['invalid partyB', { partyB: 12 }, 'partyB', 'must be a 5 to 7 digit shortcode'],
+    ['relative callback URL', { callbackUrl: '/cb' }, 'callbackUrl', 'must be an absolute URL'],
+    ['empty accountReference', { accountReference: '' }, 'accountReference', 'is required'],
+  ])('%s', async (_, override, path, message) => {
+    const { api, calls } = setup([]);
+
+    const error = await api.send({ ...input, ...override }).catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([{ path, message }]);
+    expect(calls).toHaveLength(0);
+  });
+
+  test('requires https in production', async () => {
+    const { api, calls } = setup([], { environment: 'production' });
+
+    const error = await api
+      .send({ ...input, callbackUrl: 'http://example.com/cb' })
+      .catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([
+      { path: 'callbackUrl', message: 'must use https in production' },
+    ]);
+    expect(calls).toHaveLength(0);
+  });
+});

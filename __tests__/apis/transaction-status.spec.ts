@@ -158,3 +158,36 @@ describe('transactionStatus.query empty optionals', () => {
     expect(calls).toHaveLength(0);
   });
 });
+
+describe('transactionStatus.query validation rules', () => {
+  test.each([
+    [
+      'msisdn that is not a Safaricom number',
+      { partyA: '12345', identifierType: 'msisdn' as const },
+      'partyA',
+      'must be a Safaricom number like 2547XXXXXXXX or 07XXXXXXXX',
+    ],
+    [
+      'shortcode that is too long',
+      { partyA: 1234567890 },
+      'partyA',
+      'must be a 5 to 9 digit shortcode',
+    ],
+    ['relative result URL', { resultUrl: '/result' }, 'resultUrl', 'must be an absolute URL'],
+    [
+      'occasion over 100 characters',
+      { occasion: 'o'.repeat(101) },
+      'occasion',
+      'must be at most 100 characters',
+    ],
+  ])('%s', async (_, override, path, message) => {
+    const { api, calls } = setup([]);
+
+    const error = await api
+      .query({ transactionId: 'NEF61H8J60', partyA: 600782, ...urls, ...override })
+      .catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([{ path, message }]);
+    expect(calls).toHaveLength(0);
+  });
+});

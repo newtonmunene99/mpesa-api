@@ -201,3 +201,59 @@ describe('c2b.simulate in production', () => {
     expect(calls).toHaveLength(0);
   });
 });
+
+describe('c2b validation rules', () => {
+  test.each([
+    ['shortCode too short', { shortCode: 1234 }, 'shortCode', 'must be a 5 to 7 digit shortcode'],
+    [
+      'bad defaultAction',
+      { defaultAction: 'completed' as never },
+      'defaultAction',
+      "must be 'Completed' or 'Cancelled'",
+    ],
+    [
+      'relative confirmation URL',
+      { confirmationUrl: 'confirm' },
+      'confirmationUrl',
+      'must be an absolute URL',
+    ],
+  ])('registerUrls: %s', async (_, override, path, message) => {
+    const { api, calls } = setup([]);
+
+    const error = await api.registerUrls({ ...registration, ...override }).catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([{ path, message }]);
+    expect(calls).toHaveLength(0);
+  });
+
+  const simulation = {
+    shortCode: 600984,
+    type: 'till' as const,
+    amount: 1,
+    phoneNumber: '254708374149',
+  };
+
+  test.each([
+    [
+      'shortCode too long',
+      { shortCode: 12345678 },
+      'shortCode',
+      'must be a 5 to 7 digit shortcode',
+    ],
+    ['unknown type', { type: 'bank' as never }, 'type', "must be 'paybill' or 'till'"],
+    ['non-integer amount', { amount: 2.5 }, 'amount', 'must be an integer'],
+    [
+      'invalid phone',
+      { phoneNumber: '12345' },
+      'phoneNumber',
+      'must be a Safaricom number like 2547XXXXXXXX or 07XXXXXXXX',
+    ],
+  ])('simulate: %s', async (_, override, path, message) => {
+    const { api, calls } = setup([]);
+
+    const error = await api.simulate({ ...simulation, ...override }).catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([{ path, message }]);
+    expect(calls).toHaveLength(0);
+  });
+});
