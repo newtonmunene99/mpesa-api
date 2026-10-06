@@ -1,0 +1,2 @@
+remove-check-required (refactor)
+Full gate: vp check clean, 287 tests (all existing, unchanged), vp pack, test:dist (neutral + smoke), lint:pkg. exports.spec.ts confirms it was never public.
