@@ -1,0 +1,1 @@
+Follow-up to version PR #58: CHANGELOG.md failed vp check (trailing whitespace) and claude-review refused the bot actor. version-packages verified in a scratch worktree: 4.0.0-alpha.0, vp check passes. Maintainer asked for review on mention only.
