@@ -48,6 +48,9 @@
     "test": "vp test",
     "test:sandbox": "MPESA_SANDBOX=1 vp test --project sandbox",
     "test:dist": "node scripts/check-dist-neutral.mjs && node scripts/smoke-dist.mjs",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
     "lint:pkg": "publint && attw --pack . --profile esm-only",
     "changeset": "changeset",
     "release": "vp pack && changeset publish"
@@ -60,7 +63,8 @@
     "eslint-plugin-sonarjs": "^4.2.2",
     "publint": "^0.3.24",
     "typescript": "7.0.2",
-    "vite-plus": "1.0.0"
+    "vite-plus": "1.0.0",
+    "vitepress": "^1.6.4"
   },
   "engines": {
     "node": ">=22.12"
