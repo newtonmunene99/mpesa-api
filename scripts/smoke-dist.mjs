@@ -48,7 +48,8 @@ const password = privateDecrypt(
 ).toString('utf8');
 
 if (res.responseCode !== '0' || password !== 'Safaricom999!*!') {
-  console.error('smoke failed', { res, password });
+  // Never log the decrypted password, even this fixture one.
+  console.error('smoke failed', { res, passwordMatches: password === 'Safaricom999!*!' });
   process.exit(1);
 }
 console.log('smoke ok');
