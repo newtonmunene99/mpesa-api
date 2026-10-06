@@ -1,0 +1,3 @@
+docs-pages
+Split by script from README sections (content unchanged; headings demoted, #anchors mapped to page links; unmapped anchors would have aborted). README 547 -> 99 lines.
+pnpm docs:build passes (VitePress fails on dead links). vp check clean, 287 tests (README-example coverage now spans the docs pages; formalised in docs-examples-drift).
