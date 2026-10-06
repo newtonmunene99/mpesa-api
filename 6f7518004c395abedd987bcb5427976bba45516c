@@ -1,0 +1,2 @@
+pre-mode-alpha
+pre.json is {mode: pre, tag: alpha} (Changesets 3). changeset status: mpesa-api -> 4.0.0-alpha.0 (daraja-3-client, esm-only-4-0). release-tag.ts on master now prints no tag.
