@@ -1,0 +1,1 @@
+CodeQL alerts on release PR #55 (first full diff against master). Red: the linear-time test took 5456 ms with the old regex. Green: full gate (vp check, 296 tests, vp pack, test:dist).
