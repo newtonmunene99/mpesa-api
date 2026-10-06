@@ -108,6 +108,24 @@ describe('sandbox captures', () => {
       readFileSync(new URL(`./fixtures/sandbox/callbacks/${name}.json`, import.meta.url), 'utf8'),
     );
 
+  // A real STK payment approved on a phone in the sandbox, 2026-10-06.
+  test('a live successful STK callback parses (callbacks/stk-success.json)', () => {
+    const callback = parseStkCallback(result('stk-success'));
+
+    expect(callback).toMatchObject({
+      resultCode: 0,
+      ok: true,
+      checkoutRequestId: 'ws_CO_REDACTED',
+    });
+    // Balance arrives with no Value, so it is left out; Amount 1 is 100 cents.
+    expect(callback.metadata).toEqual({
+      amountCents: 100,
+      mpesaReceiptNumber: '<redacted>',
+      transactionDate: new Date('2026-10-06T06:52:33Z'),
+      phoneNumber: '<redacted>',
+    });
+  });
+
   test('a failed Account Balance result still carries parameters (balance-result-locked.json)', () => {
     expect(parseResult(result('balance-result-locked'))).toMatchObject({
       resultCode: 8006,
