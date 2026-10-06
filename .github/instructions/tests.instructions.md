@@ -11,4 +11,4 @@ applyTo: '__tests__/**'
 - Crypto tests decrypt with the throwaway private key in `__tests__/fixtures/certs/` through `node:crypto`; Node built-ins are fine in tests, but never in `src/`.
 - Callback parser tests use Safaricom's documented samples in `__tests__/fixtures/daraja/`, and redacted live captures in `__tests__/fixtures/sandbox/`. Don't commit unredacted captures: `__tests__/fixtures/sandbox/callbacks/raw/` is gitignored for that reason.
 - `__tests__/sandbox/` holds the opt-in live suite. Every spec there must stay skipped unless `MPESA_SANDBOX=1` is set on the command line.
-- `__tests__/readme-examples.ts` mirrors the README's code blocks so they type-check. It is never run; keep it in sync when the README changes.
+- `__tests__/docs-examples.ts` mirrors every `ts` code block in `docs/` and the README so they type-check. It is never run; `__tests__/docs-examples.spec.ts` fails when a code line is missing from it, so update both together.

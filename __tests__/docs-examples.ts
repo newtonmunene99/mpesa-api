@@ -1,5 +1,6 @@
 /**
- * Every code block in README.md, kept here so `vp check` type-checks them. Never run.
+ * Every code block in the docs site (`docs/`) and README.md, kept here so `vp check` type-checks
+ * them. Never run. `docs-examples.spec.ts` fails when a docs code line is missing from this file.
  * Express, Hono and Redis are declared as minimal stand-ins, so no extra dependencies are needed.
  */
 import { readFile } from 'node:fs/promises';

@@ -2,7 +2,8 @@ name: Release
 
 on:
   push:
-    branches: [master]
+    # v3.x has its own tag-triggered release.yml; this file never runs there.
+    branches: [master, next, 'v*.x', '!v3.x']
 
 concurrency: release-${{ github.ref }}
 
@@ -21,9 +22,15 @@ jobs:
           node-version: '24'
           cache: true
       - run: vp install --frozen-lockfile
+      # The npm dist-tag for this branch: none in pre mode, latest on master, v<N>-latest on
+      # v<N>.x. Fails for any other branch, so nothing can publish to latest by mistake.
+      - id: tag
+        run: |
+          args=$(node scripts/release-tag.ts)
+          echo "args=$args" >> "$GITHUB_OUTPUT"
       - uses: changesets/action@v2.1.2
         with:
-          publish-script: pnpm run release
+          publish-script: pnpm run release ${{ steps.tag.outputs.args }}
           commit-message: 'chore: version packages'
           pr-title: 'chore: version packages'
         env:

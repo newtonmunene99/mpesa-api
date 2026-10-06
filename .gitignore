@@ -60,3 +60,7 @@ typings/
 
 # Raw sandbox callbacks pasted in by the maintainer (unredacted)
 __tests__/fixtures/sandbox/callbacks/raw/
+
+# VitePress build output and cache
+docs/.vitepress/dist
+docs/.vitepress/cache

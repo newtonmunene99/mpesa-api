@@ -20,7 +20,7 @@ All five must pass before a change is done. `pnpm test:sandbox` calls the live D
 
 ## Layout
 
-- `src/index.ts`: public exports only. Adding or removing an export also updates `__tests__/exports.spec.ts`, `__tests__/exports-types.spec.ts` and the README's Exports table.
+- `src/index.ts`: public exports only. Adding or removing an export also updates `__tests__/exports.spec.ts`, `__tests__/exports-types.spec.ts` and the Exports table in `docs/reference/exports.md`.
 - `src/client.ts`: `createMpesa`, config validation and the shared `Context` (`post`, `securityCredential`, `now`).
 - `src/core/`: `http` (the only place that calls `fetch`), `auth` (tokens, `TokenStore`), `certificate` (PEM/DER parsing), `credential` (RSA PKCS#1 v1.5), `validate`, `time` (EAT timestamps), `coerce` (`str`, `code`), `errors`.
 - `src/apis/`: one module per Daraja API, each exporting a factory that takes the `Context`; `initiator.ts` holds the shared initiator request.
@@ -34,8 +34,8 @@ All five must pass before a change is done. `pnpm test:sandbox` calls the live D
 - **Validate before sending.** Collect every problem with `Issues` from `core/validate.ts` and throw one `ValidationError` before any request is made. Error classes live in `core/errors.ts`; don't throw plain `Error`.
 - **TypeScript.** Strict mode with `isolatedDeclarations`: exported functions and constants need explicit types. Use `import type` for type-only imports, no default exports, no `any`, single quotes. Use `#private` class fields.
 - **Security.** Never log or embed credentials, tokens, passkeys or security credentials. Tests use the throwaway key pair in `__tests__/fixtures/certs/` and placeholder values; never real phone numbers, and never real Daraja credentials. Callback bodies are untrusted input.
-- **Docs.** The README is the user manual: a change to public behaviour updates its section and table, and README code blocks are mirrored in `__tests__/readme-examples.ts`, which `vp check` type-checks.
-- **Breaking changes** need a `major` changeset and a line in the README's "Migrating from 3.x" section when they affect 3.x users.
+- **Docs.** The docs site (`docs/`, VitePress, published to GitHub Pages) is the user manual, and the README is the npm landing page. A change to public behaviour updates its docs page and field table. Every `ts` code block in `docs/` and the README is mirrored in `__tests__/docs-examples.ts`, which `vp check` type-checks; `__tests__/docs-examples.spec.ts` fails when they drift.
+- **Breaking changes** need a `major` changeset and a line in `docs/migration.md` when they affect 3.x users.
 
 ## Design
 
