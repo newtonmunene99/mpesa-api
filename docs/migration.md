@@ -33,4 +33,4 @@ Behaviour changes on the wire:
 - `initiator` is optional; it's only needed for B2C, Transaction Status, Account Balance and Reversal. 3.x required `initiatorPassword` or `securityCredential` for every client.
 - C2B simulate no longer defaults `BillRefNumber` to `"account"`; it's required for paybill.
 
-Field names change from Daraja's PascalCase to camelCase; each API's table above lists the mapping. Derived fields (`CommandID` for Transaction Status, Account Balance and Reversal, `IdentifierType`, STK `Password` and `Timestamp`) are filled in for you. New in 4.x: the callback parsers, typed errors, input validation, a pluggable token store, and B2C's `OriginatorConversationID`.
+Field names change from Daraja's PascalCase to camelCase; the table on each [API page](/apis/stk-push) lists the mapping. Derived fields (`CommandID` for Transaction Status, Account Balance and Reversal, `IdentifierType`, STK `Password` and `Timestamp`) are filled in for you. New in 4.x: the callback parsers, typed errors, input validation, a pluggable token store, and B2C's `OriginatorConversationID`.

@@ -13,5 +13,5 @@
     "resolveJsonModule": true,
     "strict": true
   },
-  "include": ["src", "__tests__", "scripts", "vite.config.ts"]
+  "include": ["src", "__tests__", "scripts", "vite.config.ts", "docs/.vitepress/config.ts"]
 }
