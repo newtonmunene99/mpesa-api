@@ -1,0 +1,31 @@
+{
+  "Result": {
+    "ResultType": 0,
+    "ResultCode": 8006,
+    "ResultDesc": "The security credential is locked.",
+    "OriginatorConversationID": "<redacted-id>",
+    "ConversationID": "AG_REDACTED",
+    "TransactionID": "XXXXXXXXXX",
+    "ResultParameters": {
+      "ResultParameter": [
+        {
+          "Key": "ActionType",
+          "Value": "AccountBalance"
+        },
+        {
+          "Key": "ErrorMsg",
+          "Value": "API Password is locked. "
+        },
+        {
+          "Key": "BOCompletedTime",
+          "Value": 20261006093245
+        }
+      ]
+    },
+    "ReferenceData": {
+      "ReferenceItem": {
+        "Key": "QueueTimeoutURL"
+      }
+    }
+  }
+}
