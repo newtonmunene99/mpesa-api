@@ -1,0 +1,4 @@
+release-tag-script
+Tests: 287 passed (9 new). vp check clean. Script run by hand: master -> --tag latest, v4.x -> --tag v4-latest, next -> exit 1.
+Mutations: pre mode by file existence (1 test fails), latest on every branch (6 fail).
+Deviation: tsconfig include gains scripts/ (the type-aware lint needs the Node types for the script).
