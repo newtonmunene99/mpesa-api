@@ -7,6 +7,9 @@ hero:
   tagline: A typed client with no runtime dependencies, for Node.js, Bun, Deno and edge runtimes.
   actions:
     - theme: brand
+      text: Get started
+      link: /guide/getting-started
+    - theme: alt
       text: GitHub
       link: https://github.com/newtonmunene99/mpesa-api
     - theme: alt

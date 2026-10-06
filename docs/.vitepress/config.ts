@@ -1,10 +1,37 @@
 import { type DefaultTheme, defineConfig, type UserConfig } from 'vitepress';
 
-/** The sidebar, shared by every page. Pages are added as the manual moves out of the README. */
+/** The sidebar, shared by every page. */
 const sidebar: DefaultTheme.SidebarItem[] = [
   {
-    text: 'Introduction',
-    items: [{ text: 'Overview', link: '/' }],
+    text: 'Guide',
+    items: [
+      { text: 'Getting started', link: '/guide/getting-started' },
+      { text: 'Configuration', link: '/guide/configuration' },
+      { text: 'Certificates', link: '/guide/certificates' },
+      { text: 'Callbacks', link: '/guide/callbacks' },
+      { text: 'Errors', link: '/guide/errors' },
+      { text: 'Token store', link: '/guide/token-store' },
+      { text: 'Runtimes', link: '/guide/runtimes' },
+      { text: 'Limits', link: '/guide/limits' },
+    ],
+  },
+  {
+    text: 'APIs',
+    items: [
+      { text: 'M-Pesa Express (STK push)', link: '/apis/stk-push' },
+      { text: 'Customer to Business (C2B)', link: '/apis/c2b' },
+      { text: 'Business to Customer (B2C)', link: '/apis/b2c' },
+      { text: 'Transaction Status', link: '/apis/transaction-status' },
+      { text: 'Account Balance', link: '/apis/account-balance' },
+      { text: 'Reversal', link: '/apis/reversal' },
+    ],
+  },
+  {
+    text: 'More',
+    items: [
+      { text: 'Migrating from 3.x', link: '/migration' },
+      { text: 'Reference', link: '/reference/exports' },
+    ],
   },
 ];
 
@@ -18,6 +45,10 @@ const config: UserConfig<DefaultTheme.Config> = defineConfig({
   lastUpdated: true,
   themeConfig: {
     nav: [
+      { text: 'Guide', link: '/guide/getting-started' },
+      { text: 'APIs', link: '/apis/stk-push' },
+      { text: 'Migrating from 3.x', link: '/migration' },
+      { text: 'Reference', link: '/reference/exports' },
       {
         text: 'npm',
         link: 'https://www.npmjs.com/package/mpesa-api',
