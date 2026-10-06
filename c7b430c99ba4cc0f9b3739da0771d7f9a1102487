@@ -1,0 +1,1 @@
+Phase 1 verifier follow-up: spawn tests for the script entry point (killed the if(false) guard mutation, 2 failures) and an unanchored-regex mutation (1 failure). 15 tests in __tests__/scripts.
