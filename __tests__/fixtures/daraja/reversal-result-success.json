@@ -1,0 +1,30 @@
+{
+  "Result": {
+    "ResultType": 0,
+    "ResultCode": 0,
+    "ResultDesc": "The service request is processed successfully.",
+    "OriginatorConversationID": "dad6-4c34-8787-c8cb963a496d1268232",
+    "ConversationID": "AG_20211114_201018edbbf9f1582eaa",
+    "TransactionID": "SKE52PAWR9",
+    "ResultParameters": {
+      "ResultParameter": [
+        {
+          "Key": "DebitAccountBalance",
+          "Value": "Utility Account|KES|7722179.62|7722179.62|0.00|0.00"
+        },
+        { "Key": "Amount", "Value": 1.0 },
+        { "Key": "TransCompletedTime", "Value": 20211114132711 },
+        { "Key": "OriginalTransactionID", "Value": "SKC82PACB8" },
+        { "Key": "Charge", "Value": 0.0 },
+        { "Key": "CreditPartyPublicName", "Value": "254705912645 - NICHOLAS JOHN SONGOK" },
+        { "Key": "DebitPartyPublicName", "Value": "600992 - Safaricom Daraja 992" }
+      ]
+    },
+    "ReferenceData": {
+      "ReferenceItem": {
+        "Key": "QueueTimeoutURL",
+        "Value": "https://internalsandbox.safaricom.co.ke/mpesa/reversalresults/v1/submit"
+      }
+    }
+  }
+}

@@ -1,0 +1,78 @@
+name: Bug report
+description: Something in mpesa-api doesn't work as documented.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. **Never paste consumer keys, secrets, passkeys, initiator passwords or security credentials.** Redact them from code and responses.
+  - type: input
+    id: version
+    attributes:
+      label: mpesa-api version
+      placeholder: 4.0.0
+    validations:
+      required: true
+  - type: input
+    id: node
+    attributes:
+      label: Node.js version
+      placeholder: '24.21.0'
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Daraja environment
+      options:
+        - sandbox
+        - production
+    validations:
+      required: true
+  - type: dropdown
+    id: api
+    attributes:
+      label: API
+      options:
+        - OAuth / authentication
+        - stkPush.send
+        - stkPush.query
+        - c2b.registerUrls
+        - c2b.simulate
+        - b2c.pay
+        - accountBalance.query
+        - transactionStatus.query
+        - reversal.request
+        - Callback parsers (parseStkCallback, parseResult, parseC2BNotification, parseBalances)
+        - Version 3.x (please say which method)
+        - Installation / types / packaging
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: The smallest code that shows the problem, with credentials replaced by placeholders.
+      render: ts
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs actual behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: response
+    attributes:
+      label: Daraja response
+      description: The response or error body from Daraja, if any, with identifiers redacted.
+      render: json
+  - type: checkboxes
+    id: secrets
+    attributes:
+      label: Confirmation
+      options:
+        - label: I have removed all credentials, tokens and personal phone numbers from this report.
+          required: true

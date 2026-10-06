@@ -1,0 +1,4 @@
+# Dependencies allowed to run install scripts. esbuild (via VitePress) gets its binary from a
+# platform package, so its postinstall check isn't needed.
+allowBuilds:
+  esbuild: false

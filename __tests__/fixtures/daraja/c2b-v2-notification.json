@@ -1,0 +1,15 @@
+{
+  "TransactionType": "Pay Bill",
+  "TransID": "RKL51ZDR4F",
+  "TransTime": "20231121121325",
+  "TransAmount": "5.00",
+  "BusinessShortCode": "600966",
+  "BillRefNumber": "Sample Transaction",
+  "InvoiceNumber": "",
+  "OrgAccountBalance": "25.00",
+  "ThirdPartyTransID": "",
+  "MSISDN": "2547 ***** 126",
+  "FirstName": "NICHOLAS",
+  "MiddleName": "",
+  "LastName": ""
+}

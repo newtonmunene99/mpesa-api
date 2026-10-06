@@ -1,26 +1,17 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "module": "CommonJS",
-    "moduleResolution": "Node",
-    "esModuleInterop": true,
+    "target": "es2023",
+    "lib": ["es2023"],
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "types": ["node"],
+    "verbatimModuleSyntax": true,
+    "isolatedDeclarations": true,
     "declaration": true,
-    "removeComments": false,
-    "allowSyntheticDefaultImports": true,
-    "outDir": "lib",
-    "baseUrl": "src",
-    "sourceMap": true,
-    "lib": [
-      "ES6"
-    ]
+    "noEmit": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "strict": true
   },
-  "include": [
-    ".eslintrc.js",
-    "jest.config.js",
-    "src/**/*.ts",
-    "__tests__/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-  ]
+  "include": ["src", "__tests__", "scripts", "vite.config.ts", "docs/.vitepress/config.ts"]
 }

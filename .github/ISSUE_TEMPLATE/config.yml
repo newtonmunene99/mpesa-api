@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or help
+    url: https://github.com/newtonmunene99/mpesa-api/discussions
+    about: Ask usage questions and share integrations in Discussions.
+  - name: Security vulnerability
+    url: https://github.com/newtonmunene99/mpesa-api/security/policy
+    about: Please report vulnerabilities privately, not as public issues.

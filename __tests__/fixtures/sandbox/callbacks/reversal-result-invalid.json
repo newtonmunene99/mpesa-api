@@ -1,0 +1,16 @@
+{
+  "Result": {
+    "ResultType": 0,
+    "ResultCode": "R000002",
+    "ResultDesc": "The OriginalTransactionID is invalid.",
+    "OriginatorConversationID": "<redacted-id>",
+    "ConversationID": "AG_REDACTED",
+    "TransactionID": "XXXXXXXXXX",
+    "ReferenceData": {
+      "ReferenceItem": {
+        "Key": "QueueTimeoutURL",
+        "Value": "https://internalsandbox.safaricom.co.ke/mpesa/reversalresults/v1/submit"
+      }
+    }
+  }
+}

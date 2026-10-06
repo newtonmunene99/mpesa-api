@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [dev, master]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24', '26']
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: voidzero-dev/setup-vp@v1.21.1
+        with:
+          node-version: ${{ matrix.node }}
+          cache: true
+      - run: vp install --frozen-lockfile
+      - run: vp check
+      - run: vp test
+      - run: vp pack
+      - run: pnpm run test:dist
+      - run: pnpm run lint:pkg
+
+  docs:
+    name: Docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: voidzero-dev/setup-vp@v1.21.1
+        with:
+          node-version: '24'
+          cache: true
+      - run: vp install --frozen-lockfile
+      # VitePress fails the build on dead links.
+      - run: pnpm docs:build
