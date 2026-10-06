@@ -148,16 +148,35 @@ function readCertificate(bytes: Uint8Array): RsaPublicKey {
  * such as the bag attributes some tools add, is ignored.
  */
 function pemToDer(pem: string): { der: Uint8Array; kind: 'certificate' | 'publicKey' } {
-  const m = /-----BEGIN (CERTIFICATE|PUBLIC KEY)-----([\s\S]*?)-----END \1-----/.exec(pem);
-  if (!m) throw invalid('must be a PEM certificate or public key');
+  const block = findPemBlock(pem);
+  if (!block) throw invalid('must be a PEM certificate or public key');
   let binary: string;
   try {
-    binary = atob(m[2]!.replace(/\s+/g, ''));
+    binary = atob(block.body.replace(/\s+/g, ''));
   } catch {
     throw invalid('contains invalid base64');
   }
   const der = Uint8Array.from(binary, (c) => c.charCodeAt(0));
-  return { der, kind: m[1] === 'CERTIFICATE' ? 'certificate' : 'publicKey' };
+  return { der, kind: block.label === 'CERTIFICATE' ? 'certificate' : 'publicKey' };
+}
+
+/**
+ * Finds the first BEGIN line that has a matching END line. Runs in linear time: a single
+ * lazy regex over the whole text is quadratic on many unterminated BEGIN lines, and the
+ * text comes from the caller. Once a label has no END after some point, it has none after
+ * any later point either, so that label is skipped from then on.
+ */
+function findPemBlock(pem: string): { label: string; body: string } | undefined {
+  const unterminated = new Set<string>();
+  for (const m of pem.matchAll(/-----BEGIN (CERTIFICATE|PUBLIC KEY)-----/g)) {
+    const label = m[1]!;
+    if (unterminated.has(label)) continue;
+    const start = m.index + m[0].length;
+    const end = pem.indexOf(`-----END ${label}-----`, start);
+    if (end !== -1) return { label, body: pem.slice(start, end) };
+    unterminated.add(label);
+  }
+  return undefined;
 }
 
 /**

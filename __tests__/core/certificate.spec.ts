@@ -52,6 +52,19 @@ describe('parseCertificate', () => {
     );
   });
 
+  test('skips an unterminated block before a complete one', () => {
+    const spki = fixture('test-spki.pem').toString('utf8');
+    const key = parseCertificate(`-----BEGIN CERTIFICATE-----\nAAAA\n${spki}`);
+    expect(key.n).toBe(expected.n);
+  });
+
+  test('rejects many unterminated blocks in linear time', () => {
+    const hostile = '-----BEGIN PUBLIC KEY-----a'.repeat(50_000);
+    const started = performance.now();
+    expect(() => parseCertificate(hostile)).toThrow(ValidationError);
+    expect(performance.now() - started).toBeLessThan(500);
+  });
+
   test('rejects malformed input', () => {
     expect(() => parseCertificate('not a cert')).toThrow(ValidationError);
     expect(() =>
