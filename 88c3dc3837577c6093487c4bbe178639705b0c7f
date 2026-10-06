@@ -1,0 +1,2 @@
+docs-ci-deploy
+Actions pinned to their latest releases (2026-10-06): configure-pages v6.0.0, upload-pages-artifact v5.0.0, deploy-pages v5.0.1; checkout and setup-vp match ci.yml. All three workflows parse (yaml 2.9.1). The Docs CI job is not a required check in this track.
