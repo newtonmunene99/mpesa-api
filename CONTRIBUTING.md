@@ -62,14 +62,34 @@ CI runs the same checks on Node 22, 24 and 26.
 
   Choose patch, minor or major, and write a one-line summary. It becomes the CHANGELOG entry. PRs that only touch docs, tests or CI don't need one.
 
-## Releases
+## Releasing
 
-Maintainers release with [Changesets](https://github.com/changesets/changesets):
+Releases use [Changesets](https://github.com/changesets/changesets). Every pull request that changes what users of the package see adds a changeset (`pnpm changeset`).
 
-1. Merging to `master` makes the release workflow open or update a **"chore: version packages"** PR, which bumps the version and writes the CHANGELOG.
-2. Merging that PR publishes to npm through trusted publishing, with provenance. No npm tokens are involved.
+### Stable releases
 
-3.x receives bug and security fixes on the `v3.x` branch. Users install it with `npm i mpesa-api@3`. When a 3.x patch is published, use `npm publish --tag v3` so it doesn't replace `latest`.
+1. Merging to `master` makes the release workflow open or update a **"chore: version packages"** pull request, which bumps the version and writes `CHANGELOG.md`.
+2. GitHub doesn't run CI on that pull request, because the workflow opens it with its own token. It only changes the version and changelog, and CI already ran on the pull requests that brought in the code, so a maintainer merges it using the admin bypass on `master`.
+3. Merging it publishes to npm through trusted publishing, with provenance (no npm tokens), tags `v<version>` and creates the GitHub release.
+
+`scripts/release-tag.ts` picks the npm dist-tag: `latest` on `master`, and `v<N>-latest` on a `v<N>.x` maintenance branch.
+
+### Prereleases
+
+1. Run `pnpm changeset pre enter <tag>`, where `<tag>` is `alpha`, `beta` or `rc`, and commit `.changeset/pre.json`.
+2. While in pre mode, versions are `x.y.z-<tag>.N` and publish under the `<tag>` dist-tag; `latest` doesn't move.
+3. To move up a stage, run `pnpm changeset pre exit`, then `pnpm changeset pre enter <next tag>`.
+4. For the stable release, run `pnpm changeset pre exit` and commit; the next version PR produces `x.y.z` on `latest`.
+
+Prereleases normally come from `master`. If stable releases must keep shipping during a prerelease, use a `next` branch instead. Outside pre mode, every push to `next` fails the release workflow on purpose, so it can never publish to `latest`.
+
+### Maintenance lines
+
+When a new major starts, cut `v<N>.x` from `master` just before the breaking changes land, and on that branch set `"baseBranch": "v<N>.x"` in `.changeset/config.json`. The release workflow runs there too, and publishes to `v<N>-latest`. A fix that applies to two lines is two pull requests, one per branch, each with its own changeset.
+
+### 3.x
+
+3.x fixes go to the `v3.x` branch, which predates Changesets. Bump the version in its `package.json`, merge, then push a matching tag (`git tag v3.0.3 && git push origin v3.0.3`). Its release workflow checks that the tag matches the version and publishes to the `v3-latest` dist-tag, never `latest`. Users install 3.x with `npm i mpesa-api@3`.
 
 ## Reporting bugs and security issues
 
