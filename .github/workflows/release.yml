@@ -1,0 +1,33 @@
+name: Release
+
+# Publishes a 3.x release to npm under the v3-latest dist-tag when a v3.* tag is pushed.
+# 4.x and later publish from master through Changesets; this line never touches latest.
+# npm trusted publishing matches the workflow filename, so this file must stay release.yml.
+on:
+  push:
+    tags: ['v3.*']
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+      - name: Check the tag matches a 3.x package.json version
+        run: |
+          version="v$(node -p "require('./package.json').version")"
+          [ "$version" = "$GITHUB_REF_NAME" ] || { echo "Tag $GITHUB_REF_NAME doesn't match $version"; exit 1; }
+          case "$version" in v3.*) ;; *) echo "Not a 3.x version: $version"; exit 1 ;; esac
+      - run: npm install -g npm@latest
+      - run: npm ci
+      # 3.x's tests call the live Daraja sandbox with placeholder credentials, so they can't
+      # run here; the build is the check.
+      - run: npm run build
+      - run: npm publish --provenance --tag v3-latest
