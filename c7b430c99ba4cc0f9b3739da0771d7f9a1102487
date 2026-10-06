@@ -1,1 +1,1 @@
-Checkpoint: Phase 1 (release tooling) verified. Fresh verifier approved at db1d1b5 with no must-fixes; follow-ups landed in c7b430c. Gate: vp check, vp test, vp pack, test:dist, lint:pkg green. Open: CONTRIBUTING's 3.x section depends on v3x-release-workflow (P3) landing before land-track.
+Phase 1 verifier follow-up: spawn tests for the script entry point (killed the if(false) guard mutation, 2 failures) and an unanchored-regex mutation (1 failure). 15 tests in __tests__/scripts.
