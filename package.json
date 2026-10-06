@@ -1,6 +1,6 @@
 {
   "name": "mpesa-api",
-  "version": "3.0.2",
+  "version": "4.0.0-alpha.0",
   "description": "Typed M-Pesa Daraja 3.0 client for Node.js, Bun, Deno and edge runtimes, with no dependencies.",
   "keywords": [
     "daraja",
