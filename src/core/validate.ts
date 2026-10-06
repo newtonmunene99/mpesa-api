@@ -124,10 +124,3 @@ export function checkShortCode(issues: Issues, path: string, value: number | str
     issues.add(path, 'must be a 5 to 7 digit shortcode');
   }
 }
-
-/** Records `is required` when a value is `undefined`, `null` or `''`. */
-export function checkRequired(issues: Issues, path: string, value: unknown): void {
-  if (value === undefined || value === null || value === '') {
-    issues.add(path, 'is required');
-  }
-}
