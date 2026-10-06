@@ -62,6 +62,8 @@ CI runs the same checks on Node 22, 24 and 26.
 
   Choose patch, minor or major, and write a one-line summary. It becomes the CHANGELOG entry. PRs that only touch docs, tests or CI don't need one.
 
+To get a review from Claude on a pull request, comment `@claude review`. Mention `@claude` with anything else to ask it a question or for a change.
+
 ## Releasing
 
 Releases use [Changesets](https://github.com/changesets/changesets). Every pull request that changes what users of the package see adds a changeset (`pnpm changeset`).
@@ -69,7 +71,7 @@ Releases use [Changesets](https://github.com/changesets/changesets). Every pull 
 ### Stable releases
 
 1. Merging to `master` makes the release workflow open or update a **"chore: version packages"** pull request, which bumps the version and writes `CHANGELOG.md`.
-2. GitHub doesn't run CI on that pull request, because the workflow opens it with its own token. It only changes the version and changelog, and CI already ran on the pull requests that brought in the code, so a maintainer merges it using the admin bypass on `master`.
+2. A maintainer checks the version and changelog, then merges it. The version script formats the changelog, so CI passes when it runs. GitHub may not start CI on that pull request, because the workflow opens it with its own token; CI already ran on the pull requests that brought in the code, so the maintainer then merges it using the admin bypass on `master`.
 3. Merging it publishes to npm through trusted publishing, with provenance (no npm tokens), tags `v<version>` and creates the GitHub release.
 
 `scripts/release-tag.ts` picks the npm dist-tag: `latest` on `master`, and `v<N>-latest` on a `v<N>.x` maintenance branch.
