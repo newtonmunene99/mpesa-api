@@ -1,0 +1,2 @@
+releasing-docs
+Replaces the Releases section, including the old 'npm publish --tag v3' note (now v3-latest by tag). States that next fails outside pre mode.
