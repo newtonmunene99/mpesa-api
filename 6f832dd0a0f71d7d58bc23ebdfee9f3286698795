@@ -1,0 +1,3 @@
+docs-scaffold
+vitepress 1.6.4 (npm latest; 2.0 is still alpha). pnpm 12 required a build-script decision for esbuild: allowBuilds esbuild=false in a new pnpm-workspace.yaml (binary from @esbuild/darwin-arm64; build works).
+Full gate: vp check clean, 287 tests, vp pack, test:dist, lint:pkg. npm pack --dry-run contains nothing from docs/. pnpm docs:build succeeds.
