@@ -1,0 +1,2 @@
+docs-examples-drift
+Red: missing docs-examples.ts (ENOENT). Bites: deleting 'const status = await mpesa.stkPush.query({' fails with 'docs/apis/stk-push.md: ...'; restored. 288 tests. vp check clean.
