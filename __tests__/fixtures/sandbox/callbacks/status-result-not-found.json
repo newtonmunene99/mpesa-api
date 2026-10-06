@@ -1,0 +1,15 @@
+{
+  "Result": {
+    "ResultType": 0,
+    "ResultCode": 2032,
+    "ResultDesc": "The transaction receipt number does not exist.",
+    "OriginatorConversationID": "<redacted-id>",
+    "ConversationID": "AG_REDACTED",
+    "TransactionID": "XXXXXXXXXX",
+    "ReferenceData": {
+      "ReferenceItem": {
+        "Key": "Occasion"
+      }
+    }
+  }
+}

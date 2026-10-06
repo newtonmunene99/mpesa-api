@@ -101,6 +101,47 @@ describe('sandbox captures', () => {
     });
   });
 
+  // Live result callbacks from 2026-10-06, all failures: the shared sandbox initiator was
+  // still locked, and the receipt sent was the docs' placeholder.
+  const result = (name: string): unknown =>
+    JSON.parse(
+      readFileSync(new URL(`./fixtures/sandbox/callbacks/${name}.json`, import.meta.url), 'utf8'),
+    );
+
+  test('a failed Account Balance result still carries parameters (balance-result-locked.json)', () => {
+    expect(parseResult(result('balance-result-locked'))).toMatchObject({
+      resultCode: 8006,
+      ok: false,
+      parameters: {
+        ActionType: 'AccountBalance',
+        ErrorMsg: 'API Password is locked. ',
+        BOCompletedTime: new Date('2026-10-06T06:32:45Z'),
+      },
+      // The ReferenceItem has a Key but no Value.
+      referenceData: {},
+    });
+  });
+
+  test('a Transaction Status result for an unknown receipt (status-result-not-found.json)', () => {
+    expect(parseResult(result('status-result-not-found'))).toMatchObject({
+      resultCode: 2032,
+      resultDesc: 'The transaction receipt number does not exist.',
+      ok: false,
+      parameters: {},
+    });
+  });
+
+  test('a Reversal result keeps its non-numeric code (reversal-result-invalid.json)', () => {
+    expect(parseResult(result('reversal-result-invalid'))).toMatchObject({
+      resultCode: 'R000002',
+      resultDesc: 'The OriginalTransactionID is invalid.',
+      ok: false,
+      referenceData: {
+        QueueTimeoutURL: 'https://internalsandbox.safaricom.co.ke/mpesa/reversalresults/v1/submit',
+      },
+    });
+  });
+
   // Verification 2 (acknowledgement only; the result callbacks never arrived).
   test.each(['b2c.occassion', 'b2c.occasion'])('%s is acknowledged', async (name) => {
     const res = await client(name).b2c.pay({
