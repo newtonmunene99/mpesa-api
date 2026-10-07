@@ -1,1 +1,3 @@
 Phase 3 verifier follow-up (approved, no must-fix): notes 1-3 applied (Top Up wording in docs and research notes, requestId redaction with a red-then-green test, PartyB comment); note 4 recorded in the backlog item 'Confirm B2C against the live sandbox'. Suite 378 passed, vp check clean, docs:build ok.
+
+Checkpoint: Phase 3 (sandbox captures) verified. Fresh verifier approved; notes applied here. Live run 2026-10-07: 4 B2B acks (0) and 4 result webhooks (8006, testapi locked) within ~1 s; Pochi 401.002.01 (product not on the sandbox app). Maintainer reviewed the outcome table and approved.
