@@ -10,8 +10,9 @@ const DROP = new Set([
   'access_token',
   'InitiatorName',
 ]);
-// C2B responses misspell it OriginatorCoversationID.
-const ID_KEYS = new Set(['OriginatorConversationID', 'OriginatorCoversationID']);
+// C2B responses misspell it OriginatorCoversationID; requestId is the gateway's trace ID in
+// error bodies.
+const ID_KEYS = new Set(['OriginatorConversationID', 'OriginatorCoversationID', 'requestId']);
 const NAMES = new Set(['FirstName', 'MiddleName', 'LastName']);
 // C2B notifications: MSISDN may be masked, hashed or plain; BillRefNumber is free text.
 const MASK = new Set(['MSISDN', 'BillRefNumber']);

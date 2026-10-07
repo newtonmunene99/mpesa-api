@@ -224,6 +224,7 @@ describe.skipIf(!enabled)('Daraja sandbox', () => {
     );
   });
 
+  // Tops up 600997, the portal's sample B2C shortcode, from the org shortcode.
   test('b2b.topUpB2C', async () => {
     await capture('b2b-topup', () =>
       createMpesa(config()).b2b.topUpB2C({

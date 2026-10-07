@@ -100,6 +100,6 @@ await mpesa.b2b.remitTax({
 
 ## Results
 
-A successful B2B result's `parameters` include `Amount`, `TransCompletedTime` (a `Date`), `ReceiverPartyPublicName`, `Currency`, `DebitPartyAffectedAccountBalance` (the packed balance format; split it with [`parseBalances`](/guide/callbacks)) and `DebitAccountBalance` (a `{Amount={…}}` string, kept as is); Pay Bill and Tax Remittance results echo the account reference as `referenceData.BillReferenceNumber`; in the sandbox, Buy Goods and Top Up results didn't. A failed request carries few or no `parameters` (the portal samples show only `BOCompletedTime`).
+A successful B2B result's `parameters` include `Amount`, `TransCompletedTime` (a `Date`), `ReceiverPartyPublicName`, `Currency`, `DebitPartyAffectedAccountBalance` (the packed balance format; split it with [`parseBalances`](/guide/callbacks)) and `DebitAccountBalance` (a `{Amount={…}}` string, kept as is); Pay Bill and Tax Remittance results echo the account reference as `referenceData.BillReferenceNumber`; in the sandbox, a Buy Goods result didn't echo the reference it was sent (Top Up wasn't sent one). A failed request carries few or no `parameters` (the portal samples show only `BOCompletedTime`).
 
 The portal documents `PartyA` as a 5 or 6 digit shortcode; the SDK accepts 5 to 7 digits, as it does for the other APIs.

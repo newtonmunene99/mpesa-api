@@ -1,7 +1,7 @@
 {
   "status": 401,
   "response": {
-    "requestId": "ac7b-470b-8df7-23ab3cef38271330547",
+    "requestId": "<redacted-id>",
     "errorCode": "401.002.01",
     "errorMessage": "Error Occurred - Invalid Access Token - "
   }
