@@ -246,6 +246,7 @@ describe('pullTransactions.query', () => {
   test.each([
     ['without a zone, as EAT', '2020-08-05T13:13:00', '2020-08-05T10:13:00.000Z'],
     ['with an offset', '2020-08-05T13:13:00+03:00', '2020-08-05T10:13:00.000Z'],
+    ['with an offset without a colon', '2020-08-05T13:13:00+0300', '2020-08-05T10:13:00.000Z'],
     ['with milliseconds', '2020-08-05T10:13:00.500Z', '2020-08-05T10:13:00.500Z'],
   ])('reads trxDate %s', async (_, trxDate, iso) => {
     const [[item]] = page().Response as Record<string, unknown>[][];
@@ -355,6 +356,13 @@ describe('pullTransactions.all', () => {
       '2',
       '4',
     ]);
+  });
+
+  test('stops without another request after a page shorter than the first', async () => {
+    const { api, calls } = setup([token, pageOf('a', 'b'), pageOf('c')]);
+
+    expect(await collect(api.all(window))).toEqual(['a', 'b', 'c']);
+    expect(calls).toHaveLength(3);
   });
 
   test('yields a transaction repeated within a page once', async () => {

@@ -56,7 +56,7 @@ Daraja only keeps the last 48 hours; the SDK leaves that limit to Daraja. The re
 
 ## Every page
 
-`all` queries page after page, moving the offset on each time, and yields each transaction once. It stops at the first page with no new transactions.
+`all` queries page after page, moving the offset on each time, and yields each transaction once. It stops after a page shorter than the first, or at the first page with no new transactions.
 
 ```ts
 for await (const t of mpesa.pullTransactions.all({ shortCode: 600000, from, to })) {
@@ -64,7 +64,7 @@ for await (const t of mpesa.pullTransactions.all({ shortCode: 600000, from, to }
 }
 ```
 
-An error on any page rejects the loop after the earlier transactions were yielded. That includes the HTTP 500 that Daraja documents for "no transactions available". Invalid input throws `ValidationError` on the first iteration, before any request is sent.
+An error on any page rejects the loop after the earlier transactions were yielded. That includes the HTTP 500 that Daraja documents for "no transactions available". So when the total is an exact multiple of the page size, the final request for an empty page may reject even though every transaction was yielded. It isn't swallowed, because a real server error at that point would otherwise cut a reconciliation short silently. If that matters, count what you received before the error. Invalid input throws `ValidationError` on the first iteration, before any request is sent.
 
 ## Tested live
 

@@ -99,8 +99,8 @@ export interface PullTransactionsApi {
   query(input: PullQueryInput): Promise<PullQueryResponse>;
   /**
    * Yields every C2B transaction between `from` and `to`, calling `query` page by page (each
-   * offset after the transactions so far) until a page comes back empty or holds only
-   * transactions already yielded (each transaction is yielded once). Invalid input throws
+   * offset after the transactions so far) until a page is shorter than the first, comes back
+   * empty, or holds only transactions already yielded (each transaction is yielded once). Invalid input throws
    * `ValidationError` on the first iteration, before any request. An error from any
    * page, including the HTTP 500 Daraja documents for "no transactions", rejects the iteration
    * after the earlier pages were yielded.
@@ -115,7 +115,7 @@ const QUERY_PATH = '/pulltransactions/v1/query';
 const FOUND = '1000';
 const NONE_FOUND = '1001';
 /** An ISO 8601 date and time, such as `2020-08-05T10:13:00Z`, with an optional zone. */
-const ISO_DATE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(Z|[+-]\d{2}:?\d{2})?$/;
+const ISO_DATE = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?)(Z|[+-]\d{2}:?\d{2})?$/;
 
 async function register(ctx: Context, input: PullRegisterInput): Promise<PullRegisterResponse> {
   const issues = new Issues();
@@ -170,8 +170,10 @@ function checkQuery(input: PullQueryInput): number {
 /** Reads an ISO date, recording an issue when it isn't one. */
 function readIsoDate(issues: Issues, path: string, value: unknown): Date | undefined {
   const match = typeof value === 'string' ? ISO_DATE.exec(value) : null;
-  // A date without a zone is read as EAT, Daraja's time zone, never the host's.
-  const date = match ? new Date(match[1] ? match[0] : `${match[0]}+03:00`) : undefined;
+  // A date without a zone is read as EAT, Daraja's time zone, never the host's. A `+0300`
+  // offset becomes `+03:00`, the form every engine's Date parses.
+  const zone = match?.[2]?.replace(/^([+-]\d{2})(\d{2})$/, '$1:$2') ?? '+03:00';
+  const date = match ? new Date(`${match[1]}${zone}`) : undefined;
   if (date && isDate(date)) return date;
   issues.add(path, 'must be an ISO date');
   return undefined;
@@ -251,14 +253,21 @@ async function* all(
   const { shortCode, from, to } = input;
   // Guards against a page being served again (an ignored offset), which would loop forever.
   const seen = new Set<string>();
+  let pageSize = 0;
   let offset = 0;
   for (;;) {
     const { transactions } = await query(ctx, { shortCode, from, to, offset });
-    const fresh = transactions.filter(
-      (t) => !seen.has(t.transactionId) && seen.add(t.transactionId),
-    );
+    const fresh: PullTransaction[] = [];
+    for (const t of transactions) {
+      if (seen.has(t.transactionId)) continue;
+      seen.add(t.transactionId);
+      fresh.push(t);
+    }
     if (fresh.length === 0) return;
     yield* fresh;
+    // A page shorter than the first is the last one, so no request is made for an empty page.
+    pageSize ||= transactions.length;
+    if (transactions.length < pageSize) return;
     offset += transactions.length;
   }
 }
