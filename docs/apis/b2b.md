@@ -138,7 +138,7 @@ app.post('/payments/b2b/express', (req, res) => {
 
 It returns an `ExpressCheckoutCallback`: `resultCode` (0 on success, 4001 when the merchant cancelled), `resultDesc`, `ok`, `requestId`, `amountCents`, `raw` and, when Daraja sends them, `paymentReference`, `transactionId`, `conversationId` and `status`.
 
-Not tested live: the sandbox refused the push with a 401, most likely because the sandbox app doesn't have the product. The request follows the portal's sample, and the parser is tested against the portal's cancelled and successful callbacks.
+Not tested live: with the product enabled, every sandbox push timed out at Daraja's gateway (HTTP 504), which throws `DarajaApiError`. The request follows the portal's sample, and the parser is tested against the portal's cancelled and successful callbacks.
 
 ## Results
 

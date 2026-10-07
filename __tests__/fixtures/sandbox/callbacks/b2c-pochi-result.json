@@ -1,0 +1,22 @@
+{
+  "Result": {
+    "ResultType": 0,
+    "ResultCode": 8006,
+    "ResultDesc": "The security credential is locked.",
+    "OriginatorConversationID": "<redacted-id>",
+    "ConversationID": "AG_REDACTED",
+    "TransactionID": "XXXXXXXXXX",
+    "ResultParameters": {
+      "ResultParameter": {
+        "Key": "CreditPartyName",
+        "Value": "<redacted>"
+      }
+    },
+    "ReferenceData": {
+      "ReferenceItem": {
+        "Key": "QueueTimeoutURL",
+        "Value": "https://example.com/b2c/timeout"
+      }
+    }
+  }
+}

@@ -231,10 +231,9 @@ describe('sandbox captures', () => {
 
   // The sandbox app has no Business To Pochi product: the gateway refuses the token. The SDK
   // treats 401.002.01 as an expired token, refreshes once and gets the same answer.
-  test('b2c.payToPochi without the product enabled (b2c-pochi.json)', async () => {
+  test('b2c.payToPochi acknowledgement (b2c-pochi.json)', async () => {
     const { status, response } = sandboxCapture('b2c-pochi');
-    const refused = { status, body: response };
-    const { fetch, calls } = fakeFetch([token, refused, token, refused]);
+    const { fetch } = fakeFetch([token, { status, body: response }]);
     const mpesa = createMpesa({
       environment: 'sandbox',
       consumerKey: 'key',
@@ -243,12 +242,25 @@ describe('sandbox captures', () => {
       fetch,
     });
 
-    const error = await mpesa.b2c
-      .payToPochi({ ...b2bInput, phoneNumber: '0708374149' })
-      .catch((e: unknown) => e);
+    const res = await mpesa.b2c.payToPochi({ ...b2bInput, phoneNumber: '0708374149' });
 
-    expect(error).toMatchObject({ status: 401, errorCode: '401.002.01' });
-    expect(calls).toHaveLength(4);
+    expect(res).toMatchObject({
+      conversationId: 'AG_REDACTED',
+      responseCode: '0',
+      responseDescription: 'Accept the service request successfully.',
+    });
+  });
+
+  test('a live Business To Pochi result parses (callbacks/b2c-pochi-result.json)', () => {
+    const parsed = parseResult(result('b2c-pochi-result'));
+
+    expect(parsed).toMatchObject({
+      resultCode: 8006,
+      ok: false,
+      resultDesc: 'The security credential is locked.',
+      transactionId: 'XXXXXXXXXX',
+      parameters: { CreditPartyName: '<redacted>' },
+    });
   });
 
   // Every B2B result was 8006: the shared sandbox initiator is still locked. Buy Goods and

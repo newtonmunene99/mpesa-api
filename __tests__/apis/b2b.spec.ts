@@ -482,17 +482,16 @@ describe('b2b.expressCheckout', () => {
     await expect(api.expressCheckout(checkout)).rejects.toBeInstanceOf(DarajaApiError);
   });
 
-  test('surfaces the sandbox refusal as DarajaApiError', async () => {
+  test("surfaces the sandbox's gateway timeout as DarajaApiError", async () => {
+    // With the product enabled, the sandbox's backend times out (504) on every push.
     const captured = sandboxCapture('b2b-express-checkout');
-    const refused: FakeResponse = { status: captured.status, body: captured.response };
-    // A 401 makes the SDK refresh the token and retry once before giving up.
-    const { api, calls } = setup([token, refused, token, refused]);
+    const { api, calls } = setup([token, { status: captured.status, body: captured.response }]);
 
     const error = await api.expressCheckout(checkout).catch((e: unknown) => e);
 
     expect(error).toBeInstanceOf(DarajaApiError);
-    expect(error).toMatchObject({ status: 401, errorCode: '401' });
-    expect(calls).toHaveLength(4);
+    expect(error).toMatchObject({ status: 504, body: captured.response });
+    expect(calls).toHaveLength(2);
   });
 
   test('is wired on createMpesa', async () => {
