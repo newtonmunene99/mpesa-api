@@ -1,0 +1,1 @@
+probe-express-checkout: portal sample sent; sandbox answered 401 errorCode '401' 'Unauthorized - Invalid Access Token' (QR worked with the same token store minutes earlier), likely the product isn't on the sandbox app. No callback. Acknowledgement shape and RequestRefID casing remain unconfirmed live; parser and method follow the portal samples.
