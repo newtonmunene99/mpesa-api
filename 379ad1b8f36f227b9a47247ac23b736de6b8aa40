@@ -1,0 +1,1 @@
+transport-success-rule: request() takes an optional success rule for a 2xx ResponseCode (default all zeros, unchanged); Context.post forwards it to the first call and the token-refresh retry. Tests: rule accepts/refuses, non-numeric AG_ code, body without ResponseCode, retry path. Full suite 384 pass, vp check clean.
