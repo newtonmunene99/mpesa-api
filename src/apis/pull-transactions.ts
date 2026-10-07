@@ -50,7 +50,7 @@ export interface PullQueryInput {
 export interface PullTransaction {
   /** The M-Pesa receipt number. */
   transactionId: string;
-  /** When the transaction happened (`trxDate`, an ISO date with its time zone). */
+  /** When the transaction happened (`trxDate`: an ISO date, read as EAT when it has no zone). */
   date: Date;
   /** The customer's number as Daraja sends it, for example "722000000". */
   msisdn: string;
@@ -97,6 +97,15 @@ export interface PullTransactionsApi {
    * `to`. Daraja only keeps the last 48 hours. Pass `offset` to fetch later pages.
    */
   query(input: PullQueryInput): Promise<PullQueryResponse>;
+  /**
+   * Yields every C2B transaction between `from` and `to`, calling `query` page by page (each
+   * offset after the transactions so far) until a page comes back empty or holds only
+   * transactions already yielded (each transaction is yielded once). Invalid input throws
+   * `ValidationError` on the first iteration, before any request. An error from any
+   * page, including the HTTP 500 Daraja documents for "no transactions", rejects the iteration
+   * after the earlier pages were yielded.
+   */
+  all(input: Omit<PullQueryInput, 'offset'>): AsyncIterable<PullTransaction>;
 }
 
 const REGISTER_PATH = '/pulltransactions/v1/register';
@@ -105,8 +114,8 @@ const ALREADY_REGISTERED = '1001';
 const QUERY_PATH = '/pulltransactions/v1/query';
 const FOUND = '1000';
 const NONE_FOUND = '1001';
-/** An ISO 8601 date and time, such as `2020-08-05T10:13:00Z`. */
-const ISO_DATE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/;
+/** An ISO 8601 date and time, such as `2020-08-05T10:13:00Z`, with an optional zone. */
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(Z|[+-]\d{2}:?\d{2})?$/;
 
 async function register(ctx: Context, input: PullRegisterInput): Promise<PullRegisterResponse> {
   const issues = new Issues();
@@ -160,7 +169,9 @@ function checkQuery(input: PullQueryInput): number {
 
 /** Reads an ISO date, recording an issue when it isn't one. */
 function readIsoDate(issues: Issues, path: string, value: unknown): Date | undefined {
-  const date = typeof value === 'string' && ISO_DATE.test(value) ? new Date(value) : undefined;
+  const match = typeof value === 'string' ? ISO_DATE.exec(value) : null;
+  // A date without a zone is read as EAT, Daraja's time zone, never the host's.
+  const date = match ? new Date(match[1] ? match[0] : `${match[0]}+03:00`) : undefined;
   if (date && isDate(date)) return date;
   issues.add(path, 'must be an ISO date');
   return undefined;
@@ -233,10 +244,30 @@ async function query(ctx: Context, input: PullQueryInput): Promise<PullQueryResp
   };
 }
 
+async function* all(
+  ctx: Context,
+  input: Omit<PullQueryInput, 'offset'>,
+): AsyncGenerator<PullTransaction> {
+  const { shortCode, from, to } = input;
+  // Guards against a page being served again (an ignored offset), which would loop forever.
+  const seen = new Set<string>();
+  let offset = 0;
+  for (;;) {
+    const { transactions } = await query(ctx, { shortCode, from, to, offset });
+    const fresh = transactions.filter(
+      (t) => !seen.has(t.transactionId) && seen.add(t.transactionId),
+    );
+    if (fresh.length === 0) return;
+    yield* fresh;
+    offset += transactions.length;
+  }
+}
+
 /** Pull Transactions. */
 export function pullTransactions(ctx: Context): PullTransactionsApi {
   return {
     register: (input) => register(ctx, input),
     query: (input) => query(ctx, input),
+    all: (input) => all(ctx, input),
   };
 }
