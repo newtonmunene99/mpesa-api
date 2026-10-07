@@ -72,11 +72,11 @@ await mpesa.b2b.topUpB2C({
 });
 ```
 
-The fields are `payBill`'s with an optional `accountReference` and no `occasion`; `partyB` is the B2C shortcode.
+The fields are `payBill`'s with an optional `accountReference` and no `occasion`; `partyB` is the B2C shortcode. An `occasion` passed from untyped JavaScript is ignored, not sent.
 
 ## Remit tax to KRA
 
-Pays tax to the Kenya Revenue Authority against a payment registration number (PRN). You need a prior integration with KRA to generate PRNs. Tax always goes to KRA's shortcode, `572572`, which the SDK sends for you, so there is no `partyB`.
+Pays tax to the Kenya Revenue Authority against a payment registration number (PRN). You need a prior integration with KRA to generate PRNs. Tax always goes to KRA's shortcode, `572572`, which the SDK sends for you, so there is no `partyB`. A `partyB`, `requester` or `occasion` passed from untyped JavaScript is ignored, not sent.
 
 ```ts
 await mpesa.b2b.remitTax({

@@ -137,6 +137,34 @@ describe('b2b.payBill', () => {
     expect(calls).toHaveLength(0);
   });
 
+  test('reports every invalid field at once, in a fixed order, without calling Daraja', async () => {
+    const { api, calls } = setup([]);
+
+    const error = await api
+      .payBill({
+        ...payBill,
+        amount: 0,
+        shortCode: 12,
+        partyB: 'abc' as never,
+        remarks: '',
+        accountReference: 'a'.repeat(14),
+        occasion: 'o'.repeat(101),
+        requester: '12345',
+      })
+      .catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues.map((issue) => issue.path)).toEqual([
+      'amount',
+      'shortCode',
+      'partyB',
+      'remarks',
+      'accountReference',
+      'occasion',
+      'requester',
+    ]);
+    expect(calls).toHaveLength(0);
+  });
+
   test('is available on the client', () => {
     const { fetch } = fakeFetch([]);
     const mpesa = createMpesa({
