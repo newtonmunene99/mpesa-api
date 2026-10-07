@@ -1,0 +1,1 @@
+b2b-remit-tax: red = 10 failing; green 49 in b2b.spec.ts (remittax path and body, PRN required, fixed PartyB with @ts-expect-error on partyB, shared-rules row). Full suite 354 passed, vp check clean.
