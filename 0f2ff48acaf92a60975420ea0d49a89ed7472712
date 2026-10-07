@@ -1,0 +1,1 @@
+docs-disbursements: red = docs-examples.spec listed every new page line missing from docs-examples.ts; green after mirroring. vp check clean, docs:build no dead links. Also updated docs/migration.md (B2B row said 'Not supported'), outside the plan's files list.
