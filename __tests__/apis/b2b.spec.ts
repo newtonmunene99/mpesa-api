@@ -252,6 +252,57 @@ describe('b2b.topUpB2C', () => {
   });
 });
 
+const tax = {
+  amount: 239,
+  shortCode: 888880,
+  accountReference: 'PRN1234XN',
+  remarks: 'OK',
+  ...urls,
+};
+
+describe('b2b.remitTax', () => {
+  test('posts a Tax Remittance request to KRA', async () => {
+    const { url, body } = await sent((api) => api.remitTax(tax));
+
+    expect(url).toBe('https://sandbox.safaricom.co.ke/mpesa/b2b/v1/remittax');
+    expect(body).toEqual({
+      Initiator: 'testapi',
+      SecurityCredential: '<checked>',
+      CommandID: 'PayTaxToKRA',
+      SenderIdentifierType: '4',
+      RecieverIdentifierType: '4',
+      Amount: 239,
+      PartyA: 888880,
+      PartyB: 572572,
+      AccountReference: 'PRN1234XN',
+      Remarks: 'OK',
+      ...sentUrls,
+    });
+  });
+
+  test('requires the payment registration number', async () => {
+    const { api, calls } = setup([]);
+
+    const error = await api.remitTax({ ...tax, accountReference: '' }).catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([
+      { path: 'accountReference', message: 'is required' },
+    ]);
+    expect(calls).toHaveLength(0);
+  });
+
+  test('always pays KRA and takes no partyB, requester or occasion', async () => {
+    const { body } = await sent((api) =>
+      // @ts-expect-error remitTax has no partyB; KRA's shortcode is fixed.
+      api.remitTax({ ...tax, partyB: 600000, requester: '0708374149', occasion: 'x' }),
+    );
+
+    expect(body).toHaveProperty('PartyB', 572572);
+    expect(body).not.toHaveProperty('Requester');
+    expect(body).not.toHaveProperty('Occassion');
+  });
+});
+
 /** Each B2B method with a valid input; the shared rules below run against every one. */
 const methods: [
   string,
@@ -261,6 +312,7 @@ const methods: [
   ['payBill', (api, input) => api.payBill(input as typeof payBill), payBill],
   ['buyGoods', (api, input) => api.buyGoods(input as typeof buyGoods), buyGoods],
   ['topUpB2C', (api, input) => api.topUpB2C(input as typeof topUp), topUp],
+  ['remitTax', (api, input) => api.remitTax(input as typeof tax), tax],
 ];
 
 describe.each(methods)('b2b.%s shared validation', (method, call, valid) => {

@@ -51,6 +51,12 @@ export interface B2BTopUpInput extends B2BCommon {
   requester?: string;
 }
 
+/** Input for `b2b.remitTax`. The tax always goes to KRA's shortcode, 572572 (`PartyB`). */
+export interface B2BTaxInput extends B2BCommon {
+  /** KRA's payment registration number (PRN), 1 to 13 characters (`AccountReference`). */
+  accountReference: string;
+}
+
 /**
  * Business to Business (B2B) payments from your shortcode. Each needs the initiator to hold the
  * product's org API role on M-Pesa.
@@ -74,9 +80,18 @@ export interface B2BApi {
    * ready for disbursement (B2C Account Top Up). The outcome arrives at `resultUrl`.
    */
   topUpB2C(input: B2BTopUpInput): Promise<InitiatorResponse>;
+  /**
+   * Pays tax to the Kenya Revenue Authority against a payment registration number (Tax
+   * Remittance). Needs prior integration with KRA to generate the PRN. The outcome arrives at
+   * `resultUrl`.
+   */
+  remitTax(input: B2BTaxInput): Promise<InitiatorResponse>;
 }
 
 const PAYMENT_PATH = '/mpesa/b2b/v1/paymentrequest';
+const TAX_PATH = '/mpesa/b2b/v1/remittax';
+/** KRA's shortcode, the only `PartyB` Tax Remittance accepts. */
+const KRA_SHORTCODE = 572572;
 
 /** One B2B request: its `CommandID`, path and the fields only it sends. */
 interface B2BCall {
@@ -181,11 +196,25 @@ function topUpB2C(ctx: Context, input: B2BTopUpInput): Promise<InitiatorResponse
   });
 }
 
+function remitTax(ctx: Context, input: B2BTaxInput): Promise<InitiatorResponse> {
+  // Only the PRN is passed on: Tax Remittance takes no Requester or Occassion.
+  const { accountReference } = input;
+  return b2bRequest(ctx, {
+    api: 'b2b.remitTax',
+    path: TAX_PATH,
+    commandId: 'PayTaxToKRA',
+    input,
+    partyB: KRA_SHORTCODE,
+    extra: (issues) => extraFields(issues, { accountReference }, true),
+  });
+}
+
 /** Business to Business (B2B) payments. */
 export function b2b(ctx: Context): B2BApi {
   return {
     payBill: (input) => payBill(ctx, input),
     buyGoods: (input) => buyGoods(ctx, input),
     topUpB2C: (input) => topUpB2C(ctx, input),
+    remitTax: (input) => remitTax(ctx, input),
   };
 }
