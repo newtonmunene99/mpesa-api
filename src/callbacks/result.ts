@@ -5,8 +5,8 @@ import { Issues } from '../core/validate';
 import { flatten, isRecord, readTimestamp, requireValue, setOwn } from './shared';
 
 /**
- * A result callback from B2C, Transaction Status, Account Balance or Reversal: the body
- * Daraja POSTs to the request's `ResultURL`.
+ * A result callback from an initiator API (B2C, B2B, Business To Pochi, Transaction Status,
+ * Account Balance or Reversal): the body Daraja POSTs to the request's `ResultURL`.
  */
 export interface DarajaResult {
   /** Usually 0. Daraja documents it only as whether the result was sent to your listener. */
@@ -47,7 +47,8 @@ const TIMESTAMP_KEYS = new Set([
 const B2C_DATETIME_KEYS = new Set(['TransactionCompletedDateTime']);
 
 /**
- * Parses the result callback of B2C, Transaction Status, Account Balance or Reversal. Pass
+ * Parses the result callback of B2C, B2B, Business To Pochi, Transaction Status, Account
+ * Balance or Reversal. Pass
  * the already-parsed JSON. Throws `ValidationError` when required keys are missing or a date
  * is malformed.
  */

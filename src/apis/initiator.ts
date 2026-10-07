@@ -22,9 +22,9 @@ export interface InitiatorCall {
 }
 
 /**
- * Validates, signs and sends an initiator request: B2C, Transaction Status, Account Balance
- * or Reversal. Every problem, including a missing initiator, is reported in one
- * `ValidationError` before anything is sent.
+ * Validates, signs and sends an initiator request: B2C, B2B, Business To Pochi, Transaction
+ * Status, Account Balance or Reversal. Every problem, including a missing initiator, is
+ * reported in one `ValidationError` before anything is sent.
  */
 export async function initiatorRequest(
   ctx: Context,

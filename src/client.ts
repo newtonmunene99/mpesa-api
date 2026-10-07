@@ -1,4 +1,5 @@
 import { accountBalance, type AccountBalanceApi } from './apis/account-balance';
+import { b2b, type B2BApi } from './apis/b2b';
 import { b2c, type B2CApi } from './apis/b2c';
 import { c2b, type C2BApi } from './apis/c2b';
 import { reversal, type ReversalApi } from './apis/reversal';
@@ -15,9 +16,9 @@ import { Issues } from './core/validate';
 export type Environment = 'sandbox' | 'production';
 
 /**
- * The API operator ("initiator") used by B2C, Transaction Status, Account Balance and
- * Reversal. Pass either the password plus Safaricom's certificate for the environment (PEM
- * text or DER bytes), or a security credential generated on the Daraja portal's Test
+ * The API operator ("initiator") used by B2C, B2B, Business To Pochi, Transaction Status, Account
+ * Balance and Reversal. Pass either the password plus Safaricom's certificate for the environment
+ * (PEM text or DER bytes), or a security credential generated on the Daraja portal's Test
  * Credentials page.
  */
 export type Initiator =
@@ -31,7 +32,7 @@ export interface MpesaConfig {
   consumerKey: string;
   /** From your app on the Daraja portal. */
   consumerSecret: string;
-  /** Required for B2C, Transaction Status, Account Balance and Reversal. */
+  /** Required for B2C, B2B, Business To Pochi, Transaction Status, Account Balance and Reversal. */
   initiator?: Initiator;
   /** Lipa na M-Pesa Online passkey. Required for STK push. */
   passkey?: string;
@@ -67,8 +68,10 @@ export interface Mpesa {
   readonly stkPush: StkPushApi;
   /** Customer to Business (C2B) payment notifications. */
   readonly c2b: C2BApi;
-  /** Business to Customer (B2C) payments. */
+  /** Business to Customer (B2C) payments, including Business To Pochi. */
   readonly b2c: B2CApi;
+  /** Business to Business (B2B) payments: pay bill, buy goods, B2C top up, tax. */
+  readonly b2b: B2BApi;
   /** Transaction Status queries. */
   readonly transactionStatus: TransactionStatusApi;
   /** Account Balance queries. */
@@ -241,6 +244,7 @@ export function createMpesa(config: MpesaConfig): Mpesa {
     stkPush: stkPush(ctx),
     c2b: c2b(ctx),
     b2c: b2c(ctx),
+    b2b: b2b(ctx),
     transactionStatus: transactionStatus(ctx),
     accountBalance: accountBalance(ctx),
     reversal: reversal(ctx),
