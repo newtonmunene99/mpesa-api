@@ -17,10 +17,10 @@ import { Issues } from './core/validate';
 export type Environment = 'sandbox' | 'production';
 
 /**
- * The API operator ("initiator") used by B2C, B2B, Business To Pochi, Transaction Status, Account
- * Balance and Reversal. Pass either the password plus Safaricom's certificate for the environment
- * (PEM text or DER bytes), or a security credential generated on the Daraja portal's Test
- * Credentials page.
+ * The API operator ("initiator") used by B2C, B2B (except Express CheckOut), Business To Pochi,
+ * Transaction Status, Account Balance and Reversal. Pass either the password plus Safaricom's
+ * certificate for the environment (PEM text or DER bytes), or a security credential generated
+ * on the Daraja portal's Test Credentials page.
  */
 export type Initiator =
   | { name: string; password: string; certificate: string | Uint8Array }
@@ -33,7 +33,10 @@ export interface MpesaConfig {
   consumerKey: string;
   /** From your app on the Daraja portal. */
   consumerSecret: string;
-  /** Required for B2C, B2B, Business To Pochi, Transaction Status, Account Balance and Reversal. */
+  /**
+   * Required for B2C, B2B (except Express CheckOut), Business To Pochi, Transaction Status,
+   * Account Balance and Reversal.
+   */
   initiator?: Initiator;
   /** Lipa na M-Pesa Online passkey. Required for STK push. */
   passkey?: string;
@@ -81,7 +84,7 @@ export interface Mpesa {
   readonly c2b: C2BApi;
   /** Business to Customer (B2C) payments, including Business To Pochi. */
   readonly b2c: B2CApi;
-  /** Business to Business (B2B) payments: pay bill, buy goods, B2C top up, tax. */
+  /** Business to Business (B2B) payments: pay bill, buy goods, B2C top up, tax, Express CheckOut. */
   readonly b2b: B2BApi;
   /** Dynamic QR codes customers scan to pay. */
   readonly qr: QrApi;

@@ -1,10 +1,11 @@
 import { constants, privateDecrypt } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { describe, expect, test } from 'vite-plus/test';
+import { describe, expect, test, vi } from 'vite-plus/test';
 import { b2b, type B2BApi } from '../../src/apis/b2b';
 import { createContext, createMpesa, type MpesaConfig } from '../../src/client';
-import { ValidationError } from '../../src/core/errors';
+import { DarajaApiError, ValidationError } from '../../src/core/errors';
 import { fakeFetch, type FakeResponse } from '../helpers/fake-fetch';
+import { sandboxCapture } from '../helpers/sandbox-capture';
 
 const read = (name: string): string =>
   readFileSync(new URL(`../fixtures/certs/${name}`, import.meta.url), 'utf8');
@@ -410,6 +411,132 @@ describe('b2b optional-field rules per method', () => {
     const error = await call(api, { ...valid, [path]: value }).catch((e: unknown) => e);
 
     expect((error as ValidationError).issues).toEqual([{ path, message }]);
+    expect(calls).toHaveLength(0);
+  });
+});
+
+describe('b2b.expressCheckout', () => {
+  // The acknowledgement sample from the B2B Express CheckOut portal page.
+  const initiated = { code: '0', status: 'USSD Initiated Successfully' };
+  const checkout = {
+    shortCode: 600000,
+    merchantTill: 123456,
+    amount: 100,
+    paymentReference: 'INV-7',
+    partnerName: 'Vendor',
+    callbackUrl: 'https://example.com/b2b/express',
+  };
+
+  test('posts the push without an initiator and returns the request ID', async () => {
+    const { calls, api } = setup([token, { status: 200, body: initiated }], {
+      initiator: undefined,
+    });
+
+    const res = await api.expressCheckout({ ...checkout, requestRefId: 'ref-1' });
+
+    expect(calls[1]!.url).toBe('https://sandbox.safaricom.co.ke/v1/ussdpush/get-msisdn');
+    expect(calls[1]!.body).toEqual({
+      primaryShortCode: '123456',
+      receiverShortCode: '600000',
+      amount: '100',
+      paymentRef: 'INV-7',
+      callbackUrl: 'https://example.com/b2b/express',
+      partnerName: 'Vendor',
+      RequestRefID: 'ref-1',
+    });
+    expect(res).toEqual({
+      code: '0',
+      status: 'USSD Initiated Successfully',
+      requestRefId: 'ref-1',
+      raw: initiated,
+    });
+  });
+
+  test('generates a request ID when none is given', async () => {
+    const spy = vi.spyOn(crypto, 'randomUUID').mockReturnValue('0-0-0-0-0');
+    try {
+      const { calls, api } = setup([token, { status: 200, body: initiated }]);
+
+      const res = await api.expressCheckout(checkout);
+
+      expect(calls[1]!.body).toMatchObject({ RequestRefID: '0-0-0-0-0' });
+      expect(res.requestRefId).toBe('0-0-0-0-0');
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  test('maps a non-zero code instead of throwing', async () => {
+    const body = { code: '1', status: 'Failed' };
+    const { api } = setup([token, { status: 200, body }]);
+
+    expect(await api.expressCheckout(checkout)).toMatchObject({ code: '1', status: 'Failed' });
+  });
+
+  test('surfaces the sandbox refusal as DarajaApiError', async () => {
+    const captured = sandboxCapture('b2b-express-checkout');
+    const refused: FakeResponse = { status: captured.status, body: captured.response };
+    // A 401 makes the SDK refresh the token and retry once before giving up.
+    const { api, calls } = setup([token, refused, token, refused]);
+
+    const error = await api.expressCheckout(checkout).catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(DarajaApiError);
+    expect(error).toMatchObject({ status: 401, errorCode: '401' });
+    expect(calls).toHaveLength(4);
+  });
+
+  test('is wired on createMpesa', async () => {
+    const { fetch, calls } = fakeFetch([token, { status: 200, body: initiated }]);
+    const mpesa = createMpesa({
+      environment: 'sandbox',
+      consumerKey: 'key',
+      consumerSecret: 'secret',
+      fetch,
+    });
+
+    await mpesa.b2b.expressCheckout(checkout);
+
+    expect(calls[1]!.url).toBe('https://sandbox.safaricom.co.ke/v1/ussdpush/get-msisdn');
+  });
+
+  test.each([
+    ['amount 0', { amount: 0 }, 'amount', 'must be at least 1'],
+    ['fractional amount', { amount: 1.5 }, 'amount', 'must be an integer'],
+    ['short shortCode', { shortCode: 12 }, 'shortCode', 'must be a 5 to 7 digit shortcode'],
+    [
+      'non-numeric merchantTill',
+      { merchantTill: 'abc' as never },
+      'merchantTill',
+      'must be a 5 to 7 digit shortcode',
+    ],
+    ['empty paymentReference', { paymentReference: '' }, 'paymentReference', 'is required'],
+    ['blank partnerName', { partnerName: '  ' }, 'partnerName', 'is required'],
+    ['relative callbackUrl', { callbackUrl: '/cb' }, 'callbackUrl', 'must be an absolute URL'],
+    ['empty requestRefId', { requestRefId: '' }, 'requestRefId', 'is required'],
+    ['blank requestRefId', { requestRefId: '  ' }, 'requestRefId', 'is required'],
+    ['non-string partnerName', { partnerName: 42 as never }, 'partnerName', 'is required'],
+  ])('rejects %s', async (_, override, path, message) => {
+    const { api, calls } = setup([]);
+
+    const error = await api.expressCheckout({ ...checkout, ...override }).catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(ValidationError);
+    expect((error as ValidationError).message).toContain('b2b.expressCheckout');
+    expect((error as ValidationError).issues).toEqual([{ path, message }]);
+    expect(calls).toHaveLength(0);
+  });
+
+  test('requires https callbacks in production', async () => {
+    const { api, calls } = setup([], { environment: 'production' });
+
+    const error = await api
+      .expressCheckout({ ...checkout, callbackUrl: 'http://example.com/cb' })
+      .catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([
+      { path: 'callbackUrl', message: 'must use https in production' },
+    ]);
     expect(calls).toHaveLength(0);
   });
 });

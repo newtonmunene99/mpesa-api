@@ -65,6 +65,12 @@ describe('parseExpressCheckoutCallback', () => {
     expect(result).toMatchObject({ resultCode: 0, ok: true, amountCents: 435 });
   });
 
+  test('treats "00" as a non-canonical code, not success', () => {
+    expect(parseExpressCheckoutCallback({ ...fixture('success'), resultCode: '00' })).toMatchObject(
+      { resultCode: '00', ok: false },
+    );
+  });
+
   test('keeps a non-numeric resultCode as a string', () => {
     expect(
       parseExpressCheckoutCallback({ ...fixture('cancelled'), resultCode: 'E01' }),
