@@ -30,7 +30,7 @@ Behaviour changes on the wire:
 - B2C sends `Occassion` (the Daraja 3.0 spelling) instead of `Occasion`, and adds `OriginatorConversationID`.
 - Reversal's `RecieverIdentifierType` is always `"11"` (3.x defaulted to `"4"`), and Reversal no longer sends `Occasion`.
 - B2C and Reversal `remarks` are required, 2 to 100 characters. 3.x defaulted B2C `Remarks` to `"account"` and Reversal's to `"Transaction Reversal"`. Transaction Status still defaults `remarks` (now "Transaction status") but no longer sends a default `Occasion`.
-- `initiator` is optional; it's only needed for B2C, Transaction Status, Account Balance and Reversal. 3.x required `initiatorPassword` or `securityCredential` for every client.
+- `initiator` is optional; it's only needed for B2C, Business To Pochi, B2B, Transaction Status, Account Balance and Reversal. 3.x required `initiatorPassword` or `securityCredential` for every client.
 - C2B simulate no longer defaults `BillRefNumber` to `"account"`; it's required for paybill.
 
-Field names change from Daraja's PascalCase to camelCase; the table on each [API page](/apis/stk-push) lists the mapping. Derived fields (`CommandID` for Transaction Status, Account Balance and Reversal, `IdentifierType`, STK `Password` and `Timestamp`) are filled in for you. New in 4.x: the callback parsers, typed errors, input validation, a pluggable token store, and B2C's `OriginatorConversationID`.
+Field names change from Daraja's PascalCase to camelCase; the table on each [API page](/apis/stk-push) lists the mapping. Derived fields (`CommandID` for Transaction Status, Account Balance, Reversal, B2B and Business To Pochi, `IdentifierType`, B2B's `SenderIdentifierType` and `RecieverIdentifierType`, Tax Remittance's `PartyB`, STK `Password` and `Timestamp`) are filled in for you. New in 4.x: the callback parsers, typed errors, input validation, a pluggable token store, and B2C's `OriginatorConversationID`.

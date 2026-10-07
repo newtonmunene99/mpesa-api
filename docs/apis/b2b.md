@@ -1,6 +1,6 @@
 # Business to Business (B2B)
 
-Daraja 3.0 brings business-to-business payments back as four products, all paid from your shortcode's working account through the initiator. Each needs the initiator to hold that product's org API role on M-Pesa (for example "Business Paybill Org API initiator"). The acknowledgement only confirms that Daraja received the request; the outcome is posted to `resultUrl`, and you read it with [`parseResult`](/guide/callbacks).
+Daraja 3.0 brings business-to-business payments back as four products, all paid from your shortcode's working account through the initiator. Each needs the initiator to hold that product's org API role on M-Pesa (for example "Org Business Pay Bill API initiator", "Org Business Pay to Bulk API initiator" or "Tax Remittance to KRA API"). The acknowledgement only confirms that Daraja received the request; the outcome is posted to `resultUrl`, and you read it with [`parseResult`](/guide/callbacks).
 
 | Method         | Daraja product     | `CommandID`         |
 | -------------- | ------------------ | ------------------- |
@@ -28,17 +28,17 @@ await mpesa.b2b.payBill({
 });
 ```
 
-| Field              | Daraja field       | Notes                                                    |
-| ------------------ | ------------------ | -------------------------------------------------------- |
-| `amount`           | `Amount`           | Whole shillings, at least 1.                             |
-| `shortCode`        | `PartyA`           | Your shortcode, which is debited.                        |
-| `partyB`           | `PartyB`           | The paybill credited.                                    |
-| `accountReference` | `AccountReference` | The account number at the paybill, 1 to 13 characters.   |
-| `requester`        | `Requester`        | Optional. The customer you are paying for.               |
-| `remarks`          | `Remarks`          | 1 to 100 characters.                                     |
-| `occasion`         | `Occassion`        | Optional. 1 to 100 characters.                           |
-| `resultUrl`        | `ResultURL`        | Receives the result.                                     |
-| `queueTimeoutUrl`  | `QueueTimeOutURL`  | Receives a notice if the request times out in the queue. |
+| Field              | Daraja field       | Notes                                                                                       |
+| ------------------ | ------------------ | ------------------------------------------------------------------------------------------- |
+| `amount`           | `Amount`           | Whole shillings, at least 1.                                                                |
+| `shortCode`        | `PartyA`           | Your shortcode, which is debited.                                                           |
+| `partyB`           | `PartyB`           | The paybill credited.                                                                       |
+| `accountReference` | `AccountReference` | The account number at the paybill, 1 to 13 characters.                                      |
+| `requester`        | `Requester`        | Optional. The customer you are paying for: `07…`, `01…`, `+254…` or `254…`, sent as `254…`. |
+| `remarks`          | `Remarks`          | 1 to 100 characters.                                                                        |
+| `occasion`         | `Occassion`        | Optional. 1 to 100 characters.                                                              |
+| `resultUrl`        | `ResultURL`        | Receives the result.                                                                        |
+| `queueTimeoutUrl`  | `QueueTimeOutURL`  | Receives a notice if the request times out in the queue.                                    |
 
 ## Pay a till or merchant
 
@@ -100,6 +100,6 @@ await mpesa.b2b.remitTax({
 
 ## Results
 
-A successful B2B result's `parameters` include `Amount`, `TransCompletedTime` (a `Date`), `ReceiverPartyPublicName`, `Currency`, `DebitPartyAffectedAccountBalance` and `DebitAccountBalance`; `referenceData.BillReferenceNumber` echoes the account reference. A failed request usually carries only `BOCompletedTime`.
+A successful B2B result's `parameters` include `Amount`, `TransCompletedTime` (a `Date`), `ReceiverPartyPublicName`, `Currency`, `DebitPartyAffectedAccountBalance` (the packed balance format; split it with [`parseBalances`](/guide/callbacks)) and `DebitAccountBalance` (a `{Amount={…}}` string, kept as is); Pay Bill and Tax Remittance results echo the account reference as `referenceData.BillReferenceNumber`; in the sandbox, Buy Goods and Top Up results didn't. A failed request carries few or no `parameters` (the portal samples show only `BOCompletedTime`).
 
 The portal documents `PartyA` as a 5 or 6 digit shortcode; the SDK accepts 5 to 7 digits, as it does for the other APIs.
