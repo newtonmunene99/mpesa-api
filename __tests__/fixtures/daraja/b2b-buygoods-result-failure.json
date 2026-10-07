@@ -1,0 +1,22 @@
+{
+  "Result": {
+    "ResultType": 0,
+    "ResultCode": 2001,
+    "ResultDesc": "The initiator information is invalid.",
+    "OriginatorConversationID": "12337-23509183-5",
+    "ConversationID": "AG_20200120_0000657265d5fa9ae5c0",
+    "TransactionID": "OAK0000000",
+    "ResultParameters": {
+      "ResultParameter": {
+        "Key": "BOCompletedTime",
+        "Value": 20200120164825
+      }
+    },
+    "ReferenceData": {
+      "ReferenceItem": {
+        "Key": "QueueTimeoutURL",
+        "Value": "https://mydomain.com/b2b/businessbuygoods/queue/"
+      }
+    }
+  }
+}
