@@ -1,0 +1,1 @@
+PR #64 review items 1 and 3: all() stops on a page shorter than the first (test: 2 pages, 3 calls); the remaining exact-multiple case is documented, 500 still propagates. readIsoDate captures date-time and zone separately and normalises +hhmm. Explicit loop replaces the seen.add filter. 479 tests; TZ=America/New_York run passes.
