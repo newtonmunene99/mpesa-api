@@ -283,6 +283,23 @@ describe.skipIf(!enabled)('Daraja sandbox', () => {
     }));
   });
 
+  // Probe: the portal's B2B Express CheckOut request sample. The acknowledgement has `code`,
+  // not `ResponseCode`, so the default success rule never fires.
+  test('probe: B2B Express CheckOut', async () => {
+    const ctx = createContext(config());
+    await capture('b2b-express-checkout', async () => ({
+      raw: await ctx.post('/v1/ussdpush/get-msisdn', {
+        primaryShortCode: '000001',
+        receiverShortCode: '000002',
+        amount: '100',
+        paymentRef: 'paymentRef',
+        callbackUrl: url('b2b/express/callback'),
+        partnerName: 'Vendor',
+        RequestRefID: crypto.randomUUID(),
+      }),
+    }));
+  });
+
   test('transactionStatus.query with each ID and both (Verification 3)', async () => {
     const mpesa = createMpesa(config());
     const common = {
