@@ -1,8 +1,12 @@
 {
-  "status": 401,
+  "status": 504,
   "response": {
-    "requestId": "<redacted-id>",
-    "errorCode": "401",
-    "errorMessage": "Unauthorized - Invalid Access Token"
+    "fault": {
+      "faultstring": "Gateway Timeout",
+      "detail": {
+        "errorcode": "messaging.adaptors.http.flow.GatewayTimeout",
+        "reason": "TARGET_READ_TIMEOUT"
+      }
+    }
   }
 }

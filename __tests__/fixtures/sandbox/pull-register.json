@@ -1,8 +1,9 @@
 {
-  "status": 401,
+  "status": 200,
   "response": {
-    "requestId": "<redacted-id>",
-    "errorCode": "401.001",
-    "errorMessage": "Error Occurred - Invalid Access Token - "
+    "ResponseRefID": "0d4f2198-1ab4-4a7e-809f-560a33f2d312",
+    "Response Status": "1001",
+    "ShortCode": "600999",
+    "Response Description": "Shortcode already Registered!"
   }
 }

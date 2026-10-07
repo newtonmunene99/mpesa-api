@@ -1,8 +1,8 @@
 {
-  "status": 401,
+  "status": 200,
   "response": {
-    "requestId": "<redacted-id>",
-    "errorCode": "401.001",
-    "errorMessage": "Error Occurred - Invalid Access Token - "
+    "RequestID": "f9e9-41a5-8783-2ee591b46cc741228",
+    "ResponseCode": "1001",
+    "ResponseMessage": "No records found or Organization Name not available"
   }
 }
