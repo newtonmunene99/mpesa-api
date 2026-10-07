@@ -62,8 +62,6 @@ CI runs the same checks on Node 22, 24 and 26.
 
   Choose patch, minor or major, and write a one-line summary. It becomes the CHANGELOG entry. PRs that only touch docs, tests or CI don't need one. `pnpm changeset status` still asks for one when such a PR changes `package.json`, for example a script; add an empty one with `pnpm changeset --empty`.
 
-To get a review from Claude on a pull request, comment `@claude review` in the pull request's conversation. In an inline review comment it goes to the general assistant instead, as does any other `@claude` mention, which you can use to ask a question or for a change.
-
 ## Releasing
 
 Releases use [Changesets](https://github.com/changesets/changesets). Every pull request that changes what users of the package see adds a changeset (`pnpm changeset`).
