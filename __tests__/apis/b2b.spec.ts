@@ -149,12 +149,68 @@ describe('b2b.payBill', () => {
   });
 });
 
+const buyGoods = { amount: 239, shortCode: 600979, partyB: 600000, remarks: 'OK', ...urls };
+
+describe('b2b.buyGoods', () => {
+  test('posts a Business Buy Goods request with every documented field', async () => {
+    const { url, body } = await sent((api) =>
+      api.buyGoods({
+        ...buyGoods,
+        accountReference: '353353',
+        requester: '254708374149',
+        occasion: 'Stock',
+      }),
+    );
+
+    expect(url).toBe('https://sandbox.safaricom.co.ke/mpesa/b2b/v1/paymentrequest');
+    expect(body).toEqual({
+      Initiator: 'testapi',
+      SecurityCredential: '<checked>',
+      CommandID: 'BusinessBuyGoods',
+      SenderIdentifierType: '4',
+      RecieverIdentifierType: '4',
+      Amount: 239,
+      PartyA: 600979,
+      PartyB: 600000,
+      AccountReference: '353353',
+      Requester: '254708374149',
+      Occassion: 'Stock',
+      Remarks: 'OK',
+      ...sentUrls,
+    });
+  });
+
+  test('sends no AccountReference, Requester or Occassion when not given', async () => {
+    const { body } = await sent((api) => api.buyGoods({ ...buyGoods, accountReference: '' }));
+
+    expect(body).not.toHaveProperty('AccountReference');
+    expect(body).not.toHaveProperty('Requester');
+    expect(body).not.toHaveProperty('Occassion');
+  });
+
+  test('rejects an accountReference over 13 characters', async () => {
+    const { api, calls } = setup([]);
+
+    const error = await api
+      .buyGoods({ ...buyGoods, accountReference: 'a'.repeat(14) })
+      .catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([
+      { path: 'accountReference', message: 'must be at most 13 characters' },
+    ]);
+    expect(calls).toHaveLength(0);
+  });
+});
+
 /** Each B2B method with a valid input; the shared rules below run against every one. */
 const methods: [
   string,
   (api: B2BApi, input: Record<string, unknown>) => Promise<unknown>,
   Record<string, unknown>,
-][] = [['payBill', (api, input) => api.payBill(input as typeof payBill), payBill]];
+][] = [
+  ['payBill', (api, input) => api.payBill(input as typeof payBill), payBill],
+  ['buyGoods', (api, input) => api.buyGoods(input as typeof buyGoods), buyGoods],
+];
 
 describe.each(methods)('b2b.%s shared validation', (method, call, valid) => {
   test.each([

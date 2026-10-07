@@ -29,6 +29,18 @@ export interface B2BPayBillInput extends B2BCommon {
   occasion?: string;
 }
 
+/** Input for `b2b.buyGoods`. */
+export interface B2BBuyGoodsInput extends B2BCommon {
+  /** The till, merchant store or merchant head office credited (`PartyB`). */
+  partyB: number;
+  /** Optional. 1 to 13 characters (`AccountReference`). */
+  accountReference?: string;
+  /** Optional. The customer you are paying for (`Requester`). */
+  requester?: string;
+  /** Optional. 1 to 100 characters (`Occassion`, Daraja's spelling). */
+  occasion?: string;
+}
+
 /**
  * Business to Business (B2B) payments from your shortcode. Each needs the initiator to hold the
  * product's org API role on M-Pesa.
@@ -42,6 +54,11 @@ export interface B2BApi {
    * for a customer. The outcome arrives at `resultUrl` (see `parseResult`).
    */
   payBill(input: B2BPayBillInput): Promise<InitiatorResponse>;
+  /**
+   * Pays a till or merchant from your shortcode's working account (Business Buy Goods), for
+   * yourself or for a customer. The outcome arrives at `resultUrl` (see `parseResult`).
+   */
+  buyGoods(input: B2BBuyGoodsInput): Promise<InitiatorResponse>;
 }
 
 const PAYMENT_PATH = '/mpesa/b2b/v1/paymentrequest';
@@ -125,9 +142,21 @@ function payBill(ctx: Context, input: B2BPayBillInput): Promise<InitiatorRespons
   });
 }
 
+function buyGoods(ctx: Context, input: B2BBuyGoodsInput): Promise<InitiatorResponse> {
+  return b2bRequest(ctx, {
+    api: 'b2b.buyGoods',
+    path: PAYMENT_PATH,
+    commandId: 'BusinessBuyGoods',
+    input,
+    partyB: input.partyB,
+    extra: (issues) => extraFields(issues, input, false),
+  });
+}
+
 /** Business to Business (B2B) payments. */
 export function b2b(ctx: Context): B2BApi {
   return {
     payBill: (input) => payBill(ctx, input),
+    buyGoods: (input) => buyGoods(ctx, input),
   };
 }
