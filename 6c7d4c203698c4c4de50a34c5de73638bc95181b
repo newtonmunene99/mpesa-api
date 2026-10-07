@@ -1,0 +1,1 @@
+portal-fixtures: red = 9 failing tests (ENOENT on the new fixtures); green after transcription, no parser change needed. Full suite 305 passed, vp check clean. Pochi fixtures are byte copies of the B2C ones (the portal shows identical samples).
