@@ -41,6 +41,16 @@ export interface B2BBuyGoodsInput extends B2BCommon {
   occasion?: string;
 }
 
+/** Input for `b2b.topUpB2C`. */
+export interface B2BTopUpInput extends B2BCommon {
+  /** The B2C shortcode whose utility account is credited (`PartyB`). */
+  partyB: number;
+  /** Optional. 1 to 13 characters (`AccountReference`). */
+  accountReference?: string;
+  /** Optional. The customer you are paying for (`Requester`). */
+  requester?: string;
+}
+
 /**
  * Business to Business (B2B) payments from your shortcode. Each needs the initiator to hold the
  * product's org API role on M-Pesa.
@@ -59,6 +69,11 @@ export interface B2BApi {
    * yourself or for a customer. The outcome arrives at `resultUrl` (see `parseResult`).
    */
   buyGoods(input: B2BBuyGoodsInput): Promise<InitiatorResponse>;
+  /**
+   * Moves money from your shortcode's working account to a B2C shortcode's utility account,
+   * ready for disbursement (B2C Account Top Up). The outcome arrives at `resultUrl`.
+   */
+  topUpB2C(input: B2BTopUpInput): Promise<InitiatorResponse>;
 }
 
 const PAYMENT_PATH = '/mpesa/b2b/v1/paymentrequest';
@@ -153,10 +168,24 @@ function buyGoods(ctx: Context, input: B2BBuyGoodsInput): Promise<InitiatorRespo
   });
 }
 
+function topUpB2C(ctx: Context, input: B2BTopUpInput): Promise<InitiatorResponse> {
+  // Top Up takes no Occassion, so only the account reference and requester are passed on.
+  const { accountReference, requester } = input;
+  return b2bRequest(ctx, {
+    api: 'b2b.topUpB2C',
+    path: PAYMENT_PATH,
+    commandId: 'BusinessPayToBulk',
+    input,
+    partyB: input.partyB,
+    extra: (issues) => extraFields(issues, { accountReference, requester }, false),
+  });
+}
+
 /** Business to Business (B2B) payments. */
 export function b2b(ctx: Context): B2BApi {
   return {
     payBill: (input) => payBill(ctx, input),
     buyGoods: (input) => buyGoods(ctx, input),
+    topUpB2C: (input) => topUpB2C(ctx, input),
   };
 }

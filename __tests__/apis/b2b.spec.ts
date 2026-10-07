@@ -202,6 +202,56 @@ describe('b2b.buyGoods', () => {
   });
 });
 
+const topUp = { amount: 239, shortCode: 600979, partyB: 600000, remarks: 'OK', ...urls };
+
+describe('b2b.topUpB2C', () => {
+  test('posts a B2C Account Top Up request with every documented field', async () => {
+    const { url, body } = await sent((api) =>
+      api.topUpB2C({ ...topUp, accountReference: '353353', requester: '0708374149' }),
+    );
+
+    expect(url).toBe('https://sandbox.safaricom.co.ke/mpesa/b2b/v1/paymentrequest');
+    expect(body).toEqual({
+      Initiator: 'testapi',
+      SecurityCredential: '<checked>',
+      CommandID: 'BusinessPayToBulk',
+      SenderIdentifierType: '4',
+      RecieverIdentifierType: '4',
+      Amount: 239,
+      PartyA: 600979,
+      PartyB: 600000,
+      AccountReference: '353353',
+      Requester: '254708374149',
+      Remarks: 'OK',
+      ...sentUrls,
+    });
+  });
+
+  test('never sends Occassion, which Top Up does not take', async () => {
+    const { body } = await sent((api) =>
+      api.topUpB2C({ ...topUp, occasion: 'ignored' } as typeof topUp),
+    );
+
+    expect(body).not.toHaveProperty('Occassion');
+    expect(body).not.toHaveProperty('AccountReference');
+    expect(body).not.toHaveProperty('Requester');
+  });
+
+  test('rejects an invalid requester', async () => {
+    const { api, calls } = setup([]);
+
+    const error = await api.topUpB2C({ ...topUp, requester: '12345' }).catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([
+      {
+        path: 'requester',
+        message: 'must be a Safaricom number like 2547XXXXXXXX or 07XXXXXXXX',
+      },
+    ]);
+    expect(calls).toHaveLength(0);
+  });
+});
+
 /** Each B2B method with a valid input; the shared rules below run against every one. */
 const methods: [
   string,
@@ -210,6 +260,7 @@ const methods: [
 ][] = [
   ['payBill', (api, input) => api.payBill(input as typeof payBill), payBill],
   ['buyGoods', (api, input) => api.buyGoods(input as typeof buyGoods), buyGoods],
+  ['topUpB2C', (api, input) => api.topUpB2C(input as typeof topUp), topUp],
 ];
 
 describe.each(methods)('b2b.%s shared validation', (method, call, valid) => {
