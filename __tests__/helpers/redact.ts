@@ -14,8 +14,17 @@ const DROP = new Set([
 // error bodies.
 const ID_KEYS = new Set(['OriginatorConversationID', 'OriginatorCoversationID', 'requestId']);
 const NAMES = new Set(['FirstName', 'MiddleName', 'LastName']);
-// C2B notifications: MSISDN may be masked, hashed or plain; BillRefNumber is free text.
-const MASK = new Set(['MSISDN', 'BillRefNumber']);
+// C2B notifications: MSISDN may be masked, hashed or plain; BillRefNumber is free text. Pull
+// Transactions sends the customer's number without its 254 prefix (`msisdn`), their name
+// (`sender`) and free text (`billreference`), and registration may echo `NominatedNumber`.
+const MASK = new Set([
+  'MSISDN',
+  'BillRefNumber',
+  'msisdn',
+  'sender',
+  'billreference',
+  'NominatedNumber',
+]);
 const SENSITIVE_ENTRIES = new Set([
   'ReceiverPartyPublicName',
   'DebitPartyName',

@@ -300,6 +300,44 @@ describe.skipIf(!enabled)('Daraja sandbox', () => {
     }));
   });
 
+  // Probes: Pull Transactions register and query from the sandbox org shortcode. Register
+  // answers with ResponseStatus, so any answer is recorded.
+  test('probe: Pull Transactions register', async () => {
+    const ctx = createContext(config());
+    await capture('pull-register', async () => ({
+      raw: await ctx.post(
+        '/pulltransactions/v1/register',
+        {
+          ShortCode: String(org()),
+          RequestType: 'Pull',
+          NominatedNumber: msisdn(),
+          CallBackURL: url('pull/callback'),
+        },
+        { success: () => true },
+      ),
+    }));
+  });
+
+  test('probe: Pull Transactions query', async () => {
+    // EAT (UTC+3) as YYYY-MM-DD HH:mm:ss, for the last 24 hours.
+    const eat = (date: Date) =>
+      new Date(date.getTime() + 3 * 3_600_000).toISOString().slice(0, 19).replace('T', ' ');
+    const now = new Date();
+    const ctx = createContext(config());
+    await capture('pull-query', async () => ({
+      raw: await ctx.post(
+        '/pulltransactions/v1/query',
+        {
+          ShortCode: String(org()),
+          StartDate: eat(new Date(now.getTime() - 24 * 3_600_000)),
+          EndDate: eat(now),
+          OffSetValue: '0',
+        },
+        { success: () => true },
+      ),
+    }));
+  });
+
   test('transactionStatus.query with each ID and both (Verification 3)', async () => {
     const mpesa = createMpesa(config());
     const common = {
