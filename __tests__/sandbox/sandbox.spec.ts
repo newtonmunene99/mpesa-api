@@ -192,6 +192,77 @@ describe.skipIf(!enabled)('Daraja sandbox', () => {
     }));
   });
 
+  // The disbursement products, sent once each from the sandbox org shortcode (the shortcode
+  // the test initiator belongs to). 600000 is the portal's sample receiving shortcode.
+  test('b2b.payBill', async () => {
+    await capture('b2b-paybill', () =>
+      createMpesa(config()).b2b.payBill({
+        amount: 10,
+        shortCode: org(),
+        partyB: 600000,
+        accountReference: '353353',
+        requester: msisdn(),
+        remarks: 'SDK sandbox test',
+        resultUrl: url('b2b/paybill/result'),
+        queueTimeoutUrl: url('b2b/timeout'),
+      }),
+    );
+  });
+
+  test('b2b.buyGoods', async () => {
+    await capture('b2b-buygoods', () =>
+      createMpesa(config()).b2b.buyGoods({
+        amount: 10,
+        shortCode: org(),
+        partyB: 600000,
+        accountReference: '353353',
+        requester: msisdn(),
+        remarks: 'SDK sandbox test',
+        resultUrl: url('b2b/buygoods/result'),
+        queueTimeoutUrl: url('b2b/timeout'),
+      }),
+    );
+  });
+
+  test('b2b.topUpB2C', async () => {
+    await capture('b2b-topup', () =>
+      createMpesa(config()).b2b.topUpB2C({
+        amount: 10,
+        shortCode: org(),
+        partyB: 600997,
+        remarks: 'SDK sandbox test',
+        resultUrl: url('b2b/topup/result'),
+        queueTimeoutUrl: url('b2b/timeout'),
+      }),
+    );
+  });
+
+  test('b2b.remitTax', async () => {
+    await capture('b2b-tax', () =>
+      createMpesa(config()).b2b.remitTax({
+        amount: 10,
+        shortCode: org(),
+        accountReference: 'PRN1234XN',
+        remarks: 'SDK sandbox test',
+        resultUrl: url('b2b/tax/result'),
+        queueTimeoutUrl: url('b2b/timeout'),
+      }),
+    );
+  });
+
+  test('b2c.payToPochi', async () => {
+    await capture('b2c-pochi', () =>
+      createMpesa(config()).b2c.payToPochi({
+        amount: 10,
+        shortCode: org(),
+        phoneNumber: msisdn(),
+        remarks: 'SDK sandbox test',
+        resultUrl: url('b2c/pochi/result'),
+        queueTimeoutUrl: url('b2c/timeout'),
+      }),
+    );
+  });
+
   test('transactionStatus.query with each ID and both (Verification 3)', async () => {
     const mpesa = createMpesa(config());
     const common = {

@@ -202,4 +202,74 @@ describe('sandbox captures', () => {
       }),
     ).resolves.toMatchObject(accepted);
   });
+
+  // Disbursement calls from the sandbox org shortcode on 2026-10-07 (pnpm test:sandbox).
+  const b2bInput = { amount: 10, shortCode: 600999, remarks: 'SDK sandbox test', ...urls };
+
+  test.each([
+    [
+      'b2b-paybill',
+      (m: ReturnType<typeof client>) =>
+        m.b2b.payBill({ ...b2bInput, partyB: 600000, accountReference: '353353' }),
+    ],
+    [
+      'b2b-buygoods',
+      (m: ReturnType<typeof client>) => m.b2b.buyGoods({ ...b2bInput, partyB: 600000 }),
+    ],
+    [
+      'b2b-topup',
+      (m: ReturnType<typeof client>) => m.b2b.topUpB2C({ ...b2bInput, partyB: 600997 }),
+    ],
+    [
+      'b2b-tax',
+      (m: ReturnType<typeof client>) =>
+        m.b2b.remitTax({ ...b2bInput, accountReference: 'PRN1234XN' }),
+    ],
+  ])('%s acknowledgement', async (name, call) => {
+    await expect(call(client(name))).resolves.toMatchObject(accepted);
+  });
+
+  // The sandbox app has no Business To Pochi product: the gateway refuses the token. The SDK
+  // treats 401.002.01 as an expired token, refreshes once and gets the same answer.
+  test('b2c.payToPochi without the product enabled (b2c-pochi.json)', async () => {
+    const { status, response } = sandboxCapture('b2c-pochi');
+    const refused = { status, body: response };
+    const { fetch, calls } = fakeFetch([token, refused, token, refused]);
+    const mpesa = createMpesa({
+      environment: 'sandbox',
+      consumerKey: 'key',
+      consumerSecret: 'secret',
+      initiator: { name: 'testapi', password: 'Safaricom999!*!', certificate },
+      fetch,
+    });
+
+    const error = await mpesa.b2c
+      .payToPochi({ ...b2bInput, phoneNumber: '0708374149' })
+      .catch((e: unknown) => e);
+
+    expect(error).toMatchObject({ status: 401, errorCode: '401.002.01' });
+    expect(calls).toHaveLength(4);
+  });
+
+  // Every B2B result was 8006: the shared sandbox initiator is still locked. Buy Goods and
+  // Top Up results carry no BillReferenceNumber, and each ends with a valueless Occassion.
+  test.each([
+    ['b2b-paybill-result-locked', { BillReferenceNumber: '353353' }],
+    ['b2b-buygoods-result-locked', {}],
+    ['b2b-topup-result-locked', {}],
+    ['b2b-tax-result-locked', { BillReferenceNumber: 'PRN1234XN' }],
+  ])('a live %s result parses', (name, reference) => {
+    const parsed = parseResult(result(name));
+
+    expect(parsed).toMatchObject({
+      resultCode: 8006,
+      ok: false,
+      resultDesc: 'The security credential is locked.',
+      parameters: {},
+    });
+    expect(parsed.referenceData).toEqual({
+      ...reference,
+      QueueTimeoutURL: 'https://internalsandbox.safaricom.co.ke/mpesa/b2bresults/v1/submit',
+    });
+  });
 });

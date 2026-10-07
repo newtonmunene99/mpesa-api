@@ -1,0 +1,25 @@
+{
+  "Result": {
+    "ResultType": 0,
+    "ResultCode": 8006,
+    "ResultDesc": "The security credential is locked.",
+    "OriginatorConversationID": "<redacted-id>",
+    "ConversationID": "AG_REDACTED",
+    "TransactionID": "XXXXXXXXXX",
+    "ReferenceData": {
+      "ReferenceItem": [
+        {
+          "Key": "BillReferenceNumber",
+          "Value": "PRN1234XN"
+        },
+        {
+          "Key": "QueueTimeoutURL",
+          "Value": "https://internalsandbox.safaricom.co.ke/mpesa/b2bresults/v1/submit"
+        },
+        {
+          "Key": "Occassion"
+        }
+      ]
+    }
+  }
+}
