@@ -1,0 +1,19 @@
+{
+  "ResponseRefID": "26178-42530161-2",
+  "ResponseCode": "1000",
+  "ResponseMessage": "Success",
+  "Response": [
+    [
+      {
+        "transactionId": "yzlyrEsRG1",
+        "trxDate": "2020-08-05T10:13:00Z",
+        "msisdn": 722000000,
+        "sender": "UAT2",
+        "transactiontype": "c2b-pay-bill-debit",
+        "billreference": "37207636392",
+        "amount": "168.00",
+        "organizationname": "Daraja Pull API Test"
+      }
+    ]
+  ]
+}

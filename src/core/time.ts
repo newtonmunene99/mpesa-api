@@ -5,17 +5,28 @@ const EAT_OFFSET_MS = 3 * 60 * 60 * 1000;
 
 const pad = (n: number, width = 2): string => String(n).padStart(width, '0');
 
+/** A date's EAT calendar parts, zero-padded: year, month, day, hours, minutes, seconds. */
+function eatParts(date: Date): [string, string, string, string, string, string] {
+  const eat = new Date(date.getTime() + EAT_OFFSET_MS);
+  return [
+    pad(eat.getUTCFullYear(), 4),
+    pad(eat.getUTCMonth() + 1),
+    pad(eat.getUTCDate()),
+    pad(eat.getUTCHours()),
+    pad(eat.getUTCMinutes()),
+    pad(eat.getUTCSeconds()),
+  ];
+}
+
 /** Formats a date as Daraja's `YYYYMMDDHHmmss` timestamp in East Africa Time. */
 export function formatTimestamp(date: Date): string {
-  const eat = new Date(date.getTime() + EAT_OFFSET_MS);
-  return (
-    pad(eat.getUTCFullYear(), 4) +
-    pad(eat.getUTCMonth() + 1) +
-    pad(eat.getUTCDate()) +
-    pad(eat.getUTCHours()) +
-    pad(eat.getUTCMinutes()) +
-    pad(eat.getUTCSeconds())
-  );
+  return eatParts(date).join('');
+}
+
+/** Formats a date as `YYYY-MM-DD HH:mm:ss` in East Africa Time, the form Pull Transactions takes. */
+export function formatEatDateTime(date: Date): string {
+  const [year, month, day, hours, minutes, seconds] = eatParts(date);
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
 /** A calendar date and time as written, with a 1-based month. */
