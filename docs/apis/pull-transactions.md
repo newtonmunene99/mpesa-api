@@ -16,7 +16,7 @@ const registration = await mpesa.pullTransactions.register({
 
 | Field             | Daraja field      | Notes                                                                                                 |
 | ----------------- | ----------------- | ----------------------------------------------------------------------------------------------------- |
-| `shortCode`       | `ShortCode`       | Your paybill or till number.                                                                          |
+| `shortCode`       | `ShortCode`       | Your paybill or till number, 5 to 7 digits.                                                           |
 | `nominatedNumber` | `NominatedNumber` | The Safaricom number on the shortcode's KYC records: `07…`, `01…`, `+254…` or `254…`, sent as `254…`. |
 | `callbackUrl`     | `CallBackURL`     | Where Daraja may push transactions. The SDK doesn't parse these: Daraja doesn't document their shape. |
 
@@ -36,7 +36,7 @@ for (const t of page.transactions) console.log(t.transactionId, t.amountCents);
 
 | Field       | Daraja field  | Notes                                                        |
 | ----------- | ------------- | ------------------------------------------------------------ |
-| `shortCode` | `ShortCode`   | Your registered paybill or till number.                      |
+| `shortCode` | `ShortCode`   | Your registered paybill or till number, 5 to 7 digits.       |
 | `from`      | `StartDate`   | A `Date`, sent as `YYYY-MM-DD HH:mm:ss` in East Africa Time. |
 | `to`        | `EndDate`     | The same; must not be before `from`.                         |
 | `offset`    | `OffSetValue` | Optional. How many transactions to skip. Defaults to 0.      |
@@ -56,7 +56,7 @@ Daraja only keeps the last 48 hours; the SDK leaves that limit to Daraja. The re
 
 ## Every page
 
-`all` queries page after page, moving the offset on each time, and yields each transaction once. It stops at the first empty page.
+`all` queries page after page, moving the offset on each time, and yields each transaction once. It stops at the first page with no new transactions.
 
 ```ts
 for await (const t of mpesa.pullTransactions.all({ shortCode: 600000, from, to })) {

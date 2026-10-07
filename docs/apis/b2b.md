@@ -1,6 +1,6 @@
 # Business to Business (B2B)
 
-Daraja 3.0 brings business-to-business payments back as four products, all paid from your shortcode's working account through the initiator, plus [Express CheckOut](#express-checkout), which asks a merchant to pay you and needs no initiator. Each needs the initiator to hold that product's org API role on M-Pesa (for example "Org Business Pay Bill API initiator", "Org Business Pay to Bulk API initiator" or "Tax Remittance to KRA API"). The acknowledgement only confirms that Daraja received the request; the outcome is posted to `resultUrl`, and you read it with [`parseResult`](/guide/callbacks).
+Daraja 3.0 brings business-to-business payments back as four products, all paid from your shortcode's working account through the initiator, plus [Express CheckOut](#express-checkout), which asks a merchant to pay you and needs no initiator. Each of the four needs the initiator to hold that product's org API role on M-Pesa (for example "Org Business Pay Bill API initiator", "Org Business Pay to Bulk API initiator" or "Tax Remittance to KRA API"). For those four, the acknowledgement only confirms that Daraja received the request; the outcome is posted to `resultUrl`, and you read it with [`parseResult`](/guide/callbacks).
 
 | Method         | Daraja product     | `CommandID`         |
 | -------------- | ------------------ | ------------------- |
