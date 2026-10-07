@@ -1,0 +1,1 @@
+export-disbursements: red = TS2305 for the new names in exports-types.spec.ts; green after exporting. exports.spec.ts (runtime keys) unchanged: type-only exports. dist/index.d.mts carries the new types; lint:pkg ok.
