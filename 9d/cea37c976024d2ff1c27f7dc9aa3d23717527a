@@ -1,0 +1,1 @@
+Sandbox rerun after the maintainer added the products: Pull register 1001 with spaced keys (previously would have thrown DarajaApiError), query 1001 with RequestID and no Response key. Fixtures hand-checked. Patch changeset.
