@@ -81,17 +81,19 @@ describe('pullTransactions.register', () => {
     await expect(api.register(registration)).rejects.toBeInstanceOf(DarajaApiError);
   });
 
-  test('surfaces the sandbox refusal as DarajaApiError', async () => {
+  test("reads the sandbox's spaced keys (pull-register.json)", async () => {
+    // The live sandbox sends "Response Status" and "Response Description", with spaces.
     const captured = sandboxCapture('pull-register');
-    const refused: FakeResponse = { status: captured.status, body: captured.response };
-    // A 401 makes the SDK refresh the token and retry once before giving up.
-    const { api, calls } = setup([token, refused, token, refused]);
+    const { api } = setup([token, { status: captured.status, body: captured.response }]);
 
-    const error = await api.register(registration).catch((e: unknown) => e);
-
-    expect(error).toBeInstanceOf(DarajaApiError);
-    expect(error).toMatchObject({ status: 401, errorCode: '401.001' });
-    expect(calls).toHaveLength(4);
+    expect(await api.register(registration)).toEqual({
+      responseRefId: '0d4f2198-1ab4-4a7e-809f-560a33f2d312',
+      status: '1001',
+      shortCode: '600999',
+      description: 'Shortcode already Registered!',
+      alreadyRegistered: true,
+      raw: captured.response,
+    });
   });
 
   test('is wired on createMpesa', async () => {
@@ -234,13 +236,17 @@ describe('pullTransactions.query', () => {
     });
   });
 
-  test('surfaces the sandbox refusal as DarajaApiError', async () => {
+  test("maps the sandbox's empty answer (pull-query.json)", async () => {
+    // The live 1001 has no Response or Transaction key, and names its ID RequestID.
     const captured = sandboxCapture('pull-query');
-    const refused: FakeResponse = { status: captured.status, body: captured.response };
-    const { api, calls } = setup([token, refused, token, refused]);
+    const { api } = setup([token, { status: captured.status, body: captured.response }]);
 
-    await expect(api.query(window)).rejects.toMatchObject({ status: 401, errorCode: '401.001' });
-    expect(calls).toHaveLength(4);
+    expect(await api.query(window)).toEqual({
+      transactions: [],
+      responseRefId: 'f9e9-41a5-8783-2ee591b46cc741228',
+      responseCode: '1001',
+      raw: captured.response,
+    });
   });
 
   test.each([

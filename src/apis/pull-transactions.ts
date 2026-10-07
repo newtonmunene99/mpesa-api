@@ -22,7 +22,7 @@ export interface PullRegisterInput {
 export interface PullRegisterResponse {
   /** Daraja's reference for the request (`ResponseRefID`). */
   responseRefId: string;
-  /** "1000" when registered now, "1001" when it already was (`ResponseStatus`). */
+  /** "1000" when registered now, "1001" when it already was (`ResponseStatus`, or `Response Status`). */
   status: string;
   /** The registered shortcode, as Daraja echoes it. */
   shortCode: string;
@@ -70,7 +70,7 @@ export interface PullTransaction {
 export interface PullQueryResponse {
   /** The page's transactions; empty when there are none ("1001"). */
   transactions: PullTransaction[];
-  /** Daraja's reference for the request (`ResponseRefID`). */
+  /** Daraja's reference for the request (`ResponseRefID`, or `RequestID` as the sandbox sends it). */
   responseRefId: string;
   /** "1000", or "1001" when there are no transactions. */
   responseCode: string;
@@ -133,20 +133,22 @@ async function register(ctx: Context, input: PullRegisterInput): Promise<PullReg
     CallBackURL: input.callbackUrl,
   });
   // Registration answers with ResponseStatus rather than ResponseCode, so it is checked here.
-  const status = str(raw.ResponseStatus);
+  // The live sandbox spells its keys with spaces ("Response Status"); the portal doesn't.
+  const status = str(raw.ResponseStatus ?? raw['Response Status']);
+  const description = str(raw.ResponseDescription ?? raw['Response Description']);
   if (status !== REGISTERED && status !== ALREADY_REGISTERED) {
     throw new DarajaApiError({
       status: 200,
       body: raw,
       ...(status ? { errorCode: status } : {}),
-      errorMessage: str(raw.ResponseDescription),
+      errorMessage: description,
     });
   }
   return {
     responseRefId: str(raw.ResponseRefID),
     status,
     shortCode: str(raw.ShortCode),
-    description: str(raw.ResponseDescription),
+    description,
     alreadyRegistered: status === ALREADY_REGISTERED,
     raw,
   };
@@ -240,7 +242,8 @@ async function query(ctx: Context, input: PullQueryInput): Promise<PullQueryResp
   );
   return {
     transactions: readTransactions(raw),
-    responseRefId: str(raw.ResponseRefID),
+    // The portal sample says ResponseRefID; the live sandbox sends RequestID.
+    responseRefId: str(raw.ResponseRefID ?? raw.RequestID),
     responseCode: str(raw.ResponseCode),
     raw,
   };

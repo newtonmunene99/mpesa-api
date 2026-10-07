@@ -68,4 +68,4 @@ An error on any page rejects the loop after the earlier transactions were yielde
 
 ## Tested live
 
-Not yet. The sandbox refused both registration and query with `401.001` ("Invalid Access Token"), using a token that worked for other APIs. The sandbox app most likely doesn't have the Pull Transactions product. The parsing is tested against the portal's samples.
+Partly. In the sandbox, registering the org shortcode answered `1001` (already registered), and a query over the last day answered `1001` (no records). No transactions came back, so reading them is tested against the portal's sample. The sandbox differs from the portal's samples in two ways, and the SDK reads both forms: registration spells its keys with spaces (`Response Status`, `Response Description`), and the query names its ID `RequestID`.
