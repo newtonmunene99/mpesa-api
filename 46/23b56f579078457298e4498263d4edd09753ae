@@ -1,0 +1,1 @@
+probe-qr: portal sample sent to the sandbox; HTTP 200, ResponseCode "00", no RequestID, QRCode a 300px PNG (~3.5 KB base64, kept whole, public image, hand-checked for PII). Default all-zeros rule fits; requestId must be optional.
