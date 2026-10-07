@@ -2,6 +2,7 @@ import { accountBalance, type AccountBalanceApi } from './apis/account-balance';
 import { b2b, type B2BApi } from './apis/b2b';
 import { b2c, type B2CApi } from './apis/b2c';
 import { c2b, type C2BApi } from './apis/c2b';
+import { pullTransactions, type PullTransactionsApi } from './apis/pull-transactions';
 import { qr, type QrApi } from './apis/qr';
 import { reversal, type ReversalApi } from './apis/reversal';
 import { stkPush, type StkPushApi } from './apis/stk-push';
@@ -88,6 +89,8 @@ export interface Mpesa {
   readonly b2b: B2BApi;
   /** Dynamic QR codes customers scan to pay. */
   readonly qr: QrApi;
+  /** Pull Transactions: the last 48 hours of C2B payments to a shortcode. */
+  readonly pullTransactions: PullTransactionsApi;
   /** Transaction Status queries. */
   readonly transactionStatus: TransactionStatusApi;
   /** Account Balance queries. */
@@ -263,6 +266,7 @@ export function createMpesa(config: MpesaConfig): Mpesa {
     b2c: b2c(ctx),
     b2b: b2b(ctx),
     qr: qr(ctx),
+    pullTransactions: pullTransactions(ctx),
     transactionStatus: transactionStatus(ctx),
     accountBalance: accountBalance(ctx),
     reversal: reversal(ctx),
