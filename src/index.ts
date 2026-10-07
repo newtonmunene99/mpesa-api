@@ -21,8 +21,10 @@ export {
   type C2BValidationResponse,
   c2bValidationResponse,
   type DarajaResult,
+  type ExpressCheckoutCallback,
   parseBalances,
   parseC2BNotification,
+  parseExpressCheckoutCallback,
   parseResult,
   parseStkCallback,
   type StkCallback,
@@ -32,12 +34,23 @@ export type { AccountBalanceApi, AccountBalanceInput } from './apis/account-bala
 export type {
   B2BApi,
   B2BBuyGoodsInput,
+  B2BExpressCheckoutInput,
+  B2BExpressCheckoutResponse,
   B2BPayBillInput,
   B2BTaxInput,
   B2BTopUpInput,
 } from './apis/b2b';
 export type { B2CApi, B2CCommand, B2CInput, B2CPochiInput } from './apis/b2c';
 export type { C2BApi, C2BRegisterInput, C2BResponse, C2BSimulateInput } from './apis/c2b';
+export type {
+  PullQueryInput,
+  PullQueryResponse,
+  PullRegisterInput,
+  PullRegisterResponse,
+  PullTransaction,
+  PullTransactionsApi,
+} from './apis/pull-transactions';
+export type { QrApi, QrInput, QrResponse, QrType } from './apis/qr';
 export type { ReversalApi, ReversalInput } from './apis/reversal';
 export type { IdentifierType, InitiatorResponse } from './apis/shared';
 export type {
