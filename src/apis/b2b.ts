@@ -7,7 +7,7 @@ import type { InitiatorResponse } from './shared';
 interface B2BCommon {
   /** Whole shillings, at least 1 (`Amount`). */
   amount: number;
-  /** Your shortcode, which is debited (`PartyA`). */
+  /** Your shortcode, 5 to 7 digits, which is debited (`PartyA`). */
   shortCode: number;
   /** 1 to 100 characters (`Remarks`). */
   remarks: string;
@@ -19,11 +19,14 @@ interface B2BCommon {
 
 /** Input for `b2b.payBill`. */
 export interface B2BPayBillInput extends B2BCommon {
-  /** The paybill credited (`PartyB`). */
+  /** The paybill credited, 5 to 7 digits (`PartyB`). */
   partyB: number;
   /** The account number at the paybill, 1 to 13 characters (`AccountReference`). */
   accountReference: string;
-  /** Optional. The customer you are paying for (`Requester`). */
+  /**
+   * Optional. The customer you are paying for, as `07…`, `01…`, `+254…` or `254…`; sent as
+   * `254…` (`Requester`).
+   */
   requester?: string;
   /** Optional. 1 to 100 characters (`Occassion`, Daraja's spelling). */
   occasion?: string;
@@ -31,11 +34,14 @@ export interface B2BPayBillInput extends B2BCommon {
 
 /** Input for `b2b.buyGoods`. */
 export interface B2BBuyGoodsInput extends B2BCommon {
-  /** The till, merchant store or merchant head office credited (`PartyB`). */
+  /** The till, merchant store or head office credited, 5 to 7 digits (`PartyB`). */
   partyB: number;
   /** Optional. 1 to 13 characters (`AccountReference`). */
   accountReference?: string;
-  /** Optional. The customer you are paying for (`Requester`). */
+  /**
+   * Optional. The customer you are paying for, as `07…`, `01…`, `+254…` or `254…`; sent as
+   * `254…` (`Requester`).
+   */
   requester?: string;
   /** Optional. 1 to 100 characters (`Occassion`, Daraja's spelling). */
   occasion?: string;
@@ -43,11 +49,14 @@ export interface B2BBuyGoodsInput extends B2BCommon {
 
 /** Input for `b2b.topUpB2C`. */
 export interface B2BTopUpInput extends B2BCommon {
-  /** The B2C shortcode whose utility account is credited (`PartyB`). */
+  /** The B2C shortcode whose utility account is credited, 5 to 7 digits (`PartyB`). */
   partyB: number;
   /** Optional. 1 to 13 characters (`AccountReference`). */
   accountReference?: string;
-  /** Optional. The customer you are paying for (`Requester`). */
+  /**
+   * Optional. The customer you are paying for, as `07…`, `01…`, `+254…` or `254…`; sent as
+   * `254…` (`Requester`).
+   */
   requester?: string;
 }
 

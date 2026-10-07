@@ -280,8 +280,8 @@ describe('parseResult on the B2B and Business To Pochi portal samples', () => {
     });
   });
 
-  // The portal's parameter list is missing `{`s and its ReferenceItem pair isn't an array;
-  // rebuilt as an array of objects.
+  // Hand fixes: missing `{`s and trailing commas in the parameter list, and the two
+  // ReferenceItem objects put in an array.
   test('reads the Tax Remittance success sample', () => {
     const result = parseResult(fixture('tax-result-success.json'));
 
@@ -303,7 +303,8 @@ describe('parseResult on the B2B and Business To Pochi portal samples', () => {
       'https://internalapi.safaricom.co.ke/mpesa/abresults/v1/submit',
     ],
     ['b2b-buygoods-result-failure.json', 'https://mydomain.com/b2b/businessbuygoods/queue/'],
-    // The portal's Tax failure wraps the single parameter in an array and has a trailing comma.
+    // Tax failure hand fixes: trailing commas and an extra closing brace removed. (Its single
+    // parameter really is in an array on the portal.)
     ['tax-result-failure.json', 'https://mydomain.com/b2b/remittax/queue/'],
   ])('reads the %s sample', (name, queueTimeoutUrl) => {
     const result = parseResult(fixture(name));

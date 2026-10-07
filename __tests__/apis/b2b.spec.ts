@@ -337,18 +337,6 @@ describe.each(methods)('b2b.%s shared validation', (method, call, valid) => {
     expect(calls).toHaveLength(0);
   });
 
-  test('rejects an invalid partyB where the method takes one', async () => {
-    if (!('partyB' in valid)) return;
-    const { api, calls } = setup([]);
-
-    const error = await call(api, { ...valid, partyB: 'abc' }).catch((e: unknown) => e);
-
-    expect((error as ValidationError).issues).toEqual([
-      { path: 'partyB', message: 'must be a 5 to 7 digit shortcode' },
-    ]);
-    expect(calls).toHaveLength(0);
-  });
-
   test('requires an initiator', async () => {
     const { api, calls } = setup([], { initiator: undefined });
 
@@ -356,6 +344,44 @@ describe.each(methods)('b2b.%s shared validation', (method, call, valid) => {
 
     expect(error).toBeInstanceOf(ValidationError);
     expect((error as Error).message).toBe(`b2b.${method}: initiator is required`);
+    expect(calls).toHaveLength(0);
+  });
+});
+
+describe.each(methods.filter(([, , valid]) => 'partyB' in valid))(
+  'b2b.%s partyB',
+  (_, call, valid) => {
+    test('rejects an invalid partyB', async () => {
+      const { api, calls } = setup([]);
+
+      const error = await call(api, { ...valid, partyB: 'abc' }).catch((e: unknown) => e);
+
+      expect((error as ValidationError).issues).toEqual([
+        { path: 'partyB', message: 'must be a 5 to 7 digit shortcode' },
+      ]);
+      expect(calls).toHaveLength(0);
+    });
+  },
+);
+
+describe('b2b optional-field rules per method', () => {
+  test.each([
+    ['topUpB2C', 'accountReference', 'a'.repeat(14), 'must be at most 13 characters'],
+    ['remitTax', 'accountReference', 'a'.repeat(14), 'must be at most 13 characters'],
+    [
+      'buyGoods',
+      'requester',
+      '12345',
+      'must be a Safaricom number like 2547XXXXXXXX or 07XXXXXXXX',
+    ],
+    ['buyGoods', 'occasion', 'o'.repeat(101), 'must be at most 100 characters'],
+  ])('%s rejects an invalid %s', async (method, path, value, message) => {
+    const [, call, valid] = methods.find(([name]) => name === method)!;
+    const { api, calls } = setup([]);
+
+    const error = await call(api, { ...valid, [path]: value }).catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([{ path, message }]);
     expect(calls).toHaveLength(0);
   });
 });

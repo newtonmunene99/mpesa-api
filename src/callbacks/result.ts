@@ -48,9 +48,8 @@ const B2C_DATETIME_KEYS = new Set(['TransactionCompletedDateTime']);
 
 /**
  * Parses the result callback of B2C, B2B, Business To Pochi, Transaction Status, Account
- * Balance or Reversal. Pass
- * the already-parsed JSON. Throws `ValidationError` when required keys are missing or a date
- * is malformed.
+ * Balance or Reversal. Pass the already-parsed JSON. Throws `ValidationError` when required
+ * keys are missing or a date is malformed.
  */
 export function parseResult(body: unknown): DarajaResult {
   const result = isRecord(body) ? body.Result : undefined;
