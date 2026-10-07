@@ -1,0 +1,1 @@
+probe-pull: redact now masks Pull's msisdn, sender, billreference and NominatedNumber by key (test red then green). Sandbox register and query (600999, last 24h) both refused 401 errorCode '401.001' 'Invalid Access Token' after one refresh; likely product not on the app. No 1000/1001 bodies; parsers follow the portal samples.
