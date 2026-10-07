@@ -264,6 +264,25 @@ describe.skipIf(!enabled)('Daraja sandbox', () => {
     );
   });
 
+  // Probe: the portal's Dynamic QR request sample, sent raw to learn what the sandbox answers.
+  test('probe: Dynamic QR', async () => {
+    const ctx = createContext(config());
+    await capture('qr-generate', async () => ({
+      raw: await ctx.post(
+        '/mpesa/qrcode/v1/generate',
+        {
+          MerchantName: 'TEST SUPERMARKET',
+          RefNo: 'Invoice Test',
+          Amount: 1,
+          TrxCode: 'BG',
+          CPI: '373132',
+          Size: '300',
+        },
+        { success: () => true },
+      ),
+    }));
+  });
+
   test('transactionStatus.query with each ID and both (Verification 3)', async () => {
     const mpesa = createMpesa(config());
     const common = {
