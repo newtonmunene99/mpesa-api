@@ -60,9 +60,7 @@ CI runs the same checks on Node 22, 24 and 26.
   pnpm changeset
   ```
 
-  Choose patch, minor or major, and write a one-line summary. It becomes the CHANGELOG entry. PRs that only touch docs, tests or CI don't need one.
-
-To get a review from Claude on a pull request, comment `@claude review`. Mention `@claude` with anything else to ask it a question or for a change.
+  Choose patch, minor or major, and write a one-line summary. It becomes the CHANGELOG entry. PRs that only touch docs, tests or CI don't need one. `pnpm changeset status` still asks for one when such a PR changes `package.json`, for example a script; add an empty one with `pnpm changeset --empty`.
 
 ## Releasing
 
