@@ -10,9 +10,15 @@ import type {
   AccountBalanceApi,
   AccountBalanceEntry,
   AccountBalanceInput,
+  B2BApi,
+  B2BBuyGoodsInput,
+  B2BPayBillInput,
+  B2BTaxInput,
+  B2BTopUpInput,
   B2CApi,
   B2CCommand,
   B2CInput,
+  B2CPochiInput,
   C2BApi,
   C2BNotification,
   C2BRejectionCode,
@@ -48,6 +54,7 @@ test('public types stay exported and wired to the client', () => {
   expectTypeOf<Mpesa['stkPush']>().toEqualTypeOf<StkPushApi>();
   expectTypeOf<Mpesa['c2b']>().toEqualTypeOf<C2BApi>();
   expectTypeOf<Mpesa['b2c']>().toEqualTypeOf<B2CApi>();
+  expectTypeOf<Mpesa['b2b']>().toEqualTypeOf<B2BApi>();
   expectTypeOf<Mpesa['transactionStatus']>().toEqualTypeOf<TransactionStatusApi>();
   expectTypeOf<Mpesa['accountBalance']>().toEqualTypeOf<AccountBalanceApi>();
   expectTypeOf<Mpesa['reversal']>().toEqualTypeOf<ReversalApi>();
@@ -61,6 +68,16 @@ test('public types stay exported and wired to the client', () => {
   expectTypeOf<B2CApi['pay']>().parameters.toEqualTypeOf<[B2CInput]>();
   expectTypeOf<B2CApi['pay']>().returns.resolves.toEqualTypeOf<InitiatorResponse>();
   expectTypeOf<B2CInput['commandId']>().toEqualTypeOf<B2CCommand>();
+  expectTypeOf<B2CApi['payToPochi']>().parameters.toEqualTypeOf<[B2CPochiInput]>();
+  expectTypeOf<B2CApi['payToPochi']>().returns.resolves.toEqualTypeOf<InitiatorResponse>();
+  expectTypeOf<B2BApi['payBill']>().parameters.toEqualTypeOf<[B2BPayBillInput]>();
+  expectTypeOf<B2BApi['buyGoods']>().parameters.toEqualTypeOf<[B2BBuyGoodsInput]>();
+  expectTypeOf<B2BApi['topUpB2C']>().parameters.toEqualTypeOf<[B2BTopUpInput]>();
+  expectTypeOf<B2BApi['remitTax']>().parameters.toEqualTypeOf<[B2BTaxInput]>();
+  expectTypeOf<B2BApi['payBill']>().returns.resolves.toEqualTypeOf<InitiatorResponse>();
+  expectTypeOf<B2BApi['buyGoods']>().returns.resolves.toEqualTypeOf<InitiatorResponse>();
+  expectTypeOf<B2BApi['topUpB2C']>().returns.resolves.toEqualTypeOf<InitiatorResponse>();
+  expectTypeOf<B2BApi['remitTax']>().returns.resolves.toEqualTypeOf<InitiatorResponse>();
   expectTypeOf<TransactionStatusApi['query']>().parameters.toEqualTypeOf<
     [TransactionStatusInput]
   >();

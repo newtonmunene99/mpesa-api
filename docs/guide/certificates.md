@@ -1,6 +1,6 @@
 # Certificates
 
-The initiator APIs (B2C, Transaction Status, Account Balance and Reversal) need a **security credential**: the initiator's password encrypted with Safaricom's public certificate. There are two ways to provide it.
+The initiator APIs (B2C, B2B, Business To Pochi, Transaction Status, Account Balance and Reversal) need a **security credential**: the initiator's password encrypted with Safaricom's public certificate. There are two ways to provide it.
 
 **Let the SDK encrypt the password.** Pass the initiator's name and password with the certificate for the environment, either as PEM text or DER bytes. The SDK doesn't bundle certificates; get them from Safaricom.
 

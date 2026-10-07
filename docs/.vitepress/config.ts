@@ -21,6 +21,7 @@ const sidebar: DefaultTheme.SidebarItem[] = [
       { text: 'M-Pesa Express (STK push)', link: '/apis/stk-push' },
       { text: 'Customer to Business (C2B)', link: '/apis/c2b' },
       { text: 'Business to Customer (B2C)', link: '/apis/b2c' },
+      { text: 'Business to Business (B2B)', link: '/apis/b2b' },
       { text: 'Transaction Status', link: '/apis/transaction-status' },
       { text: 'Account Balance', link: '/apis/account-balance' },
       { text: 'Reversal', link: '/apis/reversal' },

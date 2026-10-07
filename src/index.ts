@@ -29,7 +29,14 @@ export {
   type StkCallbackMetadata,
 } from './callbacks';
 export type { AccountBalanceApi, AccountBalanceInput } from './apis/account-balance';
-export type { B2CApi, B2CCommand, B2CInput } from './apis/b2c';
+export type {
+  B2BApi,
+  B2BBuyGoodsInput,
+  B2BPayBillInput,
+  B2BTaxInput,
+  B2BTopUpInput,
+} from './apis/b2b';
+export type { B2CApi, B2CCommand, B2CInput, B2CPochiInput } from './apis/b2c';
 export type { C2BApi, C2BRegisterInput, C2BResponse, C2BSimulateInput } from './apis/c2b';
 export type { ReversalApi, ReversalInput } from './apis/reversal';
 export type { IdentifierType, InitiatorResponse } from './apis/shared';

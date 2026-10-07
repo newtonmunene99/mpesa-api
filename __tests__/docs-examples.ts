@@ -153,6 +153,57 @@ export async function b2c(mpesa: Mpesa): Promise<void> {
   console.log(payment.originatorConversationId);
 }
 
+// B2C: Business To Pochi
+export async function payToPochi(mpesa: Mpesa): Promise<void> {
+  const pochi = await mpesa.b2c.payToPochi({
+    amount: 250,
+    shortCode: 600999,
+    phoneNumber: '0712345678',
+    remarks: 'Supplier payment',
+    resultUrl: 'https://example.com/payments/pochi/result',
+    queueTimeoutUrl: 'https://example.com/payments/pochi/timeout',
+  });
+  console.log(pochi.originatorConversationId);
+}
+
+// B2B
+export async function b2b(mpesa: Mpesa): Promise<void> {
+  await mpesa.b2b.payBill({
+    amount: 1500,
+    shortCode: 600979,
+    partyB: 600000,
+    accountReference: 'INV-2042',
+    requester: '0712345678',
+    remarks: 'Electricity for unit G70',
+    resultUrl: 'https://example.com/payments/b2b/result',
+    queueTimeoutUrl: 'https://example.com/payments/b2b/timeout',
+  });
+  await mpesa.b2b.buyGoods({
+    amount: 800,
+    shortCode: 600979,
+    partyB: 600000,
+    remarks: 'Office supplies',
+    resultUrl: 'https://example.com/payments/b2b/result',
+    queueTimeoutUrl: 'https://example.com/payments/b2b/timeout',
+  });
+  await mpesa.b2b.topUpB2C({
+    amount: 50000,
+    shortCode: 600979,
+    partyB: 600997,
+    remarks: 'Float for salaries',
+    resultUrl: 'https://example.com/payments/b2b/result',
+    queueTimeoutUrl: 'https://example.com/payments/b2b/timeout',
+  });
+  await mpesa.b2b.remitTax({
+    amount: 3000,
+    shortCode: 888880,
+    accountReference: 'PRN1234XN',
+    remarks: 'VAT for September',
+    resultUrl: 'https://example.com/payments/tax/result',
+    queueTimeoutUrl: 'https://example.com/payments/tax/timeout',
+  });
+}
+
 // Transaction Status
 export async function transactionStatus(mpesa: Mpesa): Promise<void> {
   await mpesa.transactionStatus.query({

@@ -55,6 +55,20 @@ describe('redact', () => {
     });
   });
 
+  test("masks the gateway requestId in Daraja's error bodies", () => {
+    const out = redact({
+      requestId: 'ac7b-470b-8df7-23ab3cef38271330547',
+      errorCode: '401.002.01',
+      errorMessage: 'Error Occurred - Invalid Access Token - ',
+    });
+
+    expect(out).toEqual({
+      requestId: '<redacted-id>',
+      errorCode: '401.002.01',
+      errorMessage: 'Error Occurred - Invalid Access Token - ',
+    });
+  });
+
   test('masks C2B MSISDN in any format and the free-text BillRefNumber', () => {
     expect(
       redact({ MSISDN: '2547 ***** 126', BillRefNumber: 'Jane account', InvoiceNumber: '' }),
