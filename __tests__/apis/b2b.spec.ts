@@ -466,11 +466,20 @@ describe('b2b.expressCheckout', () => {
     }
   });
 
-  test('maps a non-zero code instead of throwing', async () => {
+  test('rejects a non-zero code as DarajaApiError', async () => {
     const body = { code: '1', status: 'Failed' };
     const { api } = setup([token, { status: 200, body }]);
 
-    expect(await api.expressCheckout(checkout)).toMatchObject({ code: '1', status: 'Failed' });
+    const error = await api.expressCheckout(checkout).catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(DarajaApiError);
+    expect(error).toMatchObject({ status: 200, errorCode: '1', errorMessage: 'Failed', body });
+  });
+
+  test('rejects an acknowledgement without a code', async () => {
+    const { api } = setup([token, { status: 200, body: { status: 'Unknown' } }]);
+
+    await expect(api.expressCheckout(checkout)).rejects.toBeInstanceOf(DarajaApiError);
   });
 
   test('surfaces the sandbox refusal as DarajaApiError', async () => {

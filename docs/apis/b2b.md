@@ -123,7 +123,7 @@ const push = await mpesa.b2b.expressCheckout({
 | `callbackUrl`      | `callbackUrl`       | Receives the result.                                               |
 | `requestRefId`     | `RequestRefID`      | Optional. Your unique ID for this push. Defaults to a random UUID. |
 
-Shortcodes and the amount are sent as strings, as in the portal's sample. The response (`B2BExpressCheckoutResponse`) has `code` (`"0"` when the prompt was sent), `status`, the `requestRefId` sent and `raw`. A non-zero `code` is returned, not thrown.
+Shortcodes and the amount are sent as strings, as in the portal's sample. The response (`B2BExpressCheckoutResponse`) has `code` (`"0"`), `status`, the `requestRefId` sent and `raw`. A non-zero `code` throws `DarajaApiError`, with the code as `errorCode`.
 
 The result is posted to `callbackUrl`. Read it with `parseExpressCheckoutCallback`:
 

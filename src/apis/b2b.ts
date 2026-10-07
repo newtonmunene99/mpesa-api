@@ -1,5 +1,6 @@
 import type { Context } from '../client';
 import { str } from '../core/coerce';
+import { DarajaApiError } from '../core/errors';
 import {
   checkInt,
   checkLength,
@@ -94,7 +95,7 @@ export interface B2BExpressCheckoutInput {
 
 /** Daraja's acknowledgement of a B2B Express CheckOut push. */
 export interface B2BExpressCheckoutResponse {
-  /** "0" when the USSD prompt was sent. */
+  /** Always "0": any other code throws `DarajaApiError`. */
   code: string;
   /** For example "USSD Initiated Successfully". */
   status: string;
@@ -136,8 +137,8 @@ export interface B2BApi {
   remitTax(input: B2BTaxInput): Promise<InitiatorResponse>;
   /**
    * Sends a USSD prompt to a merchant's nominated operator to pay your paybill from the
-   * merchant's till (B2B Express CheckOut). No initiator is needed. The acknowledgement only
-   * confirms the prompt was sent; the outcome arrives at `callbackUrl` (see
+   * merchant's till (B2B Express CheckOut). No initiator is needed. A non-zero `code` throws
+   * `DarajaApiError`. The acknowledgement only confirms the prompt was sent; the outcome arrives at `callbackUrl` (see
    * `parseExpressCheckoutCallback`).
    */
   expressCheckout(input: B2BExpressCheckoutInput): Promise<B2BExpressCheckoutResponse>;
@@ -291,8 +292,7 @@ async function expressCheckout(
   input: B2BExpressCheckoutInput,
 ): Promise<B2BExpressCheckoutResponse> {
   const requestRefId = checkExpressCheckout(ctx, input);
-  // Shortcodes and the amount are sent as strings, as in the portal's sample. The
-  // acknowledgement carries `code`, not `ResponseCode`, so a non-zero code is returned as is.
+  // Shortcodes and the amount are sent as strings, as in the portal's sample.
   const raw = await ctx.post<Record<string, unknown>>(EXPRESS_PATH, {
     primaryShortCode: String(input.merchantTill),
     receiverShortCode: String(input.shortCode),
@@ -302,7 +302,17 @@ async function expressCheckout(
     partnerName: input.partnerName,
     RequestRefID: requestRefId,
   });
-  return { code: str(raw.code), status: str(raw.status), requestRefId, raw };
+  // The acknowledgement carries `code`, not `ResponseCode`, so it is checked here.
+  const code = str(raw.code);
+  if (code !== '0') {
+    throw new DarajaApiError({
+      status: 200,
+      body: raw,
+      ...(code ? { errorCode: code } : {}),
+      errorMessage: str(raw.status),
+    });
+  }
+  return { code, status: str(raw.status), requestRefId, raw };
 }
 
 /** Business to Business (B2B) payments. */
