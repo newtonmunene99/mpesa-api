@@ -1,0 +1,1 @@
+b2b-buy-goods: red = 11 failing (method missing); green 27 in b2b.spec.ts (buyGoods body, optional fields omitted, 13-char limit, plus its shared-rules row). vp check clean.
