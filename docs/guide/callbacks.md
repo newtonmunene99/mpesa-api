@@ -2,13 +2,13 @@
 
 Daraja posts results to the URLs you give it. The parsers take the already-parsed JSON body, validate it, and return typed objects; they throw a `ValidationError` if required fields are missing.
 
-| Parser                       | For                                                           |
-| ---------------------------- | ------------------------------------------------------------- |
-| `parseStkCallback(body)`     | STK push callbacks                                            |
-| `parseResult(body)`          | B2C, Transaction Status, Account Balance and Reversal results |
-| `parseC2BNotification(body)` | C2B validation and confirmation requests                      |
-| `parseBalances(value)`       | The packed `AccountBalance` or `DebitAccountBalance` value    |
-| `c2bValidationResponse`      | Builds the reply to a C2B validation request                  |
+| Parser                       | For                                                                                   |
+| ---------------------------- | ------------------------------------------------------------------------------------- |
+| `parseStkCallback(body)`     | STK push callbacks                                                                    |
+| `parseResult(body)`          | B2C, Business To Pochi, B2B, Transaction Status, Account Balance and Reversal results |
+| `parseC2BNotification(body)` | C2B validation and confirmation requests                                              |
+| `parseBalances(value)`       | The packed `AccountBalance` or `DebitAccountBalance` value                            |
+| `c2bValidationResponse`      | Builds the reply to a C2B validation request                                          |
 
 What each parser returns:
 

@@ -40,6 +40,11 @@ body:
         - c2b.registerUrls
         - c2b.simulate
         - b2c.pay
+        - b2c.payToPochi
+        - b2b.payBill
+        - b2b.buyGoods
+        - b2b.topUpB2C
+        - b2b.remitTax
         - accountBalance.query
         - transactionStatus.query
         - reversal.request
