@@ -1,0 +1,1 @@
+b2c-pay-to-pochi: red = 11 failing, the 20 existing pay tests green throughout; green 31 in b2c.spec.ts. send(ctx, call: B2CSend) options object keeps max-params under the gate. Full suite 365 passed, vp check clean.
