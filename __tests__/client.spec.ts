@@ -127,6 +127,29 @@ describe('context', () => {
     ]);
   });
 
+  test('passes a success rule to the request and to the retry', async () => {
+    const only1000 = (code: string): boolean => code === '1000';
+    const { fetch } = fakeFetch([
+      token('t1'),
+      { status: 200, body: { ResponseCode: '1000' } },
+      { status: 404, body: { errorCode: '404.001.03' } },
+      token('t2'),
+      { status: 200, body: { ResponseCode: '1000' } },
+      { status: 200, body: { ResponseCode: '0' } },
+    ]);
+    const ctx = createContext(baseConfig(fetch));
+
+    await expect(ctx.post('/x', {}, { success: only1000 })).resolves.toEqual({
+      ResponseCode: '1000',
+    });
+    await expect(ctx.post('/x', {}, { success: only1000 })).resolves.toEqual({
+      ResponseCode: '1000',
+    });
+    await expect(ctx.post('/x', {}, { success: only1000 })).rejects.toMatchObject({
+      errorCode: '0',
+    });
+  });
+
   test('surfaces a second token error instead of retrying again', async () => {
     const { fetch, calls } = fakeFetch([
       token('t1'),

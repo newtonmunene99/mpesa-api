@@ -46,12 +46,22 @@ export interface MpesaConfig {
   onWarning?: (message: string) => void;
 }
 
+/** Per-call options for `Context.post`. */
+export interface PostOptions {
+  /** Whether a 2xx body's `ResponseCode` means success. Defaults to all zeros. */
+  success?: (responseCode: string) => boolean;
+}
+
 /** Shared state the API modules use to talk to Daraja. */
 export interface Context {
   readonly environment: Environment;
   readonly config: MpesaConfig;
-  /** POSTs with a bearer token, retrying once with a fresh token if Daraja rejects it. */
-  post<T>(path: string, body: unknown): Promise<T>;
+  /**
+   * POSTs with a bearer token, retrying once with a fresh token if Daraja rejects it.
+   * `options.success` overrides which `ResponseCode` values count as success (all zeros by
+   * default), for APIs that answer with other codes.
+   */
+  post<T>(path: string, body: unknown, options?: PostOptions): Promise<T>;
   /**
    * The initiator name and security credential, computed once. `api` names the calling
    * method for the `ValidationError` thrown when no initiator is configured.
@@ -179,12 +189,13 @@ export function createContext(config: MpesaConfig, clock: () => Date = () => new
 
   let credential: Promise<{ name: string; credential: string }> | undefined;
 
-  const send = <T>(path: string, body: unknown, token: string): Promise<T> =>
+  const send = <T>(path: string, body: unknown, token: string, options: PostOptions): Promise<T> =>
     request<T>(transport, {
       method: 'POST',
       path,
       headers: { authorization: `Bearer ${token}` },
       body,
+      ...(options.success ? { success: options.success } : {}),
     });
 
   return {
@@ -192,13 +203,13 @@ export function createContext(config: MpesaConfig, clock: () => Date = () => new
     config,
     now: clock,
 
-    async post<T>(path: string, body: unknown): Promise<T> {
+    async post<T>(path: string, body: unknown, options: PostOptions = {}): Promise<T> {
       const token = await tokens.get();
       try {
-        return await send<T>(path, body, token);
+        return await send<T>(path, body, token, options);
       } catch (error) {
         if (!isTokenError(error)) throw error;
-        return send<T>(path, body, await tokens.refresh(token));
+        return send<T>(path, body, await tokens.refresh(token), options);
       }
     },
 

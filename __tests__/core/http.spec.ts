@@ -117,6 +117,52 @@ describe('request', () => {
     expect(error).toMatchObject({ status: 200, errorCode: '1', errorMessage: 'Rejected' });
   });
 
+  describe('with a success rule', () => {
+    const only1000 = (code: string): boolean => code === '1000';
+
+    test('resolves a ResponseCode the rule accepts', async () => {
+      const { fetch } = fakeFetch([{ status: 200, body: { ResponseCode: '1000' } }]);
+
+      await expect(
+        request(transport(fetch), { method: 'POST', path: '/p', body: {}, success: only1000 }),
+      ).resolves.toEqual({ ResponseCode: '1000' });
+    });
+
+    test('rejects a ResponseCode the rule refuses, even all zeros', async () => {
+      const { fetch } = fakeFetch([
+        { status: 200, body: { ResponseCode: '1001', ResponseDescription: 'Nope' } },
+        { status: 200, body: { ResponseCode: '0' } },
+      ]);
+      const send = () =>
+        request(transport(fetch), { method: 'POST', path: '/p', body: {}, success: only1000 });
+
+      await expect(send()).rejects.toMatchObject({
+        name: 'DarajaApiError',
+        status: 200,
+        errorCode: '1001',
+        errorMessage: 'Nope',
+      });
+      await expect(send()).rejects.toBeInstanceOf(DarajaApiError);
+    });
+
+    test('accepts a non-numeric code when the rule allows it', async () => {
+      const body = { ResponseCode: 'AG_20191219_000043fdf61864fe9ff5' };
+      const { fetch } = fakeFetch([{ status: 200, body }]);
+
+      await expect(
+        request(transport(fetch), { method: 'POST', path: '/p', body: {}, success: () => true }),
+      ).resolves.toEqual(body);
+    });
+
+    test('never rejects a body without ResponseCode', async () => {
+      const { fetch } = fakeFetch([{ status: 200, body: { code: '0' } }]);
+
+      await expect(
+        request(transport(fetch), { method: 'POST', path: '/p', body: {}, success: () => false }),
+      ).resolves.toEqual({ code: '0' });
+    });
+  });
+
   test('wraps a rejected fetch in NetworkError with the cause', async () => {
     const cause = new TypeError('fetch failed');
     const { fetch } = fakeFetch([cause]);
