@@ -1,0 +1,1 @@
+export-customer-payments: runtime export parseExpressCheckoutCallback; type exports for QR, B2B Express CheckOut, ExpressCheckoutCallback and Pull Transactions; exports specs pin runtime keys and every new method's parameters/returns (all -> AsyncIterable<PullTransaction>). vp check, 476 tests, pack, test:dist, lint:pkg pass.
