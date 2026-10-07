@@ -1,0 +1,1 @@
+PR #64 review item 2: expressCheckout throws DarajaApiError (status 200, errorCode=code, errorMessage=status) on a non-'0' or missing code; JSDoc and docs (b2b.md, errors.md) updated.
