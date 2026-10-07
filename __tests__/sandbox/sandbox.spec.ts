@@ -264,6 +264,80 @@ describe.skipIf(!enabled)('Daraja sandbox', () => {
     );
   });
 
+  // Probe: the portal's Dynamic QR request sample, sent raw to learn what the sandbox answers.
+  test('probe: Dynamic QR', async () => {
+    const ctx = createContext(config());
+    await capture('qr-generate', async () => ({
+      raw: await ctx.post(
+        '/mpesa/qrcode/v1/generate',
+        {
+          MerchantName: 'TEST SUPERMARKET',
+          RefNo: 'Invoice Test',
+          Amount: 1,
+          TrxCode: 'BG',
+          CPI: '373132',
+          Size: '300',
+        },
+        { success: () => true },
+      ),
+    }));
+  });
+
+  // Probe: the portal's B2B Express CheckOut request sample. The acknowledgement has `code`,
+  // not `ResponseCode`, so the default success rule never fires.
+  test('probe: B2B Express CheckOut', async () => {
+    const ctx = createContext(config());
+    await capture('b2b-express-checkout', async () => ({
+      raw: await ctx.post('/v1/ussdpush/get-msisdn', {
+        primaryShortCode: '000001',
+        receiverShortCode: '000002',
+        amount: '100',
+        paymentRef: 'paymentRef',
+        callbackUrl: url('b2b/express/callback'),
+        partnerName: 'Vendor',
+        RequestRefID: crypto.randomUUID(),
+      }),
+    }));
+  });
+
+  // Probes: Pull Transactions register and query from the sandbox org shortcode. Register
+  // answers with ResponseStatus, so any answer is recorded.
+  test('probe: Pull Transactions register', async () => {
+    const ctx = createContext(config());
+    await capture('pull-register', async () => ({
+      raw: await ctx.post(
+        '/pulltransactions/v1/register',
+        {
+          ShortCode: String(org()),
+          RequestType: 'Pull',
+          NominatedNumber: msisdn(),
+          CallBackURL: url('pull/callback'),
+        },
+        { success: () => true },
+      ),
+    }));
+  });
+
+  test('probe: Pull Transactions query', async () => {
+    // EAT (UTC+3) as YYYY-MM-DD HH:mm:ss, for the last 24 hours.
+    const eat = (date: Date) =>
+      new Date(date.getTime() + 3 * 3_600_000).toISOString().slice(0, 19).replace('T', ' ');
+    const now = new Date();
+    const ctx = createContext(config());
+    await capture('pull-query', async () => ({
+      raw: await ctx.post(
+        '/pulltransactions/v1/query',
+        {
+          ShortCode: String(org()),
+          StartDate: eat(new Date(now.getTime() - 24 * 3_600_000)),
+          EndDate: eat(now),
+          OffSetValue: '0',
+        },
+        { success: () => true },
+      ),
+    }));
+  });
+
   test('transactionStatus.query with each ID and both (Verification 3)', async () => {
     const mpesa = createMpesa(config());
     const common = {

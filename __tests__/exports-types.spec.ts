@@ -3,6 +3,7 @@ import {
   c2bValidationResponse,
   parseBalances,
   parseC2BNotification,
+  parseExpressCheckoutCallback,
   parseResult,
   parseStkCallback,
 } from '../src/index';
@@ -12,6 +13,8 @@ import type {
   AccountBalanceInput,
   B2BApi,
   B2BBuyGoodsInput,
+  B2BExpressCheckoutInput,
+  B2BExpressCheckoutResponse,
   B2BPayBillInput,
   B2BTaxInput,
   B2BTopUpInput,
@@ -29,11 +32,22 @@ import type {
   CachedToken,
   DarajaResult,
   Environment,
+  ExpressCheckoutCallback,
   IdentifierType,
   Initiator,
   InitiatorResponse,
   Mpesa,
   MpesaConfig,
+  PullQueryInput,
+  PullQueryResponse,
+  PullRegisterInput,
+  PullRegisterResponse,
+  PullTransaction,
+  PullTransactionsApi,
+  QrApi,
+  QrInput,
+  QrResponse,
+  QrType,
   ReversalApi,
   ReversalInput,
   StkCallback,
@@ -58,6 +72,28 @@ test('public types stay exported and wired to the client', () => {
   expectTypeOf<Mpesa['transactionStatus']>().toEqualTypeOf<TransactionStatusApi>();
   expectTypeOf<Mpesa['accountBalance']>().toEqualTypeOf<AccountBalanceApi>();
   expectTypeOf<Mpesa['reversal']>().toEqualTypeOf<ReversalApi>();
+  expectTypeOf<Mpesa['qr']>().toEqualTypeOf<QrApi>();
+  expectTypeOf<Mpesa['pullTransactions']>().toEqualTypeOf<PullTransactionsApi>();
+  expectTypeOf<QrApi['generate']>().parameters.toEqualTypeOf<[QrInput]>();
+  expectTypeOf<QrApi['generate']>().returns.resolves.toEqualTypeOf<QrResponse>();
+  expectTypeOf<QrInput['type']>().toEqualTypeOf<QrType>();
+  expectTypeOf<B2BApi['expressCheckout']>().parameters.toEqualTypeOf<[B2BExpressCheckoutInput]>();
+  expectTypeOf<
+    B2BApi['expressCheckout']
+  >().returns.resolves.toEqualTypeOf<B2BExpressCheckoutResponse>();
+  expectTypeOf(parseExpressCheckoutCallback).returns.toEqualTypeOf<ExpressCheckoutCallback>();
+  expectTypeOf<PullTransactionsApi['register']>().parameters.toEqualTypeOf<[PullRegisterInput]>();
+  expectTypeOf<
+    PullTransactionsApi['register']
+  >().returns.resolves.toEqualTypeOf<PullRegisterResponse>();
+  expectTypeOf<PullTransactionsApi['query']>().parameters.toEqualTypeOf<[PullQueryInput]>();
+  expectTypeOf<PullTransactionsApi['query']>().returns.resolves.toEqualTypeOf<PullQueryResponse>();
+  expectTypeOf<PullTransactionsApi['all']>().parameters.toEqualTypeOf<
+    [Omit<PullQueryInput, 'offset'>]
+  >();
+  expectTypeOf<PullTransactionsApi['all']>().returns.toEqualTypeOf<
+    AsyncIterable<PullTransaction>
+  >();
   expectTypeOf<StkPushApi['send']>().parameters.toEqualTypeOf<[StkPushInput]>();
   expectTypeOf<StkPushApi['send']>().returns.resolves.toEqualTypeOf<StkPushResponse>();
   expectTypeOf<StkPushApi['query']>().parameters.toEqualTypeOf<[StkQueryInput]>();

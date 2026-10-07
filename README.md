@@ -14,9 +14,11 @@ A typed client for Safaricom's [M-Pesa Daraja 3.0 API](https://developer.safaric
 Supported APIs:
 
 - [M-Pesa Express (STK push) and its query](https://newtonmunene99.github.io/mpesa-api/apis/stk-push)
+- [Dynamic QR codes](https://newtonmunene99.github.io/mpesa-api/apis/qr)
 - [Customer to Business (C2B): register URLs and simulate](https://newtonmunene99.github.io/mpesa-api/apis/c2b)
+- [Pull Transactions: the last 48 hours of C2B payments](https://newtonmunene99.github.io/mpesa-api/apis/pull-transactions)
 - [Business to Customer (B2C) and Business To Pochi](https://newtonmunene99.github.io/mpesa-api/apis/b2c)
-- [Business to Business (B2B): pay bill, buy goods, B2C account top up, tax remittance](https://newtonmunene99.github.io/mpesa-api/apis/b2b)
+- [Business to Business (B2B): pay bill, buy goods, B2C account top up, tax remittance, Express CheckOut](https://newtonmunene99.github.io/mpesa-api/apis/b2b)
 - [Transaction Status](https://newtonmunene99.github.io/mpesa-api/apis/transaction-status)
 - [Account Balance](https://newtonmunene99.github.io/mpesa-api/apis/account-balance)
 - [Reversal](https://newtonmunene99.github.io/mpesa-api/apis/reversal)

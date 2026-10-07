@@ -2,19 +2,21 @@
 
 Daraja posts results to the URLs you give it. The parsers take the already-parsed JSON body, validate it, and return typed objects; they throw a `ValidationError` if required fields are missing.
 
-| Parser                       | For                                                                                   |
-| ---------------------------- | ------------------------------------------------------------------------------------- |
-| `parseStkCallback(body)`     | STK push callbacks                                                                    |
-| `parseResult(body)`          | B2C, Business To Pochi, B2B, Transaction Status, Account Balance and Reversal results |
-| `parseC2BNotification(body)` | C2B validation and confirmation requests                                              |
-| `parseBalances(value)`       | The packed `AccountBalance` or `DebitAccountBalance` value                            |
-| `c2bValidationResponse`      | Builds the reply to a C2B validation request                                          |
+| Parser                               | For                                                                                   |
+| ------------------------------------ | ------------------------------------------------------------------------------------- |
+| `parseStkCallback(body)`             | STK push callbacks                                                                    |
+| `parseResult(body)`                  | B2C, Business To Pochi, B2B, Transaction Status, Account Balance and Reversal results |
+| `parseC2BNotification(body)`         | C2B validation and confirmation requests                                              |
+| `parseExpressCheckoutCallback(body)` | B2B Express CheckOut results                                                          |
+| `parseBalances(value)`               | The packed `AccountBalance` or `DebitAccountBalance` value                            |
+| `c2bValidationResponse`              | Builds the reply to a C2B validation request                                          |
 
 What each parser returns:
 
 - `parseStkCallback` → `StkCallback`: `merchantRequestId`, `checkoutRequestId`, `resultCode`, `resultDesc`, `ok`, `raw`, and `metadata` (`StkCallbackMetadata`: `amountCents`, `mpesaReceiptNumber`, `balanceCents`, `transactionDate` as a `Date`, `phoneNumber`) on success.
 - `parseResult` → `DarajaResult`: `resultType`, `resultCode`, `resultDesc`, `ok`, `originatorConversationId`, `conversationId`, `transactionId`, `parameters` (`ResultParameters` flattened by key, with the documented dates converted to `Date`), `referenceData` and `raw`.
 - `parseC2BNotification` → `C2BNotification`: `transactionType`, `transId`, `transTime` (a `Date`), `transAmountCents`, `businessShortCode`, `billRefNumber`, `invoiceNumber`, `orgAccountBalanceCents` (absent on validation requests), `thirdPartyTransId`, `msisdn` (masked by Daraja), `firstName`, `middleName`, `lastName` and `raw`.
+- `parseExpressCheckoutCallback` → `ExpressCheckoutCallback`: `resultCode`, `resultDesc`, `ok`, `requestId`, `amountCents`, `raw`, and when Daraja sends them `paymentReference`, `transactionId`, `conversationId` and `status`. See [B2B Express CheckOut](/apis/b2b#express-checkout).
 - `parseBalances` → `AccountBalanceEntry[]`: `account`, `currency`, `availableCents`, `unclearedCents`, `reservedCents`, `unreservedCents`.
 - `c2bValidationResponse.accept(thirdPartyTransId?)` and `.reject(code: C2BRejectionCode)` → `C2BValidationResponse`, the JSON body to send back.
 

@@ -2,6 +2,8 @@ import { accountBalance, type AccountBalanceApi } from './apis/account-balance';
 import { b2b, type B2BApi } from './apis/b2b';
 import { b2c, type B2CApi } from './apis/b2c';
 import { c2b, type C2BApi } from './apis/c2b';
+import { pullTransactions, type PullTransactionsApi } from './apis/pull-transactions';
+import { qr, type QrApi } from './apis/qr';
 import { reversal, type ReversalApi } from './apis/reversal';
 import { stkPush, type StkPushApi } from './apis/stk-push';
 import { transactionStatus, type TransactionStatusApi } from './apis/transaction-status';
@@ -16,10 +18,10 @@ import { Issues } from './core/validate';
 export type Environment = 'sandbox' | 'production';
 
 /**
- * The API operator ("initiator") used by B2C, B2B, Business To Pochi, Transaction Status, Account
- * Balance and Reversal. Pass either the password plus Safaricom's certificate for the environment
- * (PEM text or DER bytes), or a security credential generated on the Daraja portal's Test
- * Credentials page.
+ * The API operator ("initiator") used by B2C, B2B (except Express CheckOut), Business To Pochi,
+ * Transaction Status, Account Balance and Reversal. Pass either the password plus Safaricom's
+ * certificate for the environment (PEM text or DER bytes), or a security credential generated
+ * on the Daraja portal's Test Credentials page.
  */
 export type Initiator =
   | { name: string; password: string; certificate: string | Uint8Array }
@@ -32,7 +34,10 @@ export interface MpesaConfig {
   consumerKey: string;
   /** From your app on the Daraja portal. */
   consumerSecret: string;
-  /** Required for B2C, B2B, Business To Pochi, Transaction Status, Account Balance and Reversal. */
+  /**
+   * Required for B2C, B2B (except Express CheckOut), Business To Pochi, Transaction Status,
+   * Account Balance and Reversal.
+   */
   initiator?: Initiator;
   /** Lipa na M-Pesa Online passkey. Required for STK push. */
   passkey?: string;
@@ -46,12 +51,22 @@ export interface MpesaConfig {
   onWarning?: (message: string) => void;
 }
 
+/** Per-call options for `Context.post`. */
+export interface PostOptions {
+  /** Whether a 2xx body's `ResponseCode` means success. Defaults to all zeros. */
+  success?: (responseCode: string) => boolean;
+}
+
 /** Shared state the API modules use to talk to Daraja. */
 export interface Context {
   readonly environment: Environment;
   readonly config: MpesaConfig;
-  /** POSTs with a bearer token, retrying once with a fresh token if Daraja rejects it. */
-  post<T>(path: string, body: unknown): Promise<T>;
+  /**
+   * POSTs with a bearer token, retrying once with a fresh token if Daraja rejects it.
+   * `options.success` overrides which `ResponseCode` values count as success (all zeros by
+   * default), for APIs that answer with other codes.
+   */
+  post<T>(path: string, body: unknown, options?: PostOptions): Promise<T>;
   /**
    * The initiator name and security credential, computed once. `api` names the calling
    * method for the `ValidationError` thrown when no initiator is configured.
@@ -70,8 +85,12 @@ export interface Mpesa {
   readonly c2b: C2BApi;
   /** Business to Customer (B2C) payments, including Business To Pochi. */
   readonly b2c: B2CApi;
-  /** Business to Business (B2B) payments: pay bill, buy goods, B2C top up, tax. */
+  /** Business to Business (B2B) payments: pay bill, buy goods, B2C top up, tax, Express CheckOut. */
   readonly b2b: B2BApi;
+  /** Dynamic QR codes customers scan to pay. */
+  readonly qr: QrApi;
+  /** Pull Transactions: the last 48 hours of C2B payments to a shortcode. */
+  readonly pullTransactions: PullTransactionsApi;
   /** Transaction Status queries. */
   readonly transactionStatus: TransactionStatusApi;
   /** Account Balance queries. */
@@ -179,12 +198,13 @@ export function createContext(config: MpesaConfig, clock: () => Date = () => new
 
   let credential: Promise<{ name: string; credential: string }> | undefined;
 
-  const send = <T>(path: string, body: unknown, token: string): Promise<T> =>
+  const send = <T>(path: string, body: unknown, token: string, options: PostOptions): Promise<T> =>
     request<T>(transport, {
       method: 'POST',
       path,
       headers: { authorization: `Bearer ${token}` },
       body,
+      ...(options.success ? { success: options.success } : {}),
     });
 
   return {
@@ -192,13 +212,13 @@ export function createContext(config: MpesaConfig, clock: () => Date = () => new
     config,
     now: clock,
 
-    async post<T>(path: string, body: unknown): Promise<T> {
+    async post<T>(path: string, body: unknown, options: PostOptions = {}): Promise<T> {
       const token = await tokens.get();
       try {
-        return await send<T>(path, body, token);
+        return await send<T>(path, body, token, options);
       } catch (error) {
         if (!isTokenError(error)) throw error;
-        return send<T>(path, body, await tokens.refresh(token));
+        return send<T>(path, body, await tokens.refresh(token), options);
       }
     },
 
@@ -245,6 +265,8 @@ export function createMpesa(config: MpesaConfig): Mpesa {
     c2b: c2b(ctx),
     b2c: b2c(ctx),
     b2b: b2b(ctx),
+    qr: qr(ctx),
+    pullTransactions: pullTransactions(ctx),
     transactionStatus: transactionStatus(ctx),
     accountBalance: accountBalance(ctx),
     reversal: reversal(ctx),

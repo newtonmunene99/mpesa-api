@@ -6,5 +6,6 @@ export {
   c2bValidationResponse,
   parseC2BNotification,
 } from './c2b';
+export { type ExpressCheckoutCallback, parseExpressCheckoutCallback } from './express-checkout';
 export { type DarajaResult, parseResult } from './result';
 export { parseStkCallback, type StkCallback, type StkCallbackMetadata } from './stk';

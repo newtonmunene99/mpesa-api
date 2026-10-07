@@ -76,6 +76,40 @@ describe('redact', () => {
     expect(redact({ MSISDN: 'a'.repeat(64) })).toEqual({ MSISDN: '<redacted>' });
   });
 
+  test('masks the Pull Transactions customer fields and nominated number by key', () => {
+    expect(
+      redact({
+        ShortCode: '600999',
+        NominatedNumber: '0722000000',
+        Response: [
+          [
+            {
+              transactionId: 'yzlyrEsRG1',
+              msisdn: 722000000,
+              sender: 'UAT2',
+              billreference: '37207636392',
+              amount: '168.00',
+            },
+          ],
+        ],
+      }),
+    ).toEqual({
+      ShortCode: '600999',
+      NominatedNumber: '<redacted>',
+      Response: [
+        [
+          {
+            transactionId: 'yzlyrEsRG1',
+            msisdn: '<redacted>',
+            sender: '<redacted>',
+            billreference: '<redacted>',
+            amount: '168.00',
+          },
+        ],
+      ],
+    });
+  });
+
   test('masks customer names', () => {
     expect(redact({ FirstName: 'NICHOLAS', MiddleName: '', LastName: 'SONGOK' })).toEqual({
       FirstName: '<name>',

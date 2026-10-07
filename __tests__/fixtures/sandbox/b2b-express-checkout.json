@@ -1,0 +1,8 @@
+{
+  "status": 401,
+  "response": {
+    "requestId": "<redacted-id>",
+    "errorCode": "401",
+    "errorMessage": "Unauthorized - Invalid Access Token"
+  }
+}

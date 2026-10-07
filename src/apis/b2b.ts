@@ -1,5 +1,14 @@
 import type { Context } from '../client';
-import { checkInt, checkLength, checkPhone, checkShortCode, type Issues } from '../core/validate';
+import { str } from '../core/coerce';
+import { DarajaApiError } from '../core/errors';
+import {
+  checkInt,
+  checkLength,
+  checkPhone,
+  checkShortCode,
+  checkUrl,
+  Issues,
+} from '../core/validate';
 import { initiatorRequest } from './initiator';
 import type { InitiatorResponse } from './shared';
 
@@ -66,9 +75,40 @@ export interface B2BTaxInput extends B2BCommon {
   accountReference: string;
 }
 
+/** Input for `b2b.expressCheckout`. */
+export interface B2BExpressCheckoutInput {
+  /** Your paybill, 5 to 7 digits, which is credited (`receiverShortCode`). */
+  shortCode: number;
+  /** The merchant's till, 5 to 7 digits, which is debited (`primaryShortCode`). */
+  merchantTill: number;
+  /** Whole shillings, at least 1 (`amount`). */
+  amount: number;
+  /** Shown to the merchant in the USSD prompt (`paymentRef`). */
+  paymentReference: string;
+  /** Your name as the merchant knows it, shown in the prompt (`partnerName`). */
+  partnerName: string;
+  /** Receives the result of the push (`callbackUrl`); see `parseExpressCheckoutCallback`. */
+  callbackUrl: string;
+  /** Your unique ID for this push (`RequestRefID`). Defaults to a random UUID. */
+  requestRefId?: string;
+}
+
+/** Daraja's acknowledgement of a B2B Express CheckOut push. */
+export interface B2BExpressCheckoutResponse {
+  /** Always "0": any other code throws `DarajaApiError`. */
+  code: string;
+  /** For example "USSD Initiated Successfully". */
+  status: string;
+  /** The `RequestRefID` sent, generated or given. */
+  requestRefId: string;
+  /** Daraja's response body, unmodified. */
+  raw: unknown;
+}
+
 /**
- * Business to Business (B2B) payments from your shortcode. Each needs the initiator to hold the
- * product's org API role on M-Pesa.
+ * Business to Business (B2B) payments. `payBill`, `buyGoods`, `topUpB2C` and `remitTax` pay from
+ * your shortcode and need the initiator to hold the product's org API role on M-Pesa;
+ * `expressCheckout` needs no initiator.
  *
  * Methods throw `ValidationError` before sending when the input or client config is invalid,
  * and `DarajaApiError`, `AuthError` or `NetworkError` when the request fails.
@@ -95,10 +135,18 @@ export interface B2BApi {
    * `resultUrl`.
    */
   remitTax(input: B2BTaxInput): Promise<InitiatorResponse>;
+  /**
+   * Sends a USSD prompt to a merchant's nominated operator to pay your paybill from the
+   * merchant's till (B2B Express CheckOut). No initiator is needed. A non-zero `code` throws
+   * `DarajaApiError`. The acknowledgement only confirms the prompt was sent; the outcome arrives at `callbackUrl` (see
+   * `parseExpressCheckoutCallback`).
+   */
+  expressCheckout(input: B2BExpressCheckoutInput): Promise<B2BExpressCheckoutResponse>;
 }
 
 const PAYMENT_PATH = '/mpesa/b2b/v1/paymentrequest';
 const TAX_PATH = '/mpesa/b2b/v1/remittax';
+const EXPRESS_PATH = '/v1/ussdpush/get-msisdn';
 /** KRA's shortcode, the only `PartyB` Tax Remittance accepts. */
 const KRA_SHORTCODE = 572572;
 
@@ -218,6 +266,55 @@ function remitTax(ctx: Context, input: B2BTaxInput): Promise<InitiatorResponse> 
   });
 }
 
+/** A string with something other than whitespace in it. */
+const isFilled = (value: unknown): boolean => typeof value === 'string' && value.trim() !== '';
+
+/** Validates an Express CheckOut push and returns the request ID to send. */
+function checkExpressCheckout(ctx: Context, input: B2BExpressCheckoutInput): string {
+  const issues = new Issues();
+  checkInt(issues, 'amount', input.amount, { min: 1 });
+  checkShortCode(issues, 'shortCode', input.shortCode);
+  checkShortCode(issues, 'merchantTill', input.merchantTill);
+  if (!isFilled(input.paymentReference)) issues.add('paymentReference', 'is required');
+  if (!isFilled(input.partnerName)) issues.add('partnerName', 'is required');
+  checkUrl(issues, 'callbackUrl', input.callbackUrl, {
+    production: ctx.environment === 'production',
+  });
+  if (input.requestRefId !== undefined && !isFilled(input.requestRefId)) {
+    issues.add('requestRefId', 'is required');
+  }
+  issues.throwIfAny('b2b.expressCheckout');
+  return input.requestRefId ?? crypto.randomUUID();
+}
+
+async function expressCheckout(
+  ctx: Context,
+  input: B2BExpressCheckoutInput,
+): Promise<B2BExpressCheckoutResponse> {
+  const requestRefId = checkExpressCheckout(ctx, input);
+  // Shortcodes and the amount are sent as strings, as in the portal's sample.
+  const raw = await ctx.post<Record<string, unknown>>(EXPRESS_PATH, {
+    primaryShortCode: String(input.merchantTill),
+    receiverShortCode: String(input.shortCode),
+    amount: String(input.amount),
+    paymentRef: input.paymentReference,
+    callbackUrl: input.callbackUrl,
+    partnerName: input.partnerName,
+    RequestRefID: requestRefId,
+  });
+  // The acknowledgement carries `code`, not `ResponseCode`, so it is checked here.
+  const code = str(raw.code);
+  if (code !== '0') {
+    throw new DarajaApiError({
+      status: 200,
+      body: raw,
+      ...(code ? { errorCode: code } : {}),
+      errorMessage: str(raw.status),
+    });
+  }
+  return { code, status: str(raw.status), requestRefId, raw };
+}
+
 /** Business to Business (B2B) payments. */
 export function b2b(ctx: Context): B2BApi {
   return {
@@ -225,5 +322,6 @@ export function b2b(ctx: Context): B2BApi {
     buyGoods: (input) => buyGoods(ctx, input),
     topUpB2C: (input) => topUpB2C(ctx, input),
     remitTax: (input) => remitTax(ctx, input),
+    expressCheckout: (input) => expressCheckout(ctx, input),
   };
 }
