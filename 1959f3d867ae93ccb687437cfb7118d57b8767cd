@@ -1,1 +1,0 @@
-b2b-pay-bill: red = module missing; green 16 tests (body pinned to the portal sample, optional fields omitted, ack mapping, 4 payBill rules, shared describe.each with 6 rules + partyB + initiator). Full suite green, vp check clean (complexity gate ok).
