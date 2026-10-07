@@ -1,0 +1,1 @@
+PR #63 review follow-up (claude[bot], non-blocking). Characterization test (passes on first run: pins the existing order amount, shortCode, partyB, remarks, accountReference, occasion, requester). Docs note on ignored fields. Not acted on: no B2B amount cap (portal publishes none); live success captures tracked in the backlog.
