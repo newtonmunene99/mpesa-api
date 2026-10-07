@@ -37,18 +37,22 @@ body:
         - OAuth / authentication
         - stkPush.send
         - stkPush.query
+        - qr.generate
         - c2b.registerUrls
         - c2b.simulate
+        - pullTransactions.register
+        - pullTransactions.query / pullTransactions.all
         - b2c.pay
         - b2c.payToPochi
         - b2b.payBill
         - b2b.buyGoods
         - b2b.topUpB2C
         - b2b.remitTax
+        - b2b.expressCheckout
         - accountBalance.query
         - transactionStatus.query
         - reversal.request
-        - Callback parsers (parseStkCallback, parseResult, parseC2BNotification, parseBalances)
+        - Callback parsers (parseStkCallback, parseResult, parseC2BNotification, parseBalances, parseExpressCheckoutCallback)
         - Version 3.x (please say which method)
         - Installation / types / packaging
         - Other

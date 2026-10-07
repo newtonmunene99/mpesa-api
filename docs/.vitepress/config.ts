@@ -19,7 +19,9 @@ const sidebar: DefaultTheme.SidebarItem[] = [
     text: 'APIs',
     items: [
       { text: 'M-Pesa Express (STK push)', link: '/apis/stk-push' },
+      { text: 'Dynamic QR', link: '/apis/qr' },
       { text: 'Customer to Business (C2B)', link: '/apis/c2b' },
+      { text: 'Pull Transactions', link: '/apis/pull-transactions' },
       { text: 'Business to Customer (B2C)', link: '/apis/b2c' },
       { text: 'Business to Business (B2B)', link: '/apis/b2b' },
       { text: 'Transaction Status', link: '/apis/transaction-status' },

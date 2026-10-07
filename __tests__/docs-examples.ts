@@ -14,6 +14,7 @@ import {
   NetworkError,
   parseBalances,
   parseC2BNotification,
+  parseExpressCheckoutCallback,
   parseResult,
   parseStkCallback,
   type TokenStore,
@@ -202,6 +203,62 @@ export async function b2b(mpesa: Mpesa): Promise<void> {
     resultUrl: 'https://example.com/payments/tax/result',
     queueTimeoutUrl: 'https://example.com/payments/tax/timeout',
   });
+}
+
+// B2B: Express CheckOut
+export async function expressCheckout(mpesa: Mpesa): Promise<void> {
+  const push = await mpesa.b2b.expressCheckout({
+    shortCode: 600000,
+    merchantTill: 123456,
+    amount: 100,
+    paymentReference: 'INV-7',
+    partnerName: 'Vendor',
+    callbackUrl: 'https://example.com/payments/b2b/express',
+  });
+  console.log(push.requestRefId);
+
+  app.post('/payments/b2b/express', (req, res) => {
+    const result = parseExpressCheckoutCallback(req.body);
+    if (result.ok) console.log('paid', result.transactionId, result.amountCents);
+    else console.log('not paid', result.resultCode, result.resultDesc);
+    res.json({ ok: true });
+  });
+}
+
+// Dynamic QR
+export async function dynamicQr(mpesa: Mpesa): Promise<string> {
+  const { qrCode } = await mpesa.qr.generate({
+    merchantName: 'TEST SUPERMARKET',
+    reference: 'Invoice Test',
+    amount: 1,
+    type: 'buyGoods',
+    creditParty: 373132,
+  });
+
+  const src = `data:image/png;base64,${qrCode}`;
+  return src;
+}
+
+// Pull Transactions
+export async function pullTransactions(mpesa: Mpesa, from: Date, to: Date): Promise<void> {
+  const registration = await mpesa.pullTransactions.register({
+    shortCode: 600000,
+    nominatedNumber: '0722000000',
+    callbackUrl: 'https://example.com/payments/pull',
+  });
+  console.log(registration.alreadyRegistered);
+
+  const now = new Date();
+  const page = await mpesa.pullTransactions.query({
+    shortCode: 600000,
+    from: new Date(now.getTime() - 24 * 60 * 60 * 1000),
+    to: now,
+  });
+  for (const t of page.transactions) console.log(t.transactionId, t.amountCents);
+
+  for await (const t of mpesa.pullTransactions.all({ shortCode: 600000, from, to })) {
+    console.log(t.transactionId, t.date, t.amountCents);
+  }
 }
 
 // Transaction Status

@@ -2,12 +2,12 @@
 
 Every error extends `MpesaError`. `ValidationError.issues` is a list of `ValidationIssue`.
 
-| Class             | When                                                                                     | Useful fields                                              |
-| ----------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `ValidationError` | Invalid input or config. Nothing was sent.                                               | `issues: { path, message }[]`                              |
-| `AuthError`       | The token request failed, usually a wrong consumer key or secret.                        | `status`, `errorCode`                                      |
-| `DarajaApiError`  | Daraja rejected the request, or accepted it with a non-zero `ResponseCode`.              | `status`, `errorCode`, `errorMessage`, `requestId`, `body` |
-| `NetworkError`    | No usable response: a network failure, a timeout, or a success response that isn't JSON. | `cause` (for network failures and timeouts)                |
+| Class             | When                                                                                                                                           | Useful fields                                              |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `ValidationError` | Invalid input or config. Nothing was sent.                                                                                                     | `issues: { path, message }[]`                              |
+| `AuthError`       | The token request failed, usually a wrong consumer key or secret.                                                                              | `status`, `errorCode`                                      |
+| `DarajaApiError`  | Daraja rejected the request, or accepted it with a failure code (a non-zero `ResponseCode`; for Pull Transactions anything but `1000`/`1001`). | `status`, `errorCode`, `errorMessage`, `requestId`, `body` |
+| `NetworkError`    | No usable response: a network failure, a timeout, or a success response that isn't JSON.                                                       | `cause` (for network failures and timeouts)                |
 
 ```ts
 try {
