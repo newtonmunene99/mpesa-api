@@ -1,0 +1,1 @@
+cancel-invoices: cancelInvoice posts { externalReference } to cancel-single-invoice; cancelInvoices posts [{ externalReference }] to cancel-bulk-invoices; errors list kept (empty when absent); rescode 409 for paid invoices throws; empty references rejected by path; 504 pinned. Red (8) then green.
