@@ -265,12 +265,6 @@ describe('bonga.redeem', () => {
       'must have at most 2 decimal places',
     ],
     [
-      'an amount that is not points × rate',
-      { amount: 9 },
-      'amount',
-      'must equal points × rate (8)',
-    ],
-    [
       'an amount below one cent',
       { points: 1, amount: 0.004, rate: 0.004 },
       'amount',
@@ -287,7 +281,7 @@ describe('bonga.redeem', () => {
     expect(calls).toHaveLength(0);
   });
 
-  test('reports both an infinite rate and amount without comparing them', async () => {
+  test('reports both an infinite rate and amount', async () => {
     const { api, calls } = setup([]);
 
     const error = await api
@@ -301,15 +295,12 @@ describe('bonga.redeem', () => {
     expect(calls).toHaveLength(0);
   });
 
-  test('rejects the portal sample, whose amount is not points × rate', async () => {
-    const { api } = setup([]);
+  test('sends the portal sample as given, though its amount is not points × rate', async () => {
+    // KES 50 for 20 points at 0.2 (worth 4): Daraja, not the SDK, decides whether that's valid.
+    const { api, calls } = setup([token, { status: 200, body: redeemed }]);
 
-    const error = await api
-      .redeem({ ...redemption, amount: 50, points: 20 })
-      .catch((e: unknown) => e);
+    await api.redeem({ ...redemption, amount: 50, points: 20 });
 
-    expect((error as ValidationError).issues).toEqual([
-      { path: 'amount', message: 'must equal points × rate (4)' },
-    ]);
+    expect(calls[1]!.body).toMatchObject({ amount: 50, bongaPoints: 20, conversionRate: 0.2 });
   });
 });

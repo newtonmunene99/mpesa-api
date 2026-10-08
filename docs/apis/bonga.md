@@ -42,10 +42,10 @@ await mpesa.bonga.redeem({
 | `shortCode`     | `shortCode`      | Your paybill or till, which is paid.                                  |
 | `accountNumber` | `accountNumber`  | The account number at your paybill.                                   |
 | `points`        | `bongaPoints`    | Whole points, at least 1.                                             |
-| `amount`        | `amount`         | Shillings, at most 2 decimal places.                                  |
+| `amount`        | `amount`         | Shillings, at most 2 decimal places; normally `points × rate`.        |
 | `rate`          | `conversionRate` | Shillings per point, as `calculatePoints` returned it.                |
 
-`amount` must equal `points × rate` to the cent, or `redeem` throws `ValidationError` before sending. The portal's own sample breaks this rule (KES 50 for 20 points at 0.2). The portal's calculate-points step calls `amount` "the amount to pay", so the SDK holds the two to agree. The response (`BongaRedeemResponse`) has `requestRefId`, `responseCode`, `responseMessage` and `raw`. It only confirms the request was received.
+Pass the values `calculatePoints` returned, so `amount` is `points × rate`. The SDK doesn't enforce that: the portal's own redeem sample sends KES 50 for 20 points at 0.2, and whether Daraja accepts a mismatch hasn't been tested, so Daraja decides. `amount` must be positive with at most 2 decimal places. The response (`BongaRedeemResponse`) has `requestRefId`, `responseCode`, `responseMessage` and `raw`. It only confirms the request was received.
 
 Every response carries `header.responseCode`; anything but 200 throws `DarajaApiError`. The SDK doesn't send the `Username` and `Password` headers the portal lists for "Bonga Everywhere".
 

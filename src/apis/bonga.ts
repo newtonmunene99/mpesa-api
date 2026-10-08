@@ -38,7 +38,10 @@ export interface BongaRedeemInput {
   accountNumber: string;
   /** Whole points to redeem, at least 1 (`bongaPoints`). */
   points: number;
-  /** The shillings the points pay for; must equal `points × rate` to the cent (`amount`). */
+  /**
+   * The shillings the points pay for, at most 2 decimal places (`amount`). `calculatePoints`
+   * gives `points × rate`; the SDK doesn't enforce it, Daraja does if it chooses to.
+   */
   amount: number;
   /** Shillings per point, as `calculatePoints` returned it (`conversionRate`). */
   rate: number;
@@ -148,8 +151,8 @@ const isPositive = (value: number): boolean => Number.isFinite(value) && value >
 const toCents = (shillings: number): number => Math.round(shillings * 100);
 
 /**
- * Checks that `amount` is a positive number of shillings and cents, and equals `points × rate`
- * compared in cents. The comparison is skipped when `points` or `rate` is already reported.
+ * Checks that `amount` is a positive number of shillings and cents. Whether it matches
+ * `points × rate` is left to Daraja: the portal's own sample sends one that doesn't.
  */
 function checkAmount(issues: Issues, input: BongaRedeemInput): void {
   if (!isPositive(input.amount)) {
@@ -158,12 +161,6 @@ function checkAmount(issues: Issues, input: BongaRedeemInput): void {
   }
   if (Math.abs(toCents(input.amount) - input.amount * 100) > 1e-6) {
     issues.add('amount', 'must have at most 2 decimal places');
-    return;
-  }
-  if (!Number.isInteger(input.points) || input.points < 1 || !isPositive(input.rate)) return;
-  const expected = toCents(input.points * input.rate);
-  if (toCents(input.amount) !== expected) {
-    issues.add('amount', `must equal points × rate (${expected / 100})`);
   }
 }
 
