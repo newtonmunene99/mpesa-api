@@ -1,1 +1,3 @@
 verify-p3 must-fix: errors guide now notes Pull Transactions and Bonga calculatePoints can throw ValidationError for an unreadable response body after sending; bonga.md and pull-transactions.md say so. Migration derived-fields list adds Ratiba's identifier type and TransactionType.
+
+Checkpoint P3 (exports, docs, changeset): full gate + docs:build green; fresh verifier's must-fix (ValidationError wording) applied in this commit; maintainer hand check of the docs site: 'looks good'.
