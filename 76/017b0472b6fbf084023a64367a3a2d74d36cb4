@@ -1,0 +1,1 @@
+acknowledge-payment: posts to reconciliation with paymentDate as EAT YYYY-MM-DD, paidAmount as a whole-shilling string, phoneNumber in 07/01 form, and the required text fields; rescode check; 504 capture pinned. Red (12) then green.
