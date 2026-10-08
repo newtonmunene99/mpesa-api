@@ -240,6 +240,19 @@ function invoiceBody(
   };
 }
 
+/**
+ * POSTs to a Bill Manager endpoint, sending the configured `billManager.appKey` as the
+ * `appKey` header. `optIn` doesn't use this: it is the call that issues the key.
+ */
+function post(ctx: Context, path: string, body: unknown): Promise<Record<string, unknown>> {
+  const appKey = ctx.config.billManager?.appKey;
+  return ctx.post<Record<string, unknown>>(
+    `${BASE}/${path}`,
+    body,
+    appKey ? { headers: { appKey } } : {},
+  );
+}
+
 /** Maps an invoicing or cancelling answer after checking its `rescode`. */
 function response(raw: Record<string, unknown>): BillManagerResponse {
   checkRescode(raw);
@@ -258,7 +271,7 @@ async function sendInvoice(
   const issues = new Issues();
   const body = invoiceBody(issues, invoice, '');
   issues.throwIfAny('billManager.sendInvoice');
-  return response(await ctx.post<Record<string, unknown>>(`${BASE}/single-invoicing`, body));
+  return response(await post(ctx, 'single-invoicing', body));
 }
 
 async function sendInvoices(
@@ -274,7 +287,7 @@ async function sendInvoices(
     invoiceBody(issues, invoice, `invoices[${index}].`),
   );
   issues.throwIfAny('billManager.sendInvoices');
-  return response(await ctx.post<Record<string, unknown>>(`${BASE}/bulk-invoicing`, body));
+  return response(await post(ctx, 'bulk-invoicing', body));
 }
 
 /** Maps a cancel answer, keeping Daraja's `errors` list. */
@@ -289,9 +302,7 @@ async function cancelInvoice(
   const issues = new Issues();
   if (!isFilled(externalReference)) issues.add('externalReference', 'is required');
   issues.throwIfAny('billManager.cancelInvoice');
-  return cancelResponse(
-    await ctx.post<Record<string, unknown>>(`${BASE}/cancel-single-invoice`, { externalReference }),
-  );
+  return cancelResponse(await post(ctx, 'cancel-single-invoice', { externalReference }));
 }
 
 async function cancelInvoices(
@@ -308,9 +319,7 @@ async function cancelInvoices(
   }
   issues.throwIfAny('billManager.cancelInvoices');
   const body = externalReferences.map((externalReference) => ({ externalReference }));
-  return cancelResponse(
-    await ctx.post<Record<string, unknown>>(`${BASE}/cancel-bulk-invoices`, body),
-  );
+  return cancelResponse(await post(ctx, 'cancel-bulk-invoices', body));
 }
 
 const ACKNOWLEDGED_TEXT = [
@@ -349,7 +358,7 @@ async function acknowledgePayment(
   input: BillManagerAcknowledgement,
 ): Promise<BillManagerResponse> {
   const body = acknowledgementBody(input);
-  return response(await ctx.post<Record<string, unknown>>(`${BASE}/reconciliation`, body));
+  return response(await post(ctx, 'reconciliation', body));
 }
 
 /** Validates an opt-in and returns its body. */

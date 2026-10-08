@@ -562,4 +562,50 @@ describe('billManager.acknowledgePayment', () => {
   });
 });
 
+describe('the billManager.appKey config', () => {
+  const keyed = (responses: FakeResponse[], appKey?: string) => {
+    const { fetch, calls } = fakeFetch(responses);
+    const ctx = createContext({
+      environment: 'sandbox',
+      consumerKey: 'key',
+      consumerSecret: 'secret',
+      fetch,
+      ...(appKey ? { billManager: { appKey } } : {}),
+    });
+    return { api: billManager(ctx), calls };
+  };
+  const ok: FakeResponse = { status: 200, body: { ...cancelled } };
+
+  test.each([
+    ['sendInvoice', (api: Api) => api.sendInvoice(invoice)],
+    ['sendInvoices', (api: Api) => api.sendInvoices([invoice])],
+    ['cancelInvoice', (api: Api) => api.cancelInvoice('113')],
+    ['cancelInvoices', (api: Api) => api.cancelInvoices(['113'])],
+    ['acknowledgePayment', (api: Api) => api.acknowledgePayment(acknowledgement)],
+  ])('is sent as the appKey header by %s', async (_, call) => {
+    const { api, calls } = keyed([token, ok], 'AG_KEY');
+
+    await call(api);
+
+    // Header names are case-insensitive; the recorder lower-cases them.
+    expect(calls[1]!.headers).toMatchObject({ appkey: 'AG_KEY', authorization: 'Bearer tok' });
+  });
+
+  test('is not sent by optIn, which is the call that issues it', async () => {
+    const { api, calls } = keyed([token, { status: 200, body: optedIn }], 'AG_KEY');
+
+    await api.optIn(optIn);
+
+    expect(calls[1]!.headers).not.toHaveProperty('appkey');
+  });
+
+  test('sends no header when it is not configured', async () => {
+    const { api, calls } = keyed([token, ok]);
+
+    await api.sendInvoice(invoice);
+
+    expect(calls[1]!.headers).not.toHaveProperty('appkey');
+  });
+});
+
 type Api = ReturnType<typeof billManager>;

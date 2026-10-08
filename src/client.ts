@@ -52,6 +52,12 @@ export interface MpesaConfig {
   fetch?: typeof fetch;
   /** Receives non-fatal warnings, such as an expired certificate. */
   onWarning?: (message: string) => void;
+  /**
+   * Bill Manager settings. `appKey` is the `app_key` that `billManager.optIn` returns; when
+   * set, every Bill Manager call except `optIn` sends it as the `appKey` header. The portal says
+   * the key goes in a header but doesn't name it, so the name is unconfirmed.
+   */
+  billManager?: { appKey: string };
 }
 
 /** Per-call options for `Context.post`. */
@@ -146,6 +152,7 @@ function validateConfig(config: MpesaConfig): RsaPublicKey | undefined {
   if (!config.consumerSecret) issues.add('consumerSecret', 'is required');
   const initiator = config.initiator as Record<string, unknown> | undefined;
   if (initiator !== undefined) checkInitiator(issues, initiator);
+  if (config.billManager !== undefined) checkBillManager(issues, config.billManager);
   issues.throwIfAny('createMpesa');
 
   if (initiator && 'password' in initiator && initiator.certificate) {
@@ -155,6 +162,17 @@ function validateConfig(config: MpesaConfig): RsaPublicKey | undefined {
     );
   }
   return undefined;
+}
+
+/** Reports a Bill Manager config without a usable `appKey`. */
+function checkBillManager(issues: Issues, billManager: unknown): void {
+  const appKey =
+    typeof billManager === 'object' && billManager !== null
+      ? (billManager as Record<string, unknown>).appKey
+      : undefined;
+  if (typeof appKey !== 'string' || appKey.trim() === '') {
+    issues.add('billManager.appKey', 'must be a non-empty string');
+  }
 }
 
 /** Reports a missing name, and an initiator with neither a password and certificate nor a credential. */

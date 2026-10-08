@@ -72,6 +72,32 @@ describe('createMpesa', () => {
   });
 });
 
+describe('createMpesa billManager config', () => {
+  test.each([
+    ['an empty appKey', { appKey: '' }],
+    ['a blank appKey', { appKey: '  ' }],
+    ['a non-string appKey', { appKey: 42 as never }],
+    ['a non-object billManager', 'key' as never],
+  ])('rejects %s', (_, billManager) => {
+    const { fetch } = fakeFetch([]);
+
+    expect(() => createMpesa(baseConfig(fetch, { billManager }))).toThrow(
+      expect.objectContaining({
+        name: 'ValidationError',
+        issues: [{ path: 'billManager.appKey', message: 'must be a non-empty string' }],
+      }),
+    );
+  });
+
+  test('accepts an appKey', () => {
+    const { fetch } = fakeFetch([]);
+
+    expect(() =>
+      createMpesa(baseConfig(fetch, { billManager: { appKey: 'AG_KEY' } })),
+    ).not.toThrow();
+  });
+});
+
 describe('context', () => {
   test('uses the base URL for the environment', async () => {
     for (const [environment, host] of [
