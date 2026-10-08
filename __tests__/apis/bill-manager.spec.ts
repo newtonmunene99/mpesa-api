@@ -227,13 +227,15 @@ describe('billManager.sendInvoice', () => {
     expect(calls[1]!.body).toMatchObject({ dueDate: '2021-10-12' });
   });
 
-  test('leaves out invoiceItems when there are none', async () => {
-    const { api, calls } = setup([token, { status: 200, body: sent }]);
+  test('leaves out invoiceItems when there are none, or the list is empty', async () => {
+    const { api, calls } = setup([token, { status: 200, body: sent }, { status: 200, body: sent }]);
     const { invoiceItems: _, ...plain } = invoice;
 
     await api.sendInvoice(plain);
+    await api.sendInvoice({ ...plain, invoiceItems: [] });
 
     expect(calls[1]!.body).not.toHaveProperty('invoiceItems');
+    expect(calls[2]!.body).not.toHaveProperty('invoiceItems');
   });
 
   test('rejects a duplicate externalReference (rescode 409)', async () => {
@@ -272,6 +274,12 @@ describe('billManager.sendInvoice', () => {
     ['amount 0', { amount: 0 }, 'amount', 'must be at least 1'],
     ['fractional amount', { amount: 1.5 }, 'amount', 'must be an integer'],
     ['invalid dueDate', { dueDate: new Date('x') }, 'dueDate', 'must be a valid date'],
+    [
+      'invoiceItems that is not a list',
+      { invoiceItems: {} as never },
+      'invoiceItems',
+      'must be a list',
+    ],
     [
       'an item without a name',
       { invoiceItems: [{ itemName: '', amount: 1 }] },
@@ -332,6 +340,17 @@ describe('billManager.sendInvoices', () => {
     expect((error as ValidationError).issues).toEqual([
       { path: 'invoices[1].amount', message: 'must be at least 1' },
       { path: 'invoices[1].invoiceItems[0].itemName', message: 'is required' },
+    ]);
+    expect(calls).toHaveLength(0);
+  });
+
+  test('reports a non-object invoice in the list', async () => {
+    const { api, calls } = setup([]);
+
+    const error = await api.sendInvoices([invoice, null as never]).catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([
+      { path: 'invoices[1]', message: 'must be an invoice' },
     ]);
     expect(calls).toHaveLength(0);
   });
@@ -402,7 +421,12 @@ describe('billManager.cancelInvoice and cancelInvoices', () => {
     expect((await api.cancelInvoices(['113', '114'])).errors).toEqual([
       { externalReference: '114' },
     ]);
-    expect((await api.cancelInvoice('113')).errors).toEqual([]);
+    expect(await api.cancelInvoice('113')).toEqual({
+      message: 'Success',
+      code: '200',
+      errors: [],
+      raw: { resmsg: 'Success', rescode: '200' },
+    });
   });
 
   test('rejects cancelling a paid invoice (rescode 409)', async () => {
@@ -429,20 +453,32 @@ describe('billManager.cancelInvoice and cancelInvoices', () => {
   });
 
   test.each([
-    ['an empty reference', () => (api: Api) => api.cancelInvoice(' '), 'externalReference'],
-    ['no references', () => (api: Api) => api.cancelInvoices([]), 'externalReferences'],
+    [
+      'an empty reference',
+      (api: Api) => api.cancelInvoice(' '),
+      'billManager.cancelInvoice',
+      { path: 'externalReference', message: 'is required' },
+    ],
+    [
+      'no references',
+      (api: Api) => api.cancelInvoices([]),
+      'billManager.cancelInvoices',
+      { path: 'externalReferences', message: 'must hold at least one reference' },
+    ],
     [
       'an empty reference in the list',
-      () => (api: Api) => api.cancelInvoices(['113', '']),
-      'externalReferences[1]',
+      (api: Api) => api.cancelInvoices(['113', '']),
+      'billManager.cancelInvoices',
+      { path: 'externalReferences[1]', message: 'is required' },
     ],
-  ])('rejects %s', async (_, make, path) => {
+  ])('rejects %s', async (_, call, context, issue) => {
     const { api, calls } = setup([]);
 
-    const error = await make()(api).catch((e: unknown) => e);
+    const error = await call(api).catch((e: unknown) => e);
 
     expect(error).toBeInstanceOf(ValidationError);
-    expect((error as ValidationError).issues.map((i) => i.path)).toEqual([path]);
+    expect((error as ValidationError).message).toContain(context);
+    expect((error as ValidationError).issues).toEqual([issue]);
     expect(calls).toHaveLength(0);
   });
 });

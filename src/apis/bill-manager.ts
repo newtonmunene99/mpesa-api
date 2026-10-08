@@ -1,3 +1,4 @@
+import { isRecord } from '../callbacks/shared';
 import type { Context } from '../client';
 import { str } from '../core/coerce';
 import { DarajaApiError } from '../core/errors';
@@ -110,7 +111,10 @@ export interface BillManagerApi {
    * cancelled: Daraja answers rescode 409, which throws `DarajaApiError`.
    */
   cancelInvoice(externalReference: string): Promise<BillManagerCancelResponse>;
-  /** Recalls several sent invoices by their `externalReference`s. */
+  /**
+   * Recalls several sent invoices by their `externalReference`s. The portal gives no upper
+   * limit for one call.
+   */
   cancelInvoices(externalReferences: string[]): Promise<BillManagerCancelResponse>;
 }
 
@@ -164,6 +168,16 @@ function invoiceItems(
   });
 }
 
+/** Checks that the optional invoice lines are a list, then validates each one. */
+function checkItems(issues: Issues, items: unknown, prefix: string): Record<string, string>[] {
+  if (items === undefined) return [];
+  if (!Array.isArray(items)) {
+    issues.add(`${prefix}invoiceItems`, 'must be a list');
+    return [];
+  }
+  return invoiceItems(issues, items as BillManagerInvoiceItem[], prefix);
+}
+
 /**
  * Validates one invoice, reporting issues under `prefix` (empty for `sendInvoice`,
  * `invoices[<n>].` for `sendInvoices`), and returns it as Daraja fields.
@@ -173,6 +187,10 @@ function invoiceBody(
   invoice: BillManagerInvoice,
   prefix: string,
 ): Record<string, unknown> {
+  if (!isRecord(invoice)) {
+    issues.add(prefix ? prefix.slice(0, -1) : 'invoice', 'must be an invoice');
+    return {};
+  }
   for (const field of REQUIRED_TEXT) {
     if (!isFilled(invoice[field])) issues.add(`${prefix}${field}`, 'is required');
   }
@@ -180,7 +198,7 @@ function invoiceBody(
   checkInt(issues, `${prefix}amount`, invoice.amount, { min: 1 });
   const due = isDate(invoice.dueDate);
   if (!due) issues.add(`${prefix}dueDate`, 'must be a valid date');
-  const items = invoice.invoiceItems ? invoiceItems(issues, invoice.invoiceItems, prefix) : [];
+  const items = checkItems(issues, invoice.invoiceItems, prefix);
   return {
     externalReference: invoice.externalReference,
     billedFullName: invoice.billedFullName,
@@ -190,7 +208,7 @@ function invoiceBody(
     dueDate: due ? formatEatDateTime(invoice.dueDate).slice(0, 10) : '',
     accountReference: invoice.accountReference,
     amount: String(invoice.amount),
-    ...(invoice.invoiceItems ? { invoiceItems: items } : {}),
+    ...(items.length > 0 ? { invoiceItems: items } : {}),
   };
 }
 
