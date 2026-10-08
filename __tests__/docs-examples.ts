@@ -6,6 +6,7 @@
 import { readFile } from 'node:fs/promises';
 import {
   AuthError,
+  billManagerPaymentResponse,
   c2bValidationResponse,
   type CachedToken,
   createMpesa,
@@ -13,6 +14,7 @@ import {
   type Mpesa,
   NetworkError,
   parseBalances,
+  parseBillManagerPayment,
   parseC2BNotification,
   parseExpressCheckoutCallback,
   parseRatibaCallback,
@@ -300,6 +302,61 @@ export async function bongaPoints(mpesa: Mpesa): Promise<void> {
     amount: quote.amountCents / 100,
     rate: quote.rate,
   });
+}
+
+// Bill Manager
+export async function billManagerExamples(mpesa: Mpesa): Promise<Mpesa> {
+  const { appKey } = await mpesa.billManager.optIn({
+    shortCode: 718003,
+    email: 'billing@example.com',
+    officialContact: '0710000000',
+    sendReminders: true,
+    callbackUrl: 'https://example.com/payments/bill-manager',
+  });
+  console.log(appKey);
+
+  const billing = createMpesa({
+    environment: 'production',
+    consumerKey: process.env.MPESA_CONSUMER_KEY!,
+    consumerSecret: process.env.MPESA_CONSUMER_SECRET!,
+    billManager: { appKey: process.env.MPESA_BILL_MANAGER_APP_KEY! },
+  });
+
+  await mpesa.billManager.sendInvoice({
+    externalReference: 'INV-2042',
+    billedFullName: 'John Doe',
+    billedPhoneNumber: '0722000000',
+    billedPeriod: 'October 2026',
+    invoiceName: 'Water',
+    dueDate: new Date('2026-10-31'),
+    accountReference: 'G70',
+    amount: 800,
+    invoiceItems: [
+      { itemName: 'Water', amount: 700 },
+      { itemName: 'Meter rent', amount: 100 },
+    ],
+  });
+
+  await mpesa.billManager.cancelInvoice('INV-2042');
+  await mpesa.billManager.cancelInvoices(['INV-2043', 'INV-2044']);
+
+  app.post('/payments/bill-manager', (req, res) => {
+    const payment = parseBillManagerPayment(req.body);
+    console.log(payment.transactionId, payment.paidAmountCents, payment.accountReference);
+    res.json(billManagerPaymentResponse);
+  });
+
+  await mpesa.billManager.acknowledgePayment({
+    paymentDate: new Date('2026-10-20'),
+    paidAmount: 800,
+    accountReference: 'G70',
+    transactionId: 'PJB53MYR1N',
+    phoneNumber: '0722000000',
+    fullName: 'John Doe',
+    invoiceName: 'Water',
+    externalReference: 'INV-2042',
+  });
+  return billing;
 }
 
 // Transaction Status

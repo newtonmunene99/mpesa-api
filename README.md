@@ -19,6 +19,7 @@ Supported APIs:
 - [Pull Transactions: the last 48 hours of C2B payments](https://newtonmunene99.github.io/mpesa-api/apis/pull-transactions)
 - [M-Pesa Ratiba: standing orders](https://newtonmunene99.github.io/mpesa-api/apis/ratiba)
 - [Lipa na Bonga: payments with Bonga points](https://newtonmunene99.github.io/mpesa-api/apis/bonga)
+- [Bill Manager: e-invoices, payments and receipts](https://newtonmunene99.github.io/mpesa-api/apis/bill-manager)
 - [Business to Customer (B2C) and Business To Pochi](https://newtonmunene99.github.io/mpesa-api/apis/b2c)
 - [Business to Business (B2B): pay bill, buy goods, B2C account top up, tax remittance, Express CheckOut](https://newtonmunene99.github.io/mpesa-api/apis/b2b)
 - [Transaction Status](https://newtonmunene99.github.io/mpesa-api/apis/transaction-status)

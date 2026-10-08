@@ -24,6 +24,7 @@ const sidebar: DefaultTheme.SidebarItem[] = [
       { text: 'Pull Transactions', link: '/apis/pull-transactions' },
       { text: 'M-Pesa Ratiba', link: '/apis/ratiba' },
       { text: 'Lipa na Bonga', link: '/apis/bonga' },
+      { text: 'Bill Manager', link: '/apis/bill-manager' },
       { text: 'Business to Customer (B2C)', link: '/apis/b2c' },
       { text: 'Business to Business (B2B)', link: '/apis/b2b' },
       { text: 'Transaction Status', link: '/apis/transaction-status' },
