@@ -120,6 +120,17 @@ describe('bonga.calculatePoints', () => {
     ]);
   });
 
+  test('reports a non-positive amount in the body', async () => {
+    const body = { ...calculated, body: { amount: '-8', points: '40', rate: '0.2' } };
+    const { api } = setup([token, { status: 200, body }]);
+
+    const error = await api.calculatePoints({ points: 40 }).catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([
+      { path: 'body.amount', message: 'must be a positive number' },
+    ]);
+  });
+
   test("surfaces the sandbox's 404 (bonga-calculate.json)", async () => {
     // This sandbox app has no route to Lipa na Bonga: HTTP 404 with an empty body.
     const captured = sandboxCapture('bonga-calculate');
@@ -157,5 +168,148 @@ describe('bonga.calculatePoints', () => {
     expect(error).toBeInstanceOf(ValidationError);
     expect((error as ValidationError).issues).toEqual([{ path: 'points', message }]);
     expect(calls).toHaveLength(0);
+  });
+});
+
+// The redeem response sample from the Lipa na Bonga portal page.
+const redeemed = {
+  header: {
+    requestRefId: 'a53a2939-7361-482f-ba1e-ccd51504acd3',
+    responseCode: 200,
+    responseMessage: 'Operation Successfully.',
+    customerMessage: 'Dear customer, your request was processed successfully',
+    timestamp: '2026-03-10T09:54:28.456847481',
+  },
+  body: null,
+};
+const redemption = {
+  phoneNumber: '0720776155',
+  shortCode: 888880,
+  accountNumber: 'test',
+  points: 40,
+  amount: 8,
+  rate: 0.2,
+};
+
+describe('bonga.redeem', () => {
+  test('posts the redemption and maps the acknowledgement', async () => {
+    const { api, calls } = setup([token, { status: 200, body: redeemed }]);
+
+    const res = await api.redeem(redemption);
+
+    expect(calls[1]!.url).toBe(`${base}/redeem-paybill`);
+    expect(calls[1]!.body).toEqual({
+      msisdn: '254720776155',
+      amount: 8,
+      bongaPoints: 40,
+      conversionRate: 0.2,
+      shortCode: '888880',
+      accountNumber: 'test',
+    });
+    expect(res).toEqual({
+      requestRefId: 'a53a2939-7361-482f-ba1e-ccd51504acd3',
+      responseCode: 200,
+      responseMessage: 'Operation Successfully.',
+      raw: redeemed,
+    });
+  });
+
+  test('accepts a fractional amount that matches exactly', async () => {
+    const { api, calls } = setup([token, { status: 200, body: redeemed }]);
+
+    // 0.2 * 3 is 0.6000000000000001 in floating point; the check compares cents.
+    await api.redeem({ ...redemption, points: 3, amount: 0.6 });
+
+    expect(calls[1]!.body).toMatchObject({ amount: 0.6, bongaPoints: 3 });
+  });
+
+  test('rejects a non-200 header', async () => {
+    const body = { header: { responseCode: 404, responseMessage: 'Fail' }, body: null };
+    const { api } = setup([token, { status: 200, body }]);
+
+    await expect(api.redeem(redemption)).rejects.toMatchObject({
+      name: 'DarajaApiError',
+      errorCode: '404',
+      errorMessage: 'Fail',
+    });
+  });
+
+  test("surfaces the sandbox's 404 (bonga-redeem.json)", async () => {
+    const captured = sandboxCapture('bonga-redeem');
+    const { api } = setup([token, { status: captured.status, body: captured.response }]);
+
+    await expect(api.redeem(redemption)).rejects.toMatchObject({ status: 404 });
+  });
+
+  test.each([
+    [
+      'an invalid phoneNumber',
+      { phoneNumber: '123' },
+      'phoneNumber',
+      'must be a Safaricom number like 2547XXXXXXXX or 07XXXXXXXX',
+    ],
+    ['a short shortCode', { shortCode: 12 }, 'shortCode', 'must be a 5 to 7 digit shortcode'],
+    ['an empty accountNumber', { accountNumber: ' ' }, 'accountNumber', 'is required'],
+    ['points 0', { points: 0 }, 'points', 'must be at least 1'],
+    ['fractional points', { points: 1.5 }, 'points', 'must be an integer'],
+    ['rate 0', { rate: 0 }, 'rate', 'must be a positive number'],
+    ['an infinite rate', { rate: Infinity }, 'rate', 'must be a positive number'],
+    ['a NaN rate', { rate: Number.NaN }, 'rate', 'must be a positive number'],
+    ['a negative amount', { amount: -8 }, 'amount', 'must be a positive number'],
+    ['an infinite amount', { amount: Infinity }, 'amount', 'must be a positive number'],
+    ['a NaN amount', { amount: Number.NaN }, 'amount', 'must be a positive number'],
+    [
+      'an amount with tenths of a cent',
+      { amount: 8.004 },
+      'amount',
+      'must have at most 2 decimal places',
+    ],
+    [
+      'an amount that is not points × rate',
+      { amount: 9 },
+      'amount',
+      'must equal points × rate (8)',
+    ],
+    [
+      'an amount below one cent',
+      { points: 1, amount: 0.004, rate: 0.004 },
+      'amount',
+      'must have at most 2 decimal places',
+    ],
+  ])('rejects %s', async (_, override, path, message) => {
+    const { api, calls } = setup([]);
+
+    const error = await api.redeem({ ...redemption, ...override }).catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(ValidationError);
+    expect((error as ValidationError).message).toContain('bonga.redeem');
+    expect((error as ValidationError).issues).toEqual([{ path, message }]);
+    expect(calls).toHaveLength(0);
+  });
+
+  test('reports both an infinite rate and amount without comparing them', async () => {
+    const { api, calls } = setup([]);
+
+    const error = await api
+      .redeem({ ...redemption, rate: Infinity, amount: Infinity })
+      .catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([
+      { path: 'rate', message: 'must be a positive number' },
+      { path: 'amount', message: 'must be a positive number' },
+    ]);
+    expect(calls).toHaveLength(0);
+  });
+
+  test('rejects the portal sample, whose amount is not points × rate', async () => {
+    const { api } = setup([]);
+
+    const error = await api
+      .redeem({ ...redemption, amount: 50, points: 20 })
+      .catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([
+      { path: 'amount', message: 'must equal points × rate (4)' },
+    ]);
   });
 });

@@ -2,7 +2,7 @@ import { isRecord, readCents } from '../callbacks/shared';
 import type { Context } from '../client';
 import { code, str } from '../core/coerce';
 import { DarajaApiError } from '../core/errors';
-import { checkInt, Issues } from '../core/validate';
+import { checkInt, checkPhone, checkShortCode, Issues } from '../core/validate';
 
 /** Input for `bonga.calculatePoints`. */
 export interface BongaCalculateInput {
@@ -28,6 +28,34 @@ export interface BongaCalculateResponse {
   raw: unknown;
 }
 
+/** Input for `bonga.redeem`. Pass the values `calculatePoints` returned. */
+export interface BongaRedeemInput {
+  /** The customer paying with points: `07…`, `01…`, `+254…` or `254…`, sent as `254…` (`msisdn`). */
+  phoneNumber: string;
+  /** Your paybill or till, 5 to 7 digits, which is paid (`shortCode`). */
+  shortCode: number;
+  /** The account number at your paybill (`accountNumber`). */
+  accountNumber: string;
+  /** Whole points to redeem, at least 1 (`bongaPoints`). */
+  points: number;
+  /** The shillings the points pay for; must equal `points × rate` to the cent (`amount`). */
+  amount: number;
+  /** Shillings per point, as `calculatePoints` returned it (`conversionRate`). */
+  rate: number;
+}
+
+/** Daraja's acknowledgement of a redemption. */
+export interface BongaRedeemResponse {
+  /** Daraja's ID for the request. */
+  requestRefId: string;
+  /** Always 200: anything else throws `DarajaApiError`. */
+  responseCode: number | string;
+  /** For example "Operation Successfully.". */
+  responseMessage: string;
+  /** Daraja's response body, unmodified. */
+  raw: unknown;
+}
+
 /**
  * Lipa na Bonga: let customers pay your paybill or till with Safaricom Bonga points. No
  * initiator is needed. A redeemed payment reaches you as an ordinary C2B confirmation, on the
@@ -37,8 +65,14 @@ export interface BongaCalculateResponse {
  * `DarajaApiError`, `AuthError` or `NetworkError` when the request fails.
  */
 export interface BongaApi {
-  /** Returns what a number of points is worth in shillings, and the rate used. */
+  /** Returns what a number of points is worth, in cents (`amountCents`), and the rate used. */
   calculatePoints(input: BongaCalculateInput): Promise<BongaCalculateResponse>;
+  /**
+   * Asks a customer to pay with Bonga points. Daraja sends them an M-Pesa prompt; once the
+   * points are deducted, M-Pesa pays your shortcode and posts a C2B confirmation. The
+   * acknowledgement only confirms the request was received.
+   */
+  redeem(input: BongaRedeemInput): Promise<BongaRedeemResponse>;
 }
 
 const BASE = '/v1/lipa/na/bonga';
@@ -93,6 +127,8 @@ async function calculatePoints(
   const body = isRecord(raw.body) ? raw.body : {};
   const read = new Issues();
   const amountCents = readCents(read, 'body.amount', body.amount);
+  if (amountCents !== undefined && amountCents <= 0)
+    read.add('body.amount', 'must be a positive number');
   const points = readInteger(read, 'body.points', body.points);
   const rate = readRate(read, 'body.rate', body.rate);
   read.throwIfAny('bonga.calculatePoints');
@@ -107,9 +143,61 @@ async function calculatePoints(
   };
 }
 
+const isFilled = (value: unknown): boolean => typeof value === 'string' && value.trim() !== '';
+const isPositive = (value: number): boolean => Number.isFinite(value) && value > 0;
+const toCents = (shillings: number): number => Math.round(shillings * 100);
+
+/**
+ * Checks that `amount` is a positive number of shillings and cents, and equals `points × rate`
+ * compared in cents. The comparison is skipped when `points` or `rate` is already reported.
+ */
+function checkAmount(issues: Issues, input: BongaRedeemInput): void {
+  if (!isPositive(input.amount)) {
+    issues.add('amount', 'must be a positive number');
+    return;
+  }
+  if (Math.abs(toCents(input.amount) - input.amount * 100) > 1e-6) {
+    issues.add('amount', 'must have at most 2 decimal places');
+    return;
+  }
+  if (!Number.isInteger(input.points) || input.points < 1 || !isPositive(input.rate)) return;
+  const expected = toCents(input.points * input.rate);
+  if (toCents(input.amount) !== expected) {
+    issues.add('amount', `must equal points × rate (${expected / 100})`);
+  }
+}
+
+async function redeem(ctx: Context, input: BongaRedeemInput): Promise<BongaRedeemResponse> {
+  const issues = new Issues();
+  const phone = checkPhone(issues, 'phoneNumber', input.phoneNumber);
+  checkShortCode(issues, 'shortCode', input.shortCode);
+  if (!isFilled(input.accountNumber)) issues.add('accountNumber', 'is required');
+  checkInt(issues, 'points', input.points, { min: 1 });
+  if (!isPositive(input.rate)) issues.add('rate', 'must be a positive number');
+  checkAmount(issues, input);
+  issues.throwIfAny('bonga.redeem');
+
+  const raw = await ctx.post<Record<string, unknown>>(`${BASE}/redeem-paybill`, {
+    msisdn: phone,
+    amount: input.amount,
+    bongaPoints: input.points,
+    conversionRate: input.rate,
+    shortCode: String(input.shortCode),
+    accountNumber: input.accountNumber,
+  });
+  const header = checkHeader(raw);
+  return {
+    requestRefId: str(header.requestRefId),
+    responseCode: code(header.responseCode),
+    responseMessage: str(header.responseMessage),
+    raw,
+  };
+}
+
 /** Lipa na Bonga. */
 export function bonga(ctx: Context): BongaApi {
   return {
     calculatePoints: (input) => calculatePoints(ctx, input),
+    redeem: (input) => redeem(ctx, input),
   };
 }
