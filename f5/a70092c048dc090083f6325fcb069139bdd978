@@ -1,0 +1,1 @@
+probe-bonga: calculate and redeem both 404 empty body; mismatch redeem not possible; rate check kept per the plan fallback (spec addendum). Also wrapped the Ratiba probe comment (P1 verifier nit).
