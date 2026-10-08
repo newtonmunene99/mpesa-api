@@ -16,6 +16,8 @@ export {
 } from './core/errors';
 export {
   type AccountBalanceEntry,
+  type BillManagerPayment,
+  billManagerPaymentResponse,
   type C2BNotification,
   type C2BRejectionCode,
   type C2BValidationResponse,
@@ -23,6 +25,7 @@ export {
   type DarajaResult,
   type ExpressCheckoutCallback,
   parseBalances,
+  parseBillManagerPayment,
   parseC2BNotification,
   parseExpressCheckoutCallback,
   parseRatibaCallback,
@@ -42,6 +45,16 @@ export type {
   B2BTaxInput,
   B2BTopUpInput,
 } from './apis/b2b';
+export type {
+  BillManagerAcknowledgement,
+  BillManagerApi,
+  BillManagerCancelResponse,
+  BillManagerInvoice,
+  BillManagerInvoiceItem,
+  BillManagerOptInInput,
+  BillManagerOptInResponse,
+  BillManagerResponse,
+} from './apis/bill-manager';
 export type {
   BongaApi,
   BongaCalculateInput,
