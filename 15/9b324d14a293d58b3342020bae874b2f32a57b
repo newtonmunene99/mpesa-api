@@ -1,0 +1,1 @@
+verify-p3 must-fix: errors guide now notes Pull Transactions and Bonga calculatePoints can throw ValidationError for an unreadable response body after sending; bonga.md and pull-transactions.md say so. Migration derived-fields list adds Ratiba's identifier type and TransactionType.
