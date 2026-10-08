@@ -1,0 +1,1 @@
+post-headers: PostOptions.headers merged into each POST (first try and token-refresh retry); any authorization header from the caller is dropped so only the bearer token sets it. Internal (Context isn't exported). 562 tests.
