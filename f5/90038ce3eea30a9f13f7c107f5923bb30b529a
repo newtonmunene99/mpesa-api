@@ -1,0 +1,1 @@
+bonga-calculate: posts points as a string to /v1/lipa/na/bonga/calculate-points; checkHeader requires header.responseCode 200 else DarajaApiError (errorCode/errorMessage from header); body amount read as exact cents, points integer, rate positive decimal, else ValidationError under body.*. Sandbox 404 pinned. No initiator. Wired as mpesa.bonga.
