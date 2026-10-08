@@ -1,0 +1,9 @@
+{
+  "status": 400,
+  "response": {
+    "requestRefId": "8f38-49f8-9be4-b87d691148b41784539",
+    "responseMessage": "Value in field 'BusinessShortCode' can only be what was issued for this application",
+    "responseCode": 400,
+    "timestamp": "2026-10-08T06:55:50Z"
+  }
+}

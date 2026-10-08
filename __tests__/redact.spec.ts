@@ -110,6 +110,40 @@ describe('redact', () => {
     });
   });
 
+  test('masks Ratiba Msisdn entries in either casing, and an echoed PartyA', () => {
+    expect(
+      redact({
+        PartyA: '254708374149',
+        responseBody: {
+          responseData: [
+            { name: 'Msisdn', value: '*********867' },
+            { name: 'status', value: 'ACTIVE' },
+          ],
+        },
+        ResponseBody: {
+          ResponseData: [
+            { Name: 'Msisdn', Value: '*********149' },
+            { Name: 'Status', Value: 'ERROR' },
+          ],
+        },
+      }),
+    ).toEqual({
+      PartyA: '<redacted>',
+      responseBody: {
+        responseData: [
+          { name: 'Msisdn', value: '<redacted>' },
+          { name: 'status', value: 'ACTIVE' },
+        ],
+      },
+      ResponseBody: {
+        ResponseData: [
+          { Name: 'Msisdn', Value: '<redacted>' },
+          { Name: 'Status', Value: 'ERROR' },
+        ],
+      },
+    });
+  });
+
   test('masks customer names', () => {
     expect(redact({ FirstName: 'NICHOLAS', MiddleName: '', LastName: 'SONGOK' })).toEqual({
       FirstName: '<name>',

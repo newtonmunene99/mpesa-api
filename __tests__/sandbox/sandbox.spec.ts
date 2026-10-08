@@ -338,6 +338,38 @@ describe.skipIf(!enabled)('Daraja sandbox', () => {
     }));
   });
 
+  // Probe: M-Pesa Ratiba with the portal's sandbox STK shortcode (MPESA_SHORTCODE; 300584 and 600999 are refused as not issued to the app). It sends a consent
+  // STK prompt to the test number. Dates are EAT yyyymmdd, starting tomorrow.
+  test('probe: Ratiba create', async () => {
+    const ymd = (days: number) =>
+      new Date(Date.now() + 3 * 3_600_000 + days * 86_400_000)
+        .toISOString()
+        .slice(0, 10)
+        .replaceAll('-', '');
+    const ctx = createContext(config());
+    await capture('ratiba-create', async () => ({
+      raw: await ctx.post(
+        '/standingorder/v1/createStandingOrderExternal',
+        {
+          StandingOrderName: `SDK probe ${Date.now()}`,
+          ReceiverPartyIdentifierType: '4',
+          TransactionType: 'Standing Order Pay Bill Ext-Third Party',
+          BusinessShortCode: need('MPESA_SHORTCODE'),
+          PartyA: msisdn(),
+          Amount: '1',
+          StartDate: ymd(1),
+          EndDate: ymd(31),
+          Frequency: '5',
+          CustomStoId: crypto.randomUUID(),
+          AccountReference: 'SDKPROBE',
+          TransactionDesc: 'SDK probe',
+          CallBackURL: url('ratiba/callback'),
+        },
+        { success: () => true },
+      ),
+    }));
+  });
+
   test('transactionStatus.query with each ID and both (Verification 3)', async () => {
     const mpesa = createMpesa(config());
     const common = {

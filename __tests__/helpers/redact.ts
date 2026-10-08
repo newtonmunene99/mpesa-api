@@ -24,6 +24,8 @@ const MASK = new Set([
   'sender',
   'billreference',
   'NominatedNumber',
+  // Ratiba's request echoes the customer's number.
+  'PartyA',
 ]);
 const SENSITIVE_ENTRIES = new Set([
   'ReceiverPartyPublicName',
@@ -32,6 +34,8 @@ const SENSITIVE_ENTRIES = new Set([
   'DebitPartyPublicName',
   'CreditPartyPublicName',
   'PhoneNumber',
+  // Ratiba callbacks: the customer's (masked) number.
+  'Msisdn',
   'MpesaReceiptNumber',
   'TransactionReceipt',
   'ReceiptNo',
@@ -52,6 +56,15 @@ function redactScalar(value: unknown): unknown {
 }
 
 /**
+ * Whether a `{ Key, Value }`, `{ Name, Value }` or (Ratiba's camelCase callback)
+ * `{ name, value }` entry holds personal data.
+ */
+function isSensitiveEntry(record: Record<string, unknown>): boolean {
+  const label = record.Key ?? record.Name ?? record.name;
+  return typeof label === 'string' && SENSITIVE_ENTRIES.has(label);
+}
+
+/**
  * Returns a deep copy of `value` with secrets dropped and personal data masked, so a sandbox
  * capture can be committed. Codes, amounts and timestamps are kept, as the tests need them.
  */
@@ -60,14 +73,14 @@ export function redact(value: unknown): unknown {
   if (typeof value !== 'object' || value === null) return redactScalar(value);
 
   const record = value as Record<string, unknown>;
-  const label = typeof record.Key === 'string' ? record.Key : record.Name;
+  const sensitive = isSensitiveEntry(record);
   const out: Record<string, unknown> = {};
   for (const [key, inner] of Object.entries(record)) {
     if (DROP.has(key)) out[key] = '<redacted>';
     else if (NAMES.has(key)) out[key] = inner ? '<name>' : inner;
     else if (MASK.has(key)) out[key] = inner ? '<redacted>' : inner;
     else if (ID_KEYS.has(key)) out[key] = '<redacted-id>';
-    else if (key === 'Value' && typeof label === 'string' && SENSITIVE_ENTRIES.has(label)) {
+    else if (sensitive && (key === 'Value' || key === 'value')) {
       out[key] = '<redacted>';
     } else out[key] = redact(inner);
   }
