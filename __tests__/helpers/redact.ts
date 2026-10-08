@@ -9,6 +9,8 @@ const DROP = new Set([
   'Authorization',
   'access_token',
   'InitiatorName',
+  // Bill Manager's opt-in key, a credential.
+  'app_key',
 ]);
 // C2B responses misspell it OriginatorCoversationID; requestId is the gateway's trace ID in
 // error bodies.
@@ -26,6 +28,15 @@ const MASK = new Set([
   'NominatedNumber',
   // Ratiba's request echoes the customer's number.
   'PartyA',
+  // Bill Manager: the biller's contacts, and the invoiced customer's name, number and the free
+  // text naming what they're billed for.
+  'email',
+  'officialContact',
+  'billedFullName',
+  'billedPhoneNumber',
+  'invoiceName',
+  'fullName',
+  'phoneNumber',
 ]);
 const SENSITIVE_ENTRIES = new Set([
   'ReceiverPartyPublicName',

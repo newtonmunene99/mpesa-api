@@ -402,6 +402,33 @@ describe.skipIf(!enabled)('Daraja sandbox', () => {
     }));
   });
 
+  // Probes: Bill Manager opt-in on the shared sandbox org shortcode. Another developer may have
+  // opted it in already ("Biller already Registered"), so re-runs are expected. An app_key in
+  // the answer is a credential: the fixture drops it, and it is written only to the file named
+  // by BILLMANAGER_APP_KEY_OUT (a scratch path outside the repo) for the invoicing probes.
+  const billManagerOptIn = () => ({
+    shortcode: String(org()),
+    email: 'sdk-probe@example.com',
+    officialContact: `0${msisdn().slice(-9)}`,
+    sendReminders: '0',
+    callbackurl: url('billmanager/payment'),
+  });
+
+  test('probe: Bill Manager opt-in', async () => {
+    const ctx = createContext(config());
+    const res = await capture('billmanager-optin', async () => ({
+      raw: await ctx.post<Record<string, unknown>>(
+        '/v1/billmanager-invoice/optin',
+        billManagerOptIn(),
+        { success: () => true },
+      ),
+    }));
+    const key = (res?.raw as Record<string, unknown> | undefined)?.app_key;
+    if (typeof key === 'string' && env.BILLMANAGER_APP_KEY_OUT) {
+      writeFileSync(env.BILLMANAGER_APP_KEY_OUT, key);
+    }
+  });
+
   test('transactionStatus.query with each ID and both (Verification 3)', async () => {
     const mpesa = createMpesa(config());
     const common = {

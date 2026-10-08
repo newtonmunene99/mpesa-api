@@ -144,6 +144,32 @@ describe('redact', () => {
     });
   });
 
+  test('drops the Bill Manager app_key and masks its personal fields', () => {
+    expect(
+      redact({
+        app_key: 'AG_2376487236_126732989KJ',
+        email: 'owner@example.com',
+        officialContact: '0710000000',
+        billedFullName: 'John Doe',
+        billedPhoneNumber: '0722000000',
+        invoiceName: 'School fees for Joan',
+        fullName: 'John Doe',
+        phoneNumber: '0710000000',
+        rescode: '200',
+      }),
+    ).toEqual({
+      app_key: '<redacted>',
+      email: '<redacted>',
+      officialContact: '<redacted>',
+      billedFullName: '<redacted>',
+      billedPhoneNumber: '<redacted>',
+      invoiceName: '<redacted>',
+      fullName: '<redacted>',
+      phoneNumber: '<redacted>',
+      rescode: '200',
+    });
+  });
+
   test('masks customer names', () => {
     expect(redact({ FirstName: 'NICHOLAS', MiddleName: '', LastName: 'SONGOK' })).toEqual({
       FirstName: '<name>',
