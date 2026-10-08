@@ -1,0 +1,1 @@
+export-bill-manager: runtime parseBillManagerPayment and billManagerPaymentResponse; types for every Bill Manager input/response and the payment; exports specs pin keys, MpesaConfig['billManager'] and each method signature.
