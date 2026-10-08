@@ -1,1 +1,3 @@
 app-key-config (maintainer decision 2026-10-08, probes inconclusive): MpesaConfig.billManager.appKey validated as a non-empty string; a post() helper adds the appKey header for sendInvoice/sendInvoices/cancel*/acknowledgePayment, never optIn; bearer can't be overridden. P3 verifier approved (3cb5198, 76017b0, this); nits applied (blank key test, clearer message).
+
+Checkpoint P3 (payments and app key): full gate green. Fresh verifier approved. No hand check.
