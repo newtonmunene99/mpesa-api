@@ -1,0 +1,1 @@
+send-invoice: posts to single-invoicing with billedPhoneNumber in 07/01 form, dueDate as EAT YYYY-MM-DD, amounts as strings (maintainer-confirmed), invoiceItems only when given; invoiceBody(issues, invoice, prefix) validates every field with prefixed paths for reuse by sendInvoices; rescode 409 duplicate throws; 504 capture pinned. Red (16 failing) then green.
