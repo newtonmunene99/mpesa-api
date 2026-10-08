@@ -357,3 +357,94 @@ describe('billManager.sendInvoices', () => {
     await expect(api.sendInvoices([invoice])).rejects.toMatchObject({ status: 504 });
   });
 });
+
+// The cancel response samples from the portal page (trailing commas and a missing comma fixed).
+const cancelled = {
+  Status_Message: 'Invoice cancelled successfuly.',
+  resmsg: 'Success',
+  rescode: '200',
+  errors: [],
+};
+
+describe('billManager.cancelInvoice and cancelInvoices', () => {
+  test('cancels one invoice by its externalReference', async () => {
+    const { api, calls } = setup([token, { status: 200, body: cancelled }]);
+
+    const res = await api.cancelInvoice('113');
+
+    expect(calls[1]!.url).toBe(`${base}/cancel-single-invoice`);
+    expect(calls[1]!.body).toEqual({ externalReference: '113' });
+    expect(res).toEqual({
+      statusMessage: 'Invoice cancelled successfuly.',
+      message: 'Success',
+      code: '200',
+      errors: [],
+      raw: cancelled,
+    });
+  });
+
+  test('cancels several invoices', async () => {
+    const { api, calls } = setup([token, { status: 200, body: cancelled }]);
+
+    await api.cancelInvoices(['113', '114']);
+
+    expect(calls[1]!.url).toBe(`${base}/cancel-bulk-invoices`);
+    expect(calls[1]!.body).toEqual([{ externalReference: '113' }, { externalReference: '114' }]);
+  });
+
+  test('keeps whatever errors Daraja lists, and an empty list when it sends none', async () => {
+    const { api } = setup([
+      token,
+      { status: 200, body: { ...cancelled, errors: [{ externalReference: '114' }] } },
+      { status: 200, body: { resmsg: 'Success', rescode: '200' } },
+    ]);
+
+    expect((await api.cancelInvoices(['113', '114'])).errors).toEqual([
+      { externalReference: '114' },
+    ]);
+    expect((await api.cancelInvoice('113')).errors).toEqual([]);
+  });
+
+  test('rejects cancelling a paid invoice (rescode 409)', async () => {
+    const body = {
+      Status_Message: 'partially or fully paid invoices cannot be cancelled.',
+      resmsg: 'Conflict',
+      rescode: '409',
+      errors: [],
+    };
+    const { api } = setup([token, { status: 200, body }]);
+
+    await expect(api.cancelInvoice('113')).rejects.toMatchObject({
+      name: 'DarajaApiError',
+      errorCode: '409',
+      errorMessage: 'partially or fully paid invoices cannot be cancelled.',
+    });
+  });
+
+  test("surfaces the sandbox's gateway timeout (billmanager-cancel.json)", async () => {
+    const captured = sandboxCapture('billmanager-cancel');
+    const { api } = setup([token, { status: captured.status, body: captured.response }]);
+
+    await expect(api.cancelInvoice('113')).rejects.toMatchObject({ status: 504 });
+  });
+
+  test.each([
+    ['an empty reference', () => (api: Api) => api.cancelInvoice(' '), 'externalReference'],
+    ['no references', () => (api: Api) => api.cancelInvoices([]), 'externalReferences'],
+    [
+      'an empty reference in the list',
+      () => (api: Api) => api.cancelInvoices(['113', '']),
+      'externalReferences[1]',
+    ],
+  ])('rejects %s', async (_, make, path) => {
+    const { api, calls } = setup([]);
+
+    const error = await make()(api).catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(ValidationError);
+    expect((error as ValidationError).issues.map((i) => i.path)).toEqual([path]);
+    expect(calls).toHaveLength(0);
+  });
+});
+
+type Api = ReturnType<typeof billManager>;

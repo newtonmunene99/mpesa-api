@@ -81,6 +81,12 @@ export interface BillManagerResponse {
   raw: unknown;
 }
 
+/** Bill Manager's answer to `cancelInvoice` and `cancelInvoices`. */
+export interface BillManagerCancelResponse extends BillManagerResponse {
+  /** The `errors` list Daraja returns, as is; empty when it sends none. */
+  errors: unknown[];
+}
+
 /**
  * Bill Manager: e-invoicing for a paybill. Opt in, send invoices by SMS, cancel them, receive
  * payment pushes and acknowledge them. No initiator is needed.
@@ -99,6 +105,13 @@ export interface BillManagerApi {
   sendInvoice(invoice: BillManagerInvoice): Promise<BillManagerResponse>;
   /** Sends 1 to 1000 invoices in one call. Issues are reported by index (`invoices[3].amount`). */
   sendInvoices(invoices: BillManagerInvoice[]): Promise<BillManagerResponse>;
+  /**
+   * Recalls a sent invoice by its `externalReference`. A partly or fully paid invoice can't be
+   * cancelled: Daraja answers rescode 409, which throws `DarajaApiError`.
+   */
+  cancelInvoice(externalReference: string): Promise<BillManagerCancelResponse>;
+  /** Recalls several sent invoices by their `externalReference`s. */
+  cancelInvoices(externalReferences: string[]): Promise<BillManagerCancelResponse>;
 }
 
 const BASE = '/v1/billmanager-invoice';
@@ -218,6 +231,42 @@ async function sendInvoices(
   return response(await ctx.post<Record<string, unknown>>(`${BASE}/bulk-invoicing`, body));
 }
 
+/** Maps a cancel answer, keeping Daraja's `errors` list. */
+function cancelResponse(raw: Record<string, unknown>): BillManagerCancelResponse {
+  return { ...response(raw), errors: Array.isArray(raw.errors) ? raw.errors : [] };
+}
+
+async function cancelInvoice(
+  ctx: Context,
+  externalReference: string,
+): Promise<BillManagerCancelResponse> {
+  const issues = new Issues();
+  if (!isFilled(externalReference)) issues.add('externalReference', 'is required');
+  issues.throwIfAny('billManager.cancelInvoice');
+  return cancelResponse(
+    await ctx.post<Record<string, unknown>>(`${BASE}/cancel-single-invoice`, { externalReference }),
+  );
+}
+
+async function cancelInvoices(
+  ctx: Context,
+  externalReferences: string[],
+): Promise<BillManagerCancelResponse> {
+  const issues = new Issues();
+  if (!Array.isArray(externalReferences) || externalReferences.length === 0) {
+    issues.add('externalReferences', 'must hold at least one reference');
+  } else {
+    externalReferences.forEach((ref, index) => {
+      if (!isFilled(ref)) issues.add(`externalReferences[${index}]`, 'is required');
+    });
+  }
+  issues.throwIfAny('billManager.cancelInvoices');
+  const body = externalReferences.map((externalReference) => ({ externalReference }));
+  return cancelResponse(
+    await ctx.post<Record<string, unknown>>(`${BASE}/cancel-bulk-invoices`, body),
+  );
+}
+
 /** Validates an opt-in and returns its body. */
 function optInBody(ctx: Context, input: BillManagerOptInInput): Record<string, unknown> {
   const issues = new Issues();
@@ -262,5 +311,7 @@ export function billManager(ctx: Context): BillManagerApi {
     optIn: (input) => optIn(ctx, input),
     sendInvoice: (invoice) => sendInvoice(ctx, invoice),
     sendInvoices: (invoices) => sendInvoices(ctx, invoices),
+    cancelInvoice: (externalReference) => cancelInvoice(ctx, externalReference),
+    cancelInvoices: (externalReferences) => cancelInvoices(ctx, externalReferences),
   };
 }
