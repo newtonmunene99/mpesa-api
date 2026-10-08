@@ -1,5 +1,6 @@
 import { accountBalance, type AccountBalanceApi } from './apis/account-balance';
 import { b2b, type B2BApi } from './apis/b2b';
+import { bonga, type BongaApi } from './apis/bonga';
 import { b2c, type B2CApi } from './apis/b2c';
 import { c2b, type C2BApi } from './apis/c2b';
 import { pullTransactions, type PullTransactionsApi } from './apis/pull-transactions';
@@ -94,6 +95,8 @@ export interface Mpesa {
   readonly pullTransactions: PullTransactionsApi;
   /** M-Pesa Ratiba standing orders. */
   readonly ratiba: RatibaApi;
+  /** Lipa na Bonga: payments with Bonga points. */
+  readonly bonga: BongaApi;
   /** Transaction Status queries. */
   readonly transactionStatus: TransactionStatusApi;
   /** Account Balance queries. */
@@ -271,6 +274,7 @@ export function createMpesa(config: MpesaConfig): Mpesa {
     qr: qr(ctx),
     pullTransactions: pullTransactions(ctx),
     ratiba: ratiba(ctx),
+    bonga: bonga(ctx),
     transactionStatus: transactionStatus(ctx),
     accountBalance: accountBalance(ctx),
     reversal: reversal(ctx),
