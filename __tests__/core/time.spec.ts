@@ -5,6 +5,7 @@ import {
   formatEatDateTime,
   formatTimestamp,
   parseB2CDateTime,
+  parseEatDay,
   parseTimestamp,
 } from '../../src/core/time';
 
@@ -58,4 +59,17 @@ describe('parseB2CDateTime', () => {
   test('rejects malformed values', () => {
     expect(() => parseB2CDateTime('2024-07-06 22:48:52')).toThrow(ValidationError);
   });
+});
+
+describe('parseEatDay', () => {
+  test('reads YYYY-MM-DD as midnight East Africa Time', () => {
+    expect(parseEatDay('2021-10-01').toISOString()).toBe('2021-09-30T21:00:00.000Z');
+  });
+
+  test.each(['2021-02-30', '2021-10-1', '01-10-2021', '2021-10-01T00:00'])(
+    'rejects %j',
+    (value) => {
+      expect(() => parseEatDay(value)).toThrow(ValidationError);
+    },
+  );
 });

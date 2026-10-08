@@ -1,3 +1,8 @@
+export {
+  type BillManagerPayment,
+  billManagerPaymentResponse,
+  parseBillManagerPayment,
+} from './bill-manager';
 export { type AccountBalanceEntry, parseBalances } from './balances';
 export {
   type C2BNotification,
