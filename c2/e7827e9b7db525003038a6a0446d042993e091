@@ -1,0 +1,1 @@
+export-ratiba-bonga: runtime parseRatibaCallback; type exports for Ratiba (Api, StandingOrderInput, Frequency, Response, Callback) and Bonga (Api, Calculate/Redeem Input/Response); exports specs pin keys and every method signature. check, tests, pack, test:dist, lint:pkg pass.
