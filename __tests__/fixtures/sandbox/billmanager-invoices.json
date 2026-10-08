@@ -1,0 +1,12 @@
+{
+  "status": 504,
+  "response": {
+    "fault": {
+      "faultstring": "Gateway Timeout",
+      "detail": {
+        "errorcode": "messaging.adaptors.http.flow.GatewayTimeout",
+        "reason": "TARGET_READ_TIMEOUT"
+      }
+    }
+  }
+}

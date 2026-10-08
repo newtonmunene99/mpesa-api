@@ -72,6 +72,32 @@ describe('createMpesa', () => {
   });
 });
 
+describe('createMpesa billManager config', () => {
+  test.each([
+    ['an empty appKey', { appKey: '' }],
+    ['a blank appKey', { appKey: '  ' }],
+    ['a non-string appKey', { appKey: 42 as never }],
+    ['a non-object billManager', 'key' as never],
+  ])('rejects %s', (_, billManager) => {
+    const { fetch } = fakeFetch([]);
+
+    expect(() => createMpesa(baseConfig(fetch, { billManager }))).toThrow(
+      expect.objectContaining({
+        name: 'ValidationError',
+        issues: [{ path: 'billManager.appKey', message: 'must be a non-empty string' }],
+      }),
+    );
+  });
+
+  test('accepts an appKey', () => {
+    const { fetch } = fakeFetch([]);
+
+    expect(() =>
+      createMpesa(baseConfig(fetch, { billManager: { appKey: 'AG_KEY' } })),
+    ).not.toThrow();
+  });
+});
+
 describe('context', () => {
   test('uses the base URL for the environment', async () => {
     for (const [environment, host] of [
@@ -148,6 +174,21 @@ describe('context', () => {
     await expect(ctx.post('/x', {}, { success: only1000 })).rejects.toMatchObject({
       errorCode: '0',
     });
+  });
+
+  test('sends per-call headers, on the retry too, and never lets them replace the token', async () => {
+    const { fetch, calls } = fakeFetch([
+      token('t1'),
+      { status: 404, body: { errorCode: '404.001.03' } },
+      token('t2'),
+      { status: 200, body: { ok: true } },
+    ]);
+    const ctx = createContext(baseConfig(fetch));
+
+    await ctx.post('/x', {}, { headers: { appkey: 'k1', authorization: 'Basic nope' } });
+
+    expect(calls[1]!.headers).toMatchObject({ appkey: 'k1', authorization: 'Bearer t1' });
+    expect(calls[3]!.headers).toMatchObject({ appkey: 'k1', authorization: 'Bearer t2' });
   });
 
   test('surfaces a second token error instead of retrying again', async () => {

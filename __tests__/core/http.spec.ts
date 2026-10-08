@@ -74,6 +74,38 @@ describe('request', () => {
     });
   });
 
+  test('reads Bill Manager error fields from a non-2xx body', async () => {
+    const body = {
+      Status_Message: 'Biller already Registered',
+      resmsg: 'Action Forbidden',
+      rescode: '409',
+    };
+    const { fetch } = fakeFetch([{ status: 409, body }]);
+
+    const error = await request(transport(fetch), { method: 'POST', path: '/x', body: {} }).catch(
+      (e: unknown) => e,
+    );
+
+    expect(error).toMatchObject({
+      status: 409,
+      errorCode: '409',
+      errorMessage: 'Biller already Registered',
+      body,
+    });
+  });
+
+  test('prefers the gateway fields and falls back to resmsg', async () => {
+    const { fetch } = fakeFetch([
+      { status: 400, body: { errorCode: '400.002.02', errorMessage: 'Bad', rescode: '409' } },
+      { status: 409, body: { resmsg: 'Conflict', rescode: '409' } },
+    ]);
+    const send = () =>
+      request(transport(fetch), { method: 'POST', path: '/x', body: {} }).catch((e: unknown) => e);
+
+    expect(await send()).toMatchObject({ errorCode: '400.002.02', errorMessage: 'Bad' });
+    expect(await send()).toMatchObject({ errorCode: '409', errorMessage: 'Conflict' });
+  });
+
   test('maps a non-JSON error body to DarajaApiError with the raw body', async () => {
     const { fetch } = fakeFetch([{ status: 400, body: 'bad' }]);
 

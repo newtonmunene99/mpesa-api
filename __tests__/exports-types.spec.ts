@@ -1,9 +1,12 @@
 import { expectTypeOf, test } from 'vite-plus/test';
 import {
+  billManagerPaymentResponse,
   c2bValidationResponse,
   parseBalances,
+  parseBillManagerPayment,
   parseC2BNotification,
   parseExpressCheckoutCallback,
+  parseRatibaCallback,
   parseResult,
   parseStkCallback,
 } from '../src/index';
@@ -18,10 +21,24 @@ import type {
   B2BPayBillInput,
   B2BTaxInput,
   B2BTopUpInput,
+  BongaApi,
+  BongaCalculateInput,
+  BongaCalculateResponse,
+  BongaRedeemInput,
+  BongaRedeemResponse,
   B2CApi,
   B2CCommand,
   B2CInput,
   B2CPochiInput,
+  BillManagerAcknowledgement,
+  BillManagerApi,
+  BillManagerCancelResponse,
+  BillManagerInvoice,
+  BillManagerInvoiceItem,
+  BillManagerOptInInput,
+  BillManagerOptInResponse,
+  BillManagerPayment,
+  BillManagerResponse,
   C2BApi,
   C2BNotification,
   C2BRejectionCode,
@@ -48,6 +65,11 @@ import type {
   QrInput,
   QrResponse,
   QrType,
+  RatibaApi,
+  RatibaCallback,
+  RatibaFrequency,
+  RatibaResponse,
+  RatibaStandingOrderInput,
   ReversalApi,
   ReversalInput,
   StkCallback,
@@ -74,6 +96,45 @@ test('public types stay exported and wired to the client', () => {
   expectTypeOf<Mpesa['reversal']>().toEqualTypeOf<ReversalApi>();
   expectTypeOf<Mpesa['qr']>().toEqualTypeOf<QrApi>();
   expectTypeOf<Mpesa['pullTransactions']>().toEqualTypeOf<PullTransactionsApi>();
+  expectTypeOf<Mpesa['ratiba']>().toEqualTypeOf<RatibaApi>();
+  expectTypeOf<Mpesa['bonga']>().toEqualTypeOf<BongaApi>();
+  expectTypeOf<Mpesa['billManager']>().toEqualTypeOf<BillManagerApi>();
+  expectTypeOf<MpesaConfig['billManager']>().toEqualTypeOf<{ appKey: string } | undefined>();
+  expectTypeOf<BillManagerApi['optIn']>().parameters.toEqualTypeOf<[BillManagerOptInInput]>();
+  expectTypeOf<
+    BillManagerApi['optIn']
+  >().returns.resolves.toEqualTypeOf<BillManagerOptInResponse>();
+  expectTypeOf<BillManagerApi['sendInvoice']>().parameters.toEqualTypeOf<[BillManagerInvoice]>();
+  expectTypeOf<BillManagerApi['sendInvoices']>().parameters.toEqualTypeOf<[BillManagerInvoice[]]>();
+  expectTypeOf<
+    BillManagerApi['sendInvoice']
+  >().returns.resolves.toEqualTypeOf<BillManagerResponse>();
+  expectTypeOf<BillManagerInvoice['invoiceItems']>().toEqualTypeOf<
+    BillManagerInvoiceItem[] | undefined
+  >();
+  expectTypeOf<
+    BillManagerApi['cancelInvoices']
+  >().returns.resolves.toEqualTypeOf<BillManagerCancelResponse>();
+  expectTypeOf<BillManagerApi['acknowledgePayment']>().parameters.toEqualTypeOf<
+    [BillManagerAcknowledgement]
+  >();
+  expectTypeOf(parseBillManagerPayment).returns.toEqualTypeOf<BillManagerPayment>();
+  expectTypeOf(billManagerPaymentResponse).toEqualTypeOf<{
+    readonly resmsg: 'Success';
+    readonly rescode: '200';
+  }>();
+  expectTypeOf<RatibaApi['createStandingOrder']>().parameters.toEqualTypeOf<
+    [RatibaStandingOrderInput]
+  >();
+  expectTypeOf<RatibaApi['createStandingOrder']>().returns.resolves.toEqualTypeOf<RatibaResponse>();
+  expectTypeOf<RatibaStandingOrderInput['frequency']>().toEqualTypeOf<RatibaFrequency>();
+  expectTypeOf(parseRatibaCallback).returns.toEqualTypeOf<RatibaCallback>();
+  expectTypeOf<BongaApi['calculatePoints']>().parameters.toEqualTypeOf<[BongaCalculateInput]>();
+  expectTypeOf<
+    BongaApi['calculatePoints']
+  >().returns.resolves.toEqualTypeOf<BongaCalculateResponse>();
+  expectTypeOf<BongaApi['redeem']>().parameters.toEqualTypeOf<[BongaRedeemInput]>();
+  expectTypeOf<BongaApi['redeem']>().returns.resolves.toEqualTypeOf<BongaRedeemResponse>();
   expectTypeOf<QrApi['generate']>().parameters.toEqualTypeOf<[QrInput]>();
   expectTypeOf<QrApi['generate']>().returns.resolves.toEqualTypeOf<QrResponse>();
   expectTypeOf<QrInput['type']>().toEqualTypeOf<QrType>();

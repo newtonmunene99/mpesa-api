@@ -1,0 +1,52 @@
+{
+  "responseHeader": {
+    "responseRefID": "06aae68f-7d5a-4b44-a22d-8aa77126689b",
+    "requestRefID": "06aae68f-7d5a-4b44-a22d-8aa77126689b",
+    "responseCode": "0",
+    "responseDescription": "Standing order created successfully"
+  },
+  "responseBody": {
+    "responseData": [
+      {
+        "name": "standingOrderName",
+        "value": "mpesa_Ratiba_test_Name"
+      },
+      {
+        "name": "amount",
+        "value": "500.00"
+      },
+      {
+        "name": "issuePaymentReminderUntil",
+        "value": "20280407"
+      },
+      {
+        "name": "reminderScheduleId",
+        "value": "2571168"
+      },
+      {
+        "name": "firstPaymentReminderDate",
+        "value": "20260807"
+      },
+      {
+        "name": "status",
+        "value": "ACTIVE"
+      },
+      {
+        "name": "TransactionID",
+        "value": "2571168"
+      },
+      {
+        "name": "ResponseCode",
+        "value": "0"
+      },
+      {
+        "name": "Status",
+        "value": "OKAY"
+      },
+      {
+        "name": "Msisdn",
+        "value": "*********867"
+      }
+    ]
+  }
+}

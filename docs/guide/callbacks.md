@@ -8,6 +8,8 @@ Daraja posts results to the URLs you give it. The parsers take the already-parse
 | `parseResult(body)`                  | B2C, Business To Pochi, B2B, Transaction Status, Account Balance and Reversal results |
 | `parseC2BNotification(body)`         | C2B validation and confirmation requests                                              |
 | `parseExpressCheckoutCallback(body)` | B2B Express CheckOut results                                                          |
+| `parseRatibaCallback(body)`          | M-Pesa Ratiba standing order results, in either casing                                |
+| `parseBillManagerPayment(body)`      | Bill Manager payment pushes; reply with `billManagerPaymentResponse`                  |
 | `parseBalances(value)`               | The packed `AccountBalance` or `DebitAccountBalance` value                            |
 | `c2bValidationResponse`              | Builds the reply to a C2B validation request                                          |
 
@@ -17,6 +19,8 @@ What each parser returns:
 - `parseResult` → `DarajaResult`: `resultType`, `resultCode`, `resultDesc`, `ok`, `originatorConversationId`, `conversationId`, `transactionId`, `parameters` (`ResultParameters` flattened by key, with the documented dates converted to `Date`), `referenceData` and `raw`.
 - `parseC2BNotification` → `C2BNotification`: `transactionType`, `transId`, `transTime` (a `Date`), `transAmountCents`, `businessShortCode`, `billRefNumber`, `invoiceNumber`, `orgAccountBalanceCents` (absent on validation requests), `thirdPartyTransId`, `msisdn` (masked by Daraja), `firstName`, `middleName`, `lastName` and `raw`.
 - `parseExpressCheckoutCallback` → `ExpressCheckoutCallback`: `resultCode`, `resultDesc`, `ok`, `requestId`, `amountCents`, `raw`, and when Daraja sends them `paymentReference`, `transactionId`, `conversationId` and `status`. See [B2B Express CheckOut](/apis/b2b#express-checkout).
+- `parseRatibaCallback` → `RatibaCallback`: `resultCode`, `ok`, `responseDescription`, `responseRefId`, `requestRefId`, `data` (every name/value pair), `raw`, and when Daraja sends them `standingOrderId`, `transactionId` and `status`. See [M-Pesa Ratiba](/apis/ratiba#the-result).
+- `parseBillManagerPayment` → `BillManagerPayment`: `transactionId`, `paidAmountCents`, `msisdn`, `dateCreated` (a `Date`), `accountReference`, `shortCode`, `raw`. Reply with `billManagerPaymentResponse`. See [Bill Manager](/apis/bill-manager#payments).
 - `parseBalances` → `AccountBalanceEntry[]`: `account`, `currency`, `availableCents`, `unclearedCents`, `reservedCents`, `unreservedCents`.
 - `c2bValidationResponse.accept(thirdPartyTransId?)` and `.reject(code: C2BRejectionCode)` → `C2BValidationResponse`, the JSON body to send back.
 

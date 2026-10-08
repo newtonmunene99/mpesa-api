@@ -49,8 +49,9 @@ function parse(text: string): { json: true; value: unknown } | { json: false; va
 }
 
 /**
- * Builds the error for a non-2xx response, reading Daraja's gateway fields
- * (`requestId`, `errorCode`, `errorMessage`) when the body is a JSON object.
+ * Builds the error for a non-2xx response, reading Daraja's gateway fields (`requestId`,
+ * `errorCode`, `errorMessage`) when the body is a JSON object. Bill Manager answers with
+ * `rescode`, `Status_Message` and `resmsg` instead, read when the gateway fields are absent.
  */
 function rejection(status: number, body: unknown): DarajaApiError {
   if (!isRecord(body)) return new DarajaApiError({ status, body });
@@ -58,8 +59,9 @@ function rejection(status: number, body: unknown): DarajaApiError {
     status,
     body,
     requestId: asString(body.requestId),
-    errorCode: asString(body.errorCode),
-    errorMessage: asString(body.errorMessage),
+    errorCode: asString(body.errorCode) ?? asString(body.rescode),
+    errorMessage:
+      asString(body.errorMessage) ?? asString(body.Status_Message) ?? asString(body.resmsg),
   });
 }
 
