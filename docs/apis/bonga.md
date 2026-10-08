@@ -19,6 +19,8 @@ console.log(quote.amountCents, quote.rate); // 800, 0.2
 | -------- | ------------ | ------------------------- |
 | `points` | `points`     | Whole points, at least 1. |
 
+If Daraja's `body` can't be read (a non-numeric or non-positive amount, non-integer points, a non-positive rate), `calculatePoints` throws `ValidationError` with `body.` paths, after the request was sent.
+
 The response (`BongaCalculateResponse`) has `amountCents` (what the points are worth, in cents), `points`, `rate` (shillings per point), `requestRefId`, `responseCode`, `customerMessage` and `raw`.
 
 ## Redeem
