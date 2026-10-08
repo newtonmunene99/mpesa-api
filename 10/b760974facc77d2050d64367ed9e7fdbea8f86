@@ -1,0 +1,1 @@
+probe-invoicing: all four 504. Maintainer confirmed dueDate/paymentDate YYYY-MM-DD and amounts as strings (portal samples). The probe sends the appKey header when a key file exists (none did).
