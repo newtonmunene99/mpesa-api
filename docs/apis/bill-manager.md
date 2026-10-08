@@ -90,7 +90,7 @@ Both return a `BillManagerCancelResponse`: the fields above, plus `errors`, Dara
 
 ## Payments
 
-Read each payment push with `parseBillManagerPayment` and reply with `billManagerPaymentResponse`. Bill Manager retries a push 5 times if it doesn't get that reply. After reconciling a payment, acknowledge it, and the customer gets an e-receipt:
+Read each payment push with `parseBillManagerPayment` and reply with `billManagerPaymentResponse`. Bill Manager says it tries a push up to 5 times. After reconciling a payment, acknowledge it, and the customer gets an e-receipt:
 
 ```ts
 app.post('/payments/bill-manager', (req, res) => {
@@ -133,4 +133,4 @@ Every Bill Manager answer carries `rescode`; anything but `"200"` throws `Daraja
 
 ## Tested live
 
-Not yet. Every Bill Manager call timed out at the sandbox gateway (HTTP 504) and was retried. So it's untested whether the app key is needed, what its header is called, and how errors arrive (as HTTP 409, or as HTTP 200 with `rescode` `"409"`; the SDK handles both). The request formats follow the portal's samples. Where the portal contradicts itself (its error list asks for due dates as "yymmdd", but every sample uses `YYYY-MM-DD`), the SDK follows the samples.
+Not yet. Every Bill Manager call timed out at the sandbox gateway (HTTP 504), opt-in also on a retry. So it's untested whether the app key is needed, what its header is called, and how errors arrive (as HTTP 409, or as HTTP 200 with `rescode` `"409"`; the SDK handles both). The request formats follow the portal's samples. Where the portal contradicts itself (its error list asks for due dates as "yymmdd", but every sample uses `YYYY-MM-DD`), the SDK follows the samples.
