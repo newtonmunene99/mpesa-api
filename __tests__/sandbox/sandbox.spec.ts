@@ -338,8 +338,9 @@ describe.skipIf(!enabled)('Daraja sandbox', () => {
     }));
   });
 
-  // Probe: M-Pesa Ratiba with the portal's sandbox STK shortcode (MPESA_SHORTCODE; 300584 and 600999 are refused as not issued to the app). It sends a consent
-  // STK prompt to the test number. Dates are EAT yyyymmdd, starting tomorrow.
+  // Probe: M-Pesa Ratiba with the STK shortcode (MPESA_SHORTCODE). The sandbox refuses it, the
+  // portal sample's 300584 and the org shortcode 600999 alike, as not issued to the app. It
+  // sends a consent STK prompt to the test number. Dates are EAT yyyymmdd, starting tomorrow.
   test('probe: Ratiba create', async () => {
     const ymd = (days: number) =>
       new Date(Date.now() + 3 * 3_600_000 + days * 86_400_000)
@@ -364,6 +365,37 @@ describe.skipIf(!enabled)('Daraja sandbox', () => {
           AccountReference: 'SDKPROBE',
           TransactionDesc: 'SDK probe',
           CallBackURL: url('ratiba/callback'),
+        },
+        { success: () => true },
+      ),
+    }));
+  });
+
+  // Probes: Lipa na Bonga. Redeem sends an STK prompt to the test number; 40 points at 0.2 is
+  // KES 8.
+  test('probe: Bonga calculate', async () => {
+    const ctx = createContext(config());
+    await capture('bonga-calculate', async () => ({
+      raw: await ctx.post(
+        '/v1/lipa/na/bonga/calculate-points',
+        { points: '40' },
+        { success: () => true },
+      ),
+    }));
+  });
+
+  test('probe: Bonga redeem', async () => {
+    const ctx = createContext(config());
+    await capture('bonga-redeem', async () => ({
+      raw: await ctx.post(
+        '/v1/lipa/na/bonga/redeem-paybill',
+        {
+          msisdn: msisdn(),
+          amount: 8,
+          bongaPoints: 40,
+          conversionRate: 0.2,
+          shortCode: String(org()),
+          accountNumber: 'SDKPROBE',
         },
         { success: () => true },
       ),
