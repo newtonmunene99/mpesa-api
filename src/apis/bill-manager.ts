@@ -1,7 +1,8 @@
 import type { Context } from '../client';
 import { str } from '../core/coerce';
 import { DarajaApiError } from '../core/errors';
-import { checkPhone, checkShortCode, checkUrl, Issues } from '../core/validate';
+import { formatEatDateTime } from '../core/time';
+import { checkInt, checkPhone, checkShortCode, checkUrl, Issues } from '../core/validate';
 
 /** Input for `billManager.optIn`. */
 export interface BillManagerOptInInput {
@@ -35,6 +36,51 @@ export interface BillManagerOptInResponse {
   raw: unknown;
 }
 
+/** One billable line on an invoice. */
+export interface BillManagerInvoiceItem {
+  /** `itemName`. */
+  itemName: string;
+  /** Whole shillings, at least 1, sent as a string (`amount`). */
+  amount: number;
+}
+
+/** An invoice for `billManager.sendInvoice` and `sendInvoices`, sent to the customer by SMS. */
+export interface BillManagerInvoice {
+  /** Your unique ID for the invoice, used to cancel it later (`externalReference`). */
+  externalReference: string;
+  /** The customer's name, shown in the SMS (`billedFullName`). */
+  billedFullName: string;
+  /**
+   * The Safaricom number that receives the invoice: `07…`, `01…`, `+254…` or `254…`, sent as
+   * `07…`/`01…` (`billedPhoneNumber`).
+   */
+  billedPhoneNumber: string;
+  /** The period billed, for example "August 2021" (`billedPeriod`). */
+  billedPeriod: string;
+  /** What the customer is billed for, shown in the SMS (`invoiceName`). */
+  invoiceName: string;
+  /** When payment is due, sent as an East Africa Time `YYYY-MM-DD` (`dueDate`). */
+  dueDate: Date;
+  /** The account number the customer pays to (`accountReference`). */
+  accountReference: string;
+  /** The total, whole shillings, at least 1, sent as a string (`amount`). */
+  amount: number;
+  /** Optional billable lines shown on the invoice (`invoiceItems`). */
+  invoiceItems?: BillManagerInvoiceItem[];
+}
+
+/** Bill Manager's answer to an invoicing or cancelling call. */
+export interface BillManagerResponse {
+  /** `Status_Message`, for example "Invoice sent successfully", when Daraja sends one. */
+  statusMessage?: string;
+  /** `resmsg`, for example "Success". */
+  message: string;
+  /** `rescode`: always "200", anything else throws `DarajaApiError`. */
+  code: string;
+  /** Daraja's response body, unmodified. */
+  raw: unknown;
+}
+
 /**
  * Bill Manager: e-invoicing for a paybill. Opt in, send invoices by SMS, cancel them, receive
  * payment pushes and acknowledge them. No initiator is needed.
@@ -49,6 +95,8 @@ export interface BillManagerApi {
    * `app_key` Daraja issues.
    */
   optIn(input: BillManagerOptInInput): Promise<BillManagerOptInResponse>;
+  /** Sends one invoice to a customer by SMS. Reminders follow if the opt-in enabled them. */
+  sendInvoice(invoice: BillManagerInvoice): Promise<BillManagerResponse>;
 }
 
 const BASE = '/v1/billmanager-invoice';
@@ -74,6 +122,81 @@ function checkRescode(raw: Record<string, unknown>): void {
     ...(code ? { errorCode: code } : {}),
     errorMessage: str(raw.Status_Message ?? raw.resmsg),
   });
+}
+
+const isFilled = (value: unknown): boolean => typeof value === 'string' && value.trim() !== '';
+const isDate = (value: Date): boolean => value instanceof Date && !Number.isNaN(value.getTime());
+const REQUIRED_TEXT = [
+  'externalReference',
+  'billedFullName',
+  'billedPeriod',
+  'invoiceName',
+  'accountReference',
+] as const;
+
+/** Validates the optional invoice lines and returns them as Daraja fields. */
+function invoiceItems(
+  issues: Issues,
+  items: BillManagerInvoiceItem[],
+  prefix: string,
+): Record<string, string>[] {
+  return items.map((item, index) => {
+    const at = `${prefix}invoiceItems[${index}]`;
+    if (!isFilled(item?.itemName)) issues.add(`${at}.itemName`, 'is required');
+    checkInt(issues, `${at}.amount`, item?.amount, { min: 1 });
+    return { itemName: item?.itemName, amount: String(item?.amount) };
+  });
+}
+
+/**
+ * Validates one invoice, reporting issues under `prefix` (empty for `sendInvoice`,
+ * `invoices[<n>].` for `sendInvoices`), and returns it as Daraja fields.
+ */
+function invoiceBody(
+  issues: Issues,
+  invoice: BillManagerInvoice,
+  prefix: string,
+): Record<string, unknown> {
+  for (const field of REQUIRED_TEXT) {
+    if (!isFilled(invoice[field])) issues.add(`${prefix}${field}`, 'is required');
+  }
+  const phone = checkNationalPhone(issues, `${prefix}billedPhoneNumber`, invoice.billedPhoneNumber);
+  checkInt(issues, `${prefix}amount`, invoice.amount, { min: 1 });
+  const due = isDate(invoice.dueDate);
+  if (!due) issues.add(`${prefix}dueDate`, 'must be a valid date');
+  const items = invoice.invoiceItems ? invoiceItems(issues, invoice.invoiceItems, prefix) : [];
+  return {
+    externalReference: invoice.externalReference,
+    billedFullName: invoice.billedFullName,
+    billedPhoneNumber: phone,
+    billedPeriod: invoice.billedPeriod,
+    invoiceName: invoice.invoiceName,
+    dueDate: due ? formatEatDateTime(invoice.dueDate).slice(0, 10) : '',
+    accountReference: invoice.accountReference,
+    amount: String(invoice.amount),
+    ...(invoice.invoiceItems ? { invoiceItems: items } : {}),
+  };
+}
+
+/** Maps an invoicing or cancelling answer after checking its `rescode`. */
+function response(raw: Record<string, unknown>): BillManagerResponse {
+  checkRescode(raw);
+  return {
+    ...(raw.Status_Message == null ? {} : { statusMessage: str(raw.Status_Message) }),
+    message: str(raw.resmsg),
+    code: str(raw.rescode),
+    raw,
+  };
+}
+
+async function sendInvoice(
+  ctx: Context,
+  invoice: BillManagerInvoice,
+): Promise<BillManagerResponse> {
+  const issues = new Issues();
+  const body = invoiceBody(issues, invoice, '');
+  issues.throwIfAny('billManager.sendInvoice');
+  return response(await ctx.post<Record<string, unknown>>(`${BASE}/single-invoicing`, body));
 }
 
 /** Validates an opt-in and returns its body. */
@@ -118,5 +241,6 @@ async function optIn(
 export function billManager(ctx: Context): BillManagerApi {
   return {
     optIn: (input) => optIn(ctx, input),
+    sendInvoice: (invoice) => sendInvoice(ctx, invoice),
   };
 }

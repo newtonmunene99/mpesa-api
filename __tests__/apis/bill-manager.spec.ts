@@ -171,3 +171,127 @@ describe('billManager.optIn', () => {
     expect(calls).toHaveLength(0);
   });
 });
+
+// The single-invoicing response sample from the portal page.
+const sent = { Status_Message: 'Invoice sent successfully', resmsg: 'Success', rescode: '200' };
+const invoice = {
+  externalReference: '#9932340',
+  billedFullName: 'John Doe',
+  billedPhoneNumber: '254722000000',
+  billedPeriod: 'August 2021',
+  invoiceName: 'Jentrys',
+  // 22:00 EAT on 11 October, so a UTC formatter would send the wrong day.
+  dueDate: new Date('2021-10-11T19:00:00Z'),
+  accountReference: '1ASD678H',
+  amount: 800,
+  invoiceItems: [
+    { itemName: 'food', amount: 700 },
+    { itemName: 'water', amount: 100 },
+  ],
+};
+
+describe('billManager.sendInvoice', () => {
+  test('posts the invoice in the portal form and maps the answer', async () => {
+    const { api, calls } = setup([token, { status: 200, body: sent }]);
+
+    const res = await api.sendInvoice(invoice);
+
+    expect(calls[1]!.url).toBe(`${base}/single-invoicing`);
+    expect(calls[1]!.body).toEqual({
+      externalReference: '#9932340',
+      billedFullName: 'John Doe',
+      billedPhoneNumber: '0722000000',
+      billedPeriod: 'August 2021',
+      invoiceName: 'Jentrys',
+      dueDate: '2021-10-11',
+      accountReference: '1ASD678H',
+      amount: '800',
+      invoiceItems: [
+        { itemName: 'food', amount: '700' },
+        { itemName: 'water', amount: '100' },
+      ],
+    });
+    expect(res).toEqual({
+      statusMessage: 'Invoice sent successfully',
+      message: 'Success',
+      code: '200',
+      raw: sent,
+    });
+  });
+
+  test('sends the due date as the EAT day, across UTC midnight', async () => {
+    const { api, calls } = setup([token, { status: 200, body: sent }]);
+
+    await api.sendInvoice({ ...invoice, dueDate: new Date('2021-10-11T21:30:00Z') });
+
+    expect(calls[1]!.body).toMatchObject({ dueDate: '2021-10-12' });
+  });
+
+  test('leaves out invoiceItems when there are none', async () => {
+    const { api, calls } = setup([token, { status: 200, body: sent }]);
+    const { invoiceItems: _, ...plain } = invoice;
+
+    await api.sendInvoice(plain);
+
+    expect(calls[1]!.body).not.toHaveProperty('invoiceItems');
+  });
+
+  test('rejects a duplicate externalReference (rescode 409)', async () => {
+    const body = {
+      Status_Message: 'Another entry exist with the same externalReference number',
+      resmsg: 'Action forbidden',
+      rescode: '409',
+    };
+    const { api } = setup([token, { status: 200, body }]);
+
+    await expect(api.sendInvoice(invoice)).rejects.toMatchObject({
+      name: 'DarajaApiError',
+      errorCode: '409',
+    });
+  });
+
+  test("surfaces the sandbox's gateway timeout (billmanager-invoice.json)", async () => {
+    const captured = sandboxCapture('billmanager-invoice');
+    const { api } = setup([token, { status: captured.status, body: captured.response }]);
+
+    await expect(api.sendInvoice(invoice)).rejects.toMatchObject({ status: 504 });
+  });
+
+  test.each([
+    ['empty externalReference', { externalReference: ' ' }, 'externalReference', 'is required'],
+    ['empty billedFullName', { billedFullName: '' }, 'billedFullName', 'is required'],
+    ['empty billedPeriod', { billedPeriod: '' }, 'billedPeriod', 'is required'],
+    ['empty invoiceName', { invoiceName: '' }, 'invoiceName', 'is required'],
+    ['empty accountReference', { accountReference: '' }, 'accountReference', 'is required'],
+    [
+      'invalid billedPhoneNumber',
+      { billedPhoneNumber: '0812345678' },
+      'billedPhoneNumber',
+      'must be a Safaricom number like 2547XXXXXXXX or 07XXXXXXXX',
+    ],
+    ['amount 0', { amount: 0 }, 'amount', 'must be at least 1'],
+    ['fractional amount', { amount: 1.5 }, 'amount', 'must be an integer'],
+    ['invalid dueDate', { dueDate: new Date('x') }, 'dueDate', 'must be a valid date'],
+    [
+      'an item without a name',
+      { invoiceItems: [{ itemName: '', amount: 1 }] },
+      'invoiceItems[0].itemName',
+      'is required',
+    ],
+    [
+      'an item with amount 0',
+      { invoiceItems: [{ itemName: 'x', amount: 0 }] },
+      'invoiceItems[0].amount',
+      'must be at least 1',
+    ],
+  ])('rejects %s', async (_, override, path, message) => {
+    const { api, calls } = setup([]);
+
+    const error = await api.sendInvoice({ ...invoice, ...override }).catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(ValidationError);
+    expect((error as ValidationError).message).toContain('billManager.sendInvoice');
+    expect((error as ValidationError).issues).toEqual([{ path, message }]);
+    expect(calls).toHaveLength(0);
+  });
+});
