@@ -295,3 +295,65 @@ describe('billManager.sendInvoice', () => {
     expect(calls).toHaveLength(0);
   });
 });
+
+describe('billManager.sendInvoices', () => {
+  test('posts the invoices as an array', async () => {
+    const { api, calls } = setup([token, { status: 200, body: sent }]);
+
+    const res = await api.sendInvoices([invoice, { ...invoice, externalReference: '967' }]);
+
+    expect(calls[1]!.url).toBe(`${base}/bulk-invoicing`);
+    const body = calls[1]!.body as Record<string, unknown>[];
+    expect(body).toHaveLength(2);
+    expect(body[1]).toMatchObject({ externalReference: '967', billedPhoneNumber: '0722000000' });
+    expect(res).toMatchObject({ statusMessage: 'Invoice sent successfully', code: '200' });
+  });
+
+  test('accepts 1000 invoices', async () => {
+    const { api, calls } = setup([token, { status: 200, body: sent }]);
+
+    await api.sendInvoices(Array.from({ length: 1000 }, () => invoice));
+
+    expect(calls[1]!.body).toHaveLength(1000);
+  });
+
+  test("reports each invoice's issues by its index", async () => {
+    const { api, calls } = setup([]);
+
+    const error = await api
+      .sendInvoices([
+        invoice,
+        { ...invoice, amount: 0, invoiceItems: [{ itemName: '', amount: 1 }] },
+      ])
+      .catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(ValidationError);
+    expect((error as ValidationError).message).toContain('billManager.sendInvoices');
+    expect((error as ValidationError).issues).toEqual([
+      { path: 'invoices[1].amount', message: 'must be at least 1' },
+      { path: 'invoices[1].invoiceItems[0].itemName', message: 'is required' },
+    ]);
+    expect(calls).toHaveLength(0);
+  });
+
+  test.each([
+    ['no invoices', []],
+    ['1001 invoices', Array.from({ length: 1001 }, () => invoice)],
+  ])('rejects %s', async (_, invoices) => {
+    const { api, calls } = setup([]);
+
+    const error = await api.sendInvoices(invoices).catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([
+      { path: 'invoices', message: 'must hold 1 to 1000 invoices' },
+    ]);
+    expect(calls).toHaveLength(0);
+  });
+
+  test("surfaces the sandbox's gateway timeout (billmanager-invoices.json)", async () => {
+    const captured = sandboxCapture('billmanager-invoices');
+    const { api } = setup([token, { status: captured.status, body: captured.response }]);
+
+    await expect(api.sendInvoices([invoice])).rejects.toMatchObject({ status: 504 });
+  });
+});

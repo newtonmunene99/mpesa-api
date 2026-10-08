@@ -97,10 +97,13 @@ export interface BillManagerApi {
   optIn(input: BillManagerOptInInput): Promise<BillManagerOptInResponse>;
   /** Sends one invoice to a customer by SMS. Reminders follow if the opt-in enabled them. */
   sendInvoice(invoice: BillManagerInvoice): Promise<BillManagerResponse>;
+  /** Sends 1 to 1000 invoices in one call. Issues are reported by index (`invoices[3].amount`). */
+  sendInvoices(invoices: BillManagerInvoice[]): Promise<BillManagerResponse>;
 }
 
 const BASE = '/v1/billmanager-invoice';
 const OK = '200';
+const MAX_INVOICES = 1000;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** A Safaricom number in the national `07…`/`01…` form Bill Manager uses. */
@@ -199,6 +202,22 @@ async function sendInvoice(
   return response(await ctx.post<Record<string, unknown>>(`${BASE}/single-invoicing`, body));
 }
 
+async function sendInvoices(
+  ctx: Context,
+  invoices: BillManagerInvoice[],
+): Promise<BillManagerResponse> {
+  const issues = new Issues();
+  if (!Array.isArray(invoices) || invoices.length === 0 || invoices.length > MAX_INVOICES) {
+    issues.add('invoices', `must hold 1 to ${MAX_INVOICES} invoices`);
+    issues.throwIfAny('billManager.sendInvoices');
+  }
+  const body = invoices.map((invoice, index) =>
+    invoiceBody(issues, invoice, `invoices[${index}].`),
+  );
+  issues.throwIfAny('billManager.sendInvoices');
+  return response(await ctx.post<Record<string, unknown>>(`${BASE}/bulk-invoicing`, body));
+}
+
 /** Validates an opt-in and returns its body. */
 function optInBody(ctx: Context, input: BillManagerOptInInput): Record<string, unknown> {
   const issues = new Issues();
@@ -242,5 +261,6 @@ export function billManager(ctx: Context): BillManagerApi {
   return {
     optIn: (input) => optIn(ctx, input),
     sendInvoice: (invoice) => sendInvoice(ctx, invoice),
+    sendInvoices: (invoices) => sendInvoices(ctx, invoices),
   };
 }
