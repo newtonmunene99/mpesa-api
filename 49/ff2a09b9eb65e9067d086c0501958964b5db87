@@ -1,0 +1,1 @@
+send-invoices: bulk-invoicing with 1-1000 invoices (else 'invoices' issue), each validated via invoiceBody with invoices[n]. paths; 504 capture pinned. Red (6) then green.
