@@ -1,0 +1,1 @@
+probe-ratiba: redact handles {name,value} entries, Msisdn, PartyA (red then green; isSensitiveEntry extracted to stay under complexity 15). Probe refused 400 with 300584, 600999 and 174379; simulator shows no issued shortcode. No ack/callback captured.
