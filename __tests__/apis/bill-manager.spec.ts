@@ -483,4 +483,83 @@ describe('billManager.cancelInvoice and cancelInvoices', () => {
   });
 });
 
+// The acknowledgement sample from the portal page.
+const acknowledgement = {
+  paymentDate: new Date('2021-09-30T21:00:00Z'),
+  paidAmount: 800,
+  accountReference: 'Balboa95',
+  transactionId: 'PJB53MYR1N',
+  phoneNumber: '254710000000',
+  fullName: 'John Doe',
+  invoiceName: 'School Fees',
+  externalReference: '955',
+};
+
+describe('billManager.acknowledgePayment', () => {
+  test('posts the acknowledgement in the portal form', async () => {
+    const answer = { resmsg: 'Success', rescode: '200' };
+    const { api, calls } = setup([token, { status: 200, body: answer }]);
+
+    const res = await api.acknowledgePayment(acknowledgement);
+
+    expect(calls[1]!.url).toBe(`${base}/reconciliation`);
+    expect(calls[1]!.body).toEqual({
+      paymentDate: '2021-10-01',
+      paidAmount: '800',
+      accountReference: 'Balboa95',
+      transactionId: 'PJB53MYR1N',
+      phoneNumber: '0710000000',
+      fullName: 'John Doe',
+      invoiceName: 'School Fees',
+      externalReference: '955',
+    });
+    expect(res).toEqual({ message: 'Success', code: '200', raw: answer });
+  });
+
+  test('rejects a refused acknowledgement', async () => {
+    const { api } = setup([token, { status: 200, body: { resmsg: 'Failed', rescode: '400' } }]);
+
+    await expect(api.acknowledgePayment(acknowledgement)).rejects.toMatchObject({
+      name: 'DarajaApiError',
+      errorCode: '400',
+      errorMessage: 'Failed',
+    });
+  });
+
+  test("surfaces the sandbox's gateway timeout (billmanager-reconciliation.json)", async () => {
+    const captured = sandboxCapture('billmanager-reconciliation');
+    const { api } = setup([token, { status: captured.status, body: captured.response }]);
+
+    await expect(api.acknowledgePayment(acknowledgement)).rejects.toMatchObject({ status: 504 });
+  });
+
+  test.each([
+    ['invalid paymentDate', { paymentDate: new Date('x') }, 'paymentDate', 'must be a valid date'],
+    ['paidAmount 0', { paidAmount: 0 }, 'paidAmount', 'must be at least 1'],
+    ['fractional paidAmount', { paidAmount: 1.5 }, 'paidAmount', 'must be an integer'],
+    [
+      'invalid phoneNumber',
+      { phoneNumber: '123' },
+      'phoneNumber',
+      'must be a Safaricom number like 2547XXXXXXXX or 07XXXXXXXX',
+    ],
+    ['empty accountReference', { accountReference: '' }, 'accountReference', 'is required'],
+    ['empty transactionId', { transactionId: ' ' }, 'transactionId', 'is required'],
+    ['empty fullName', { fullName: '' }, 'fullName', 'is required'],
+    ['empty invoiceName', { invoiceName: '' }, 'invoiceName', 'is required'],
+    ['empty externalReference', { externalReference: '' }, 'externalReference', 'is required'],
+  ])('rejects %s', async (_, override, path, message) => {
+    const { api, calls } = setup([]);
+
+    const error = await api
+      .acknowledgePayment({ ...acknowledgement, ...override })
+      .catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(ValidationError);
+    expect((error as ValidationError).message).toContain('billManager.acknowledgePayment');
+    expect((error as ValidationError).issues).toEqual([{ path, message }]);
+    expect(calls).toHaveLength(0);
+  });
+});
+
 type Api = ReturnType<typeof billManager>;

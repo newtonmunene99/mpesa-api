@@ -82,6 +82,29 @@ export interface BillManagerResponse {
   raw: unknown;
 }
 
+/** Input for `billManager.acknowledgePayment`, describing a payment you've reconciled. */
+export interface BillManagerAcknowledgement {
+  /** When the customer paid, sent as an East Africa Time `YYYY-MM-DD` (`paymentDate`). */
+  paymentDate: Date;
+  /** Whole shillings paid, at least 1, sent as a string (`paidAmount`). */
+  paidAmount: number;
+  /** The account number paid to (`accountReference`). */
+  accountReference: string;
+  /** The M-Pesa receipt number (`transactionId`). */
+  transactionId: string;
+  /**
+   * The Safaricom number that receives the e-receipt: `07…`, `01…`, `+254…` or `254…`, sent as
+   * `07…`/`01…` (`phoneNumber`).
+   */
+  phoneNumber: string;
+  /** The customer's name (`fullName`). */
+  fullName: string;
+  /** What the customer paid for (`invoiceName`). */
+  invoiceName: string;
+  /** The invoice's `externalReference`. */
+  externalReference: string;
+}
+
 /** Bill Manager's answer to `cancelInvoice` and `cancelInvoices`. */
 export interface BillManagerCancelResponse extends BillManagerResponse {
   /** The `errors` list Daraja returns, as is; empty when it sends none. */
@@ -116,6 +139,11 @@ export interface BillManagerApi {
    * limit for one call.
    */
   cancelInvoices(externalReferences: string[]): Promise<BillManagerCancelResponse>;
+  /**
+   * Acknowledges a payment Bill Manager pushed to you, once you've reconciled it. Bill Manager
+   * then sends the customer an e-receipt by SMS.
+   */
+  acknowledgePayment(acknowledgement: BillManagerAcknowledgement): Promise<BillManagerResponse>;
 }
 
 const BASE = '/v1/billmanager-invoice';
@@ -285,6 +313,45 @@ async function cancelInvoices(
   );
 }
 
+const ACKNOWLEDGED_TEXT = [
+  'accountReference',
+  'transactionId',
+  'fullName',
+  'invoiceName',
+  'externalReference',
+] as const;
+
+/** Validates an acknowledgement and returns its body. */
+function acknowledgementBody(input: BillManagerAcknowledgement): Record<string, unknown> {
+  const issues = new Issues();
+  const paid = isDate(input.paymentDate);
+  if (!paid) issues.add('paymentDate', 'must be a valid date');
+  checkInt(issues, 'paidAmount', input.paidAmount, { min: 1 });
+  const phone = checkNationalPhone(issues, 'phoneNumber', input.phoneNumber);
+  for (const field of ACKNOWLEDGED_TEXT) {
+    if (!isFilled(input[field])) issues.add(field, 'is required');
+  }
+  issues.throwIfAny('billManager.acknowledgePayment');
+  return {
+    paymentDate: formatEatDateTime(input.paymentDate).slice(0, 10),
+    paidAmount: String(input.paidAmount),
+    accountReference: input.accountReference,
+    transactionId: input.transactionId,
+    phoneNumber: phone,
+    fullName: input.fullName,
+    invoiceName: input.invoiceName,
+    externalReference: input.externalReference,
+  };
+}
+
+async function acknowledgePayment(
+  ctx: Context,
+  input: BillManagerAcknowledgement,
+): Promise<BillManagerResponse> {
+  const body = acknowledgementBody(input);
+  return response(await ctx.post<Record<string, unknown>>(`${BASE}/reconciliation`, body));
+}
+
 /** Validates an opt-in and returns its body. */
 function optInBody(ctx: Context, input: BillManagerOptInInput): Record<string, unknown> {
   const issues = new Issues();
@@ -331,5 +398,6 @@ export function billManager(ctx: Context): BillManagerApi {
     sendInvoices: (invoices) => sendInvoices(ctx, invoices),
     cancelInvoice: (externalReference) => cancelInvoice(ctx, externalReference),
     cancelInvoices: (externalReferences) => cancelInvoices(ctx, externalReferences),
+    acknowledgePayment: (acknowledgement) => acknowledgePayment(ctx, acknowledgement),
   };
 }
