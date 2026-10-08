@@ -49,10 +49,12 @@ body:
         - b2b.topUpB2C
         - b2b.remitTax
         - b2b.expressCheckout
+        - ratiba.createStandingOrder
+        - bonga.calculatePoints / bonga.redeem
         - accountBalance.query
         - transactionStatus.query
         - reversal.request
-        - Callback parsers (parseStkCallback, parseResult, parseC2BNotification, parseBalances, parseExpressCheckoutCallback)
+        - Callback parsers (parseStkCallback, parseResult, parseC2BNotification, parseBalances, parseExpressCheckoutCallback, parseRatibaCallback)
         - Version 3.x (please say which method)
         - Installation / types / packaging
         - Other

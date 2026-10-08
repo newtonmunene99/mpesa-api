@@ -18,7 +18,7 @@ hero:
 
 features:
   - title: Daraja 3.0 APIs
-    details: M-Pesa Express (STK push), Dynamic QR, C2B and Pull Transactions, B2C and Business To Pochi, B2B (pay bill, buy goods, B2C top up, tax, Express CheckOut), Transaction Status, Account Balance and Reversal, on the current endpoints.
+    details: M-Pesa Express (STK push), Dynamic QR, C2B and Pull Transactions, M-Pesa Ratiba standing orders, Lipa na Bonga, B2C and Business To Pochi, B2B (pay bill, buy goods, B2C top up, tax, Express CheckOut), Transaction Status, Account Balance and Reversal, on the current endpoints.
   - title: Runs anywhere
     details: Web-standard APIs only, so the same client works on Node.js 22.12+, Bun, Deno and Cloudflare Workers.
   - title: Typed callbacks

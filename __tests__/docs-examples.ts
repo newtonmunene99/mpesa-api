@@ -15,6 +15,7 @@ import {
   parseBalances,
   parseC2BNotification,
   parseExpressCheckoutCallback,
+  parseRatibaCallback,
   parseResult,
   parseStkCallback,
   type TokenStore,
@@ -259,6 +260,46 @@ export async function pullTransactions(mpesa: Mpesa, from: Date, to: Date): Prom
   for await (const t of mpesa.pullTransactions.all({ shortCode: 600000, from, to })) {
     console.log(t.transactionId, t.date, t.amountCents);
   }
+}
+
+// M-Pesa Ratiba
+export async function standingOrder(mpesa: Mpesa): Promise<void> {
+  const order = await mpesa.ratiba.createStandingOrder({
+    name: 'Phone loan',
+    type: 'paybill',
+    shortCode: 600000,
+    phoneNumber: '0712345678',
+    amount: 500,
+    startDate: new Date('2026-11-01'),
+    endDate: new Date('2027-10-31'),
+    frequency: 'monthly',
+    accountReference: 'PHONE-42',
+    description: 'Phone loan',
+    callbackUrl: 'https://example.com/payments/ratiba',
+  });
+  console.log(order.requestRefId);
+
+  app.post('/payments/ratiba', (req, res) => {
+    const result = parseRatibaCallback(req.body);
+    if (result.ok) console.log('order', result.standingOrderId, result.status);
+    else console.log('not created', result.resultCode, result.responseDescription);
+    res.json({ ok: true });
+  });
+}
+
+// Lipa na Bonga
+export async function bongaPoints(mpesa: Mpesa): Promise<void> {
+  const quote = await mpesa.bonga.calculatePoints({ points: 40 });
+  console.log(quote.amountCents, quote.rate); // 800, 0.2
+
+  await mpesa.bonga.redeem({
+    phoneNumber: '0720776155',
+    shortCode: 888880,
+    accountNumber: 'INV-7',
+    points: quote.points,
+    amount: quote.amountCents / 100,
+    rate: quote.rate,
+  });
 }
 
 // Transaction Status
