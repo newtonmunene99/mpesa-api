@@ -1,0 +1,28 @@
+{
+  "ResponseHeader": {
+    "responseRefID": "4dd9b5d9-d738-42ba-9326-2cc99e966000",
+    "requestRefID": "c8c2bb31-3b3a-402e-84fc-21ef35161e48",
+    "responseCode": "1037",
+    "responseDescription": "Error"
+  },
+  "ResponseBody": {
+    "ResponseData": [
+      {
+        "Name": "TransactionID",
+        "Value": "0000000000"
+      },
+      {
+        "Name": "responseCode",
+        "Value": "1037"
+      },
+      {
+        "Name": "Status",
+        "Value": "ERROR"
+      },
+      {
+        "Name": "Msisdn",
+        "Value": "*********149"
+      }
+    ]
+  }
+}
