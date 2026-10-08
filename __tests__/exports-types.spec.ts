@@ -4,6 +4,7 @@ import {
   parseBalances,
   parseC2BNotification,
   parseExpressCheckoutCallback,
+  parseRatibaCallback,
   parseResult,
   parseStkCallback,
 } from '../src/index';
@@ -18,6 +19,11 @@ import type {
   B2BPayBillInput,
   B2BTaxInput,
   B2BTopUpInput,
+  BongaApi,
+  BongaCalculateInput,
+  BongaCalculateResponse,
+  BongaRedeemInput,
+  BongaRedeemResponse,
   B2CApi,
   B2CCommand,
   B2CInput,
@@ -48,6 +54,11 @@ import type {
   QrInput,
   QrResponse,
   QrType,
+  RatibaApi,
+  RatibaCallback,
+  RatibaFrequency,
+  RatibaResponse,
+  RatibaStandingOrderInput,
   ReversalApi,
   ReversalInput,
   StkCallback,
@@ -74,6 +85,20 @@ test('public types stay exported and wired to the client', () => {
   expectTypeOf<Mpesa['reversal']>().toEqualTypeOf<ReversalApi>();
   expectTypeOf<Mpesa['qr']>().toEqualTypeOf<QrApi>();
   expectTypeOf<Mpesa['pullTransactions']>().toEqualTypeOf<PullTransactionsApi>();
+  expectTypeOf<Mpesa['ratiba']>().toEqualTypeOf<RatibaApi>();
+  expectTypeOf<Mpesa['bonga']>().toEqualTypeOf<BongaApi>();
+  expectTypeOf<RatibaApi['createStandingOrder']>().parameters.toEqualTypeOf<
+    [RatibaStandingOrderInput]
+  >();
+  expectTypeOf<RatibaApi['createStandingOrder']>().returns.resolves.toEqualTypeOf<RatibaResponse>();
+  expectTypeOf<RatibaStandingOrderInput['frequency']>().toEqualTypeOf<RatibaFrequency>();
+  expectTypeOf(parseRatibaCallback).returns.toEqualTypeOf<RatibaCallback>();
+  expectTypeOf<BongaApi['calculatePoints']>().parameters.toEqualTypeOf<[BongaCalculateInput]>();
+  expectTypeOf<
+    BongaApi['calculatePoints']
+  >().returns.resolves.toEqualTypeOf<BongaCalculateResponse>();
+  expectTypeOf<BongaApi['redeem']>().parameters.toEqualTypeOf<[BongaRedeemInput]>();
+  expectTypeOf<BongaApi['redeem']>().returns.resolves.toEqualTypeOf<BongaRedeemResponse>();
   expectTypeOf<QrApi['generate']>().parameters.toEqualTypeOf<[QrInput]>();
   expectTypeOf<QrApi['generate']>().returns.resolves.toEqualTypeOf<QrResponse>();
   expectTypeOf<QrInput['type']>().toEqualTypeOf<QrType>();

@@ -15,6 +15,7 @@ test('exports exactly the 4.0 runtime API', () => {
       'parseBalances',
       'parseC2BNotification',
       'parseExpressCheckoutCallback',
+      'parseRatibaCallback',
       'parseResult',
       'parseStkCallback',
     ].sort(),

@@ -25,8 +25,10 @@ export {
   parseBalances,
   parseC2BNotification,
   parseExpressCheckoutCallback,
+  parseRatibaCallback,
   parseResult,
   parseStkCallback,
+  type RatibaCallback,
   type StkCallback,
   type StkCallbackMetadata,
 } from './callbacks';
@@ -40,6 +42,13 @@ export type {
   B2BTaxInput,
   B2BTopUpInput,
 } from './apis/b2b';
+export type {
+  BongaApi,
+  BongaCalculateInput,
+  BongaCalculateResponse,
+  BongaRedeemInput,
+  BongaRedeemResponse,
+} from './apis/bonga';
 export type { B2CApi, B2CCommand, B2CInput, B2CPochiInput } from './apis/b2c';
 export type { C2BApi, C2BRegisterInput, C2BResponse, C2BSimulateInput } from './apis/c2b';
 export type {
@@ -51,6 +60,12 @@ export type {
   PullTransactionsApi,
 } from './apis/pull-transactions';
 export type { QrApi, QrInput, QrResponse, QrType } from './apis/qr';
+export type {
+  RatibaApi,
+  RatibaFrequency,
+  RatibaResponse,
+  RatibaStandingOrderInput,
+} from './apis/ratiba';
 export type { ReversalApi, ReversalInput } from './apis/reversal';
 export type { IdentifierType, InitiatorResponse } from './apis/shared';
 export type {
