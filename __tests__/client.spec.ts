@@ -150,6 +150,21 @@ describe('context', () => {
     });
   });
 
+  test('sends per-call headers, on the retry too, and never lets them replace the token', async () => {
+    const { fetch, calls } = fakeFetch([
+      token('t1'),
+      { status: 404, body: { errorCode: '404.001.03' } },
+      token('t2'),
+      { status: 200, body: { ok: true } },
+    ]);
+    const ctx = createContext(baseConfig(fetch));
+
+    await ctx.post('/x', {}, { headers: { appkey: 'k1', authorization: 'Basic nope' } });
+
+    expect(calls[1]!.headers).toMatchObject({ appkey: 'k1', authorization: 'Bearer t1' });
+    expect(calls[3]!.headers).toMatchObject({ appkey: 'k1', authorization: 'Bearer t2' });
+  });
+
   test('surfaces a second token error instead of retrying again', async () => {
     const { fetch, calls } = fakeFetch([
       token('t1'),

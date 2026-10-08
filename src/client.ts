@@ -57,7 +57,15 @@ export interface MpesaConfig {
 export interface PostOptions {
   /** Whether a 2xx body's `ResponseCode` means success. Defaults to all zeros. */
   success?: (responseCode: string) => boolean;
+  /** Extra request headers, such as an API's own key. They can't replace the bearer token. */
+  headers?: Record<string, string>;
 }
+
+/** The caller's headers without any `authorization`, which only the token may set. */
+const extraHeaders = (headers: Record<string, string> = {}): Record<string, string> =>
+  Object.fromEntries(
+    Object.entries(headers).filter(([name]) => name.toLowerCase() !== 'authorization'),
+  );
 
 /** Shared state the API modules use to talk to Daraja. */
 export interface Context {
@@ -208,7 +216,7 @@ export function createContext(config: MpesaConfig, clock: () => Date = () => new
     request<T>(transport, {
       method: 'POST',
       path,
-      headers: { authorization: `Bearer ${token}` },
+      headers: { ...extraHeaders(options.headers), authorization: `Bearer ${token}` },
       body,
       ...(options.success ? { success: options.success } : {}),
     });
