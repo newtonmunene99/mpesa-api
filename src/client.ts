@@ -4,6 +4,7 @@ import { b2c, type B2CApi } from './apis/b2c';
 import { c2b, type C2BApi } from './apis/c2b';
 import { pullTransactions, type PullTransactionsApi } from './apis/pull-transactions';
 import { qr, type QrApi } from './apis/qr';
+import { ratiba, type RatibaApi } from './apis/ratiba';
 import { reversal, type ReversalApi } from './apis/reversal';
 import { stkPush, type StkPushApi } from './apis/stk-push';
 import { transactionStatus, type TransactionStatusApi } from './apis/transaction-status';
@@ -91,6 +92,8 @@ export interface Mpesa {
   readonly qr: QrApi;
   /** Pull Transactions: the last 48 hours of C2B payments to a shortcode. */
   readonly pullTransactions: PullTransactionsApi;
+  /** M-Pesa Ratiba standing orders. */
+  readonly ratiba: RatibaApi;
   /** Transaction Status queries. */
   readonly transactionStatus: TransactionStatusApi;
   /** Account Balance queries. */
@@ -267,6 +270,7 @@ export function createMpesa(config: MpesaConfig): Mpesa {
     b2b: b2b(ctx),
     qr: qr(ctx),
     pullTransactions: pullTransactions(ctx),
+    ratiba: ratiba(ctx),
     transactionStatus: transactionStatus(ctx),
     accountBalance: accountBalance(ctx),
     reversal: reversal(ctx),

@@ -16,9 +16,11 @@ export interface RatibaCallback {
   requestRefId: string;
   /** The standing order's ID (`reminderScheduleId`), on success. */
   standingOrderId?: string;
-  /** `TransactionID`, when Daraja sends one. */
+  /** `TransactionID`, when Daraja sends one; failures send the placeholder "0000000000". */
   transactionId?: string;
-  /** The order's status, such as "ACTIVE" (`status`, or `Status`). */
+  /**
+   * The order's status: `status` ("ACTIVE") when present, else `Status` ("OKAY" or "ERROR").
+   */
   status?: string;
   /** Every name/value pair in the response data, as strings. Has no prototype. */
   data: Record<string, string>;

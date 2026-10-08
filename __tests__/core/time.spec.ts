@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vite-plus/test';
 import { ValidationError } from '../../src/core/errors';
 import {
+  formatEatDate,
   formatEatDateTime,
   formatTimestamp,
   parseB2CDateTime,
@@ -14,6 +15,13 @@ describe('formatTimestamp', () => {
 
   test('crosses day and year boundaries', () => {
     expect(formatTimestamp(new Date('2026-12-31T22:00:00.000Z'))).toBe('20270101010000');
+  });
+});
+
+describe('formatEatDate', () => {
+  test('formats as yyyymmdd in East Africa Time, across UTC midnight', () => {
+    expect(formatEatDate(new Date('2026-10-07T21:30:00Z'))).toBe('20261008');
+    expect(formatEatDate(new Date('2026-10-07T20:59:59Z'))).toBe('20261007');
   });
 });
 

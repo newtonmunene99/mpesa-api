@@ -23,6 +23,11 @@ export function formatTimestamp(date: Date): string {
   return eatParts(date).join('');
 }
 
+/** Formats a date as `yyyymmdd` in East Africa Time, the form M-Pesa Ratiba takes. */
+export function formatEatDate(date: Date): string {
+  return eatParts(date).slice(0, 3).join('');
+}
+
 /** Formats a date as `YYYY-MM-DD HH:mm:ss` in East Africa Time, the form Pull Transactions takes. */
 export function formatEatDateTime(date: Date): string {
   const [year, month, day, hours, minutes, seconds] = eatParts(date);
