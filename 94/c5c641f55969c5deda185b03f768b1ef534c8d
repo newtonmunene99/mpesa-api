@@ -1,1 +1,3 @@
 P2 verifier fixes: non-object invoice -> 'invoice'/'invoices[n]' must be an invoice; non-array invoiceItems -> must be a list; empty items omitted; cancel validation tests assert full issues and message prefix; statusMessage absence pinned via toEqual; cancelInvoices JSDoc notes no portal limit.
+
+Checkpoint P2 (Bill Manager invoicing): full gate green. Fresh verifier reviewed 10b7609, fde0f90, 49ff2a0, 1ea3e78; must-fixes applied in this commit. Live gap: every invoicing call 504. No hand check.
