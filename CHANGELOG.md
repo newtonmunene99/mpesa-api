@@ -2,6 +2,33 @@
 
 Notable changes to this project will be documented in this file.
 
+## 4.0.0-alpha.1
+
+### Minor Changes
+
+- [#66](https://github.com/newtonmunene99/mpesa-api/pull/66) [`6b11f60`](https://github.com/newtonmunene99/mpesa-api/commit/6b11f60077bfec573375477692f0e2495b029296) Thanks [@newtonmunene99](https://github.com/newtonmunene99)! - Daraja 3.0 Bill Manager (e-invoicing for a paybill), with no initiator: `billManager.optIn`, `sendInvoice`, `sendInvoices` (up to 1000 at once), `cancelInvoice`, `cancelInvoices` and `acknowledgePayment`. Payment pushes are read with the new `parseBillManagerPayment`, and answered with `billManagerPaymentResponse`. The optional `billManager.appKey` client config is sent as the `appKey` header on every call but `optIn`. See [Bill Manager](https://newtonmunene99.github.io/mpesa-api/apis/bill-manager).
+
+- [#64](https://github.com/newtonmunene99/mpesa-api/pull/64) [`e6c7b5a`](https://github.com/newtonmunene99/mpesa-api/commit/e6c7b5a1cd6fac85a1c9c569c4206ba6a7e8d7df) Thanks [@newtonmunene99](https://github.com/newtonmunene99)! - Daraja 3.0 customer payments and lookups, none of which needs an initiator:
+
+  - `qr.generate` makes Dynamic QR codes, returned as a base64 PNG.
+  - `b2b.expressCheckout` sends a B2B Express CheckOut USSD push to a merchant's till; read its callback with the new `parseExpressCheckoutCallback`.
+  - `pullTransactions.register`, `query` and `all` list the last 48 hours of C2B payments to a shortcode. `all` is an async iterator over every page.
+
+  See [Dynamic QR](https://newtonmunene99.github.io/mpesa-api/apis/qr), [B2B Express CheckOut](https://newtonmunene99.github.io/mpesa-api/apis/b2b#express-checkout) and [Pull Transactions](https://newtonmunene99.github.io/mpesa-api/apis/pull-transactions).
+
+- [#63](https://github.com/newtonmunene99/mpesa-api/pull/63) [`c851fc8`](https://github.com/newtonmunene99/mpesa-api/commit/c851fc890f19021afbb9579e15cfec6d847bbd9a) Thanks [@newtonmunene99](https://github.com/newtonmunene99)! - Daraja 3.0 disbursements: `b2b.payBill` (Business Pay Bill), `b2b.buyGoods` (Business Buy Goods), `b2b.topUpB2C` (B2C Account Top Up), `b2b.remitTax` (Tax Remittance to KRA) and `b2c.payToPochi` (Business To Pochi). Each acts through the initiator and posts its outcome to `resultUrl`; read it with `parseResult`. See [B2B](https://newtonmunene99.github.io/mpesa-api/apis/b2b) and [Business To Pochi](https://newtonmunene99.github.io/mpesa-api/apis/b2c#business-to-pochi).
+
+- [#66](https://github.com/newtonmunene99/mpesa-api/pull/66) [`18e2774`](https://github.com/newtonmunene99/mpesa-api/commit/18e27740f4731a471a7d29239211b0cbfdebd35c) Thanks [@newtonmunene99](https://github.com/newtonmunene99)! - Daraja 3.0 M-Pesa Ratiba and Lipa na Bonga, neither of which needs an initiator:
+
+  - `ratiba.createStandingOrder` sets up a standing order that collects from a customer's M-Pesa on a schedule. Its result is read with the new `parseRatibaCallback`, which accepts both of the casings Daraja sends.
+  - `bonga.calculatePoints` and `bonga.redeem` let customers pay with Bonga points. The payment then arrives as an ordinary C2B confirmation.
+
+  See [M-Pesa Ratiba](https://newtonmunene99.github.io/mpesa-api/apis/ratiba) and [Lipa na Bonga](https://newtonmunene99.github.io/mpesa-api/apis/bonga).
+
+### Patch Changes
+
+- [#65](https://github.com/newtonmunene99/mpesa-api/pull/65) [`9dcea37`](https://github.com/newtonmunene99/mpesa-api/commit/9dcea37c976024d2ff1c27f7dc9aa3d23717527a) Thanks [@newtonmunene99](https://github.com/newtonmunene99)! - `pullTransactions.register` now reads the `Response Status` and `Response Description` keys (with spaces) that the live sandbox sends, and `pullTransactions.query` falls back to `RequestID` for `responseRefId`.
+
 ## 4.0.0-alpha.0
 
 ### Major Changes
