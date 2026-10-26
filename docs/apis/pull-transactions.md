@@ -41,7 +41,7 @@ for (const t of page.transactions) console.log(t.transactionId, t.amountCents);
 | `to`        | `EndDate`     | The same; must not be before `from`.                         |
 | `offset`    | `OffSetValue` | Optional. How many transactions to skip. Defaults to 0.      |
 
-Daraja only keeps the last 48 hours; the SDK leaves that limit to Daraja. The response (`PullQueryResponse`) has `transactions`, `responseRefId`, `responseCode` and `raw`. `transactions` is empty when there are none (`"1001"`). Each `PullTransaction` has:
+Daraja only keeps the last 48 hours; the SDK leaves that limit to Daraja. The response (`PullQueryResponse`) has `transactions`, `responseRefId`, `responseCode` and `raw`. `transactions` is empty when there are none (`"1001"`). A transaction the SDK can't read (no `transactionId`, a `trxDate` that isn't an ISO date, an unreadable `amount`) throws `ValidationError` with `transactions[<n>]` paths, after the request was sent. Each `PullTransaction` has:
 
 | Field              | Daraja field       | Notes                                                                |
 | ------------------ | ------------------ | -------------------------------------------------------------------- |

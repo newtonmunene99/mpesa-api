@@ -1,9 +1,11 @@
 import { describe, expect, test } from 'vite-plus/test';
 import { ValidationError } from '../../src/core/errors';
 import {
+  formatEatDate,
   formatEatDateTime,
   formatTimestamp,
   parseB2CDateTime,
+  parseEatDay,
   parseTimestamp,
 } from '../../src/core/time';
 
@@ -14,6 +16,13 @@ describe('formatTimestamp', () => {
 
   test('crosses day and year boundaries', () => {
     expect(formatTimestamp(new Date('2026-12-31T22:00:00.000Z'))).toBe('20270101010000');
+  });
+});
+
+describe('formatEatDate', () => {
+  test('formats as yyyymmdd in East Africa Time, across UTC midnight', () => {
+    expect(formatEatDate(new Date('2026-10-07T21:30:00Z'))).toBe('20261008');
+    expect(formatEatDate(new Date('2026-10-07T20:59:59Z'))).toBe('20261007');
   });
 });
 
@@ -50,4 +59,17 @@ describe('parseB2CDateTime', () => {
   test('rejects malformed values', () => {
     expect(() => parseB2CDateTime('2024-07-06 22:48:52')).toThrow(ValidationError);
   });
+});
+
+describe('parseEatDay', () => {
+  test('reads YYYY-MM-DD as midnight East Africa Time', () => {
+    expect(parseEatDay('2021-10-01').toISOString()).toBe('2021-09-30T21:00:00.000Z');
+  });
+
+  test.each(['2021-02-30', '2021-10-1', '01-10-2021', '2021-10-01T00:00'])(
+    'rejects %j',
+    (value) => {
+      expect(() => parseEatDay(value)).toThrow(ValidationError);
+    },
+  );
 });

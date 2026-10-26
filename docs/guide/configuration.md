@@ -11,5 +11,6 @@
 | `timeoutMs`      | `number`                    | Per-request timeout. Defaults to 30 000.                                                                                                                                         |
 | `fetch`          | `typeof fetch`              | The fetch implementation. Defaults to the global `fetch`.                                                                                                                        |
 | `onWarning`      | `(message: string) => void` | Receives non-fatal warnings, such as an expired certificate.                                                                                                                     |
+| `billManager`    | `{ appKey: string }`        | Optional. The key `billManager.optIn` returns, sent as the `appKey` header on every other Bill Manager call. See [Bill Manager](/apis/bill-manager#the-app-key).                 |
 
 `createMpesa` validates the configuration and throws a `ValidationError` listing every problem.

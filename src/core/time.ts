@@ -23,6 +23,11 @@ export function formatTimestamp(date: Date): string {
   return eatParts(date).join('');
 }
 
+/** Formats a date as `yyyymmdd` in East Africa Time, the form M-Pesa Ratiba takes. */
+export function formatEatDate(date: Date): string {
+  return eatParts(date).slice(0, 3).join('');
+}
+
 /** Formats a date as `YYYY-MM-DD HH:mm:ss` in East Africa Time, the form Pull Transactions takes. */
 export function formatEatDateTime(date: Date): string {
   const [year, month, day, hours, minutes, seconds] = eatParts(date);
@@ -79,6 +84,21 @@ export function parseTimestamp(value: string | number): Date {
   }
   const [, year, month, day, hours, minutes, seconds] = m.map(Number);
   return fromEatParts(text, { year, month, day, hours, minutes, seconds } as DateParts);
+}
+
+/**
+ * Parses a `YYYY-MM-DD` day as midnight East Africa Time, as in Bill Manager's payment pushes.
+ * Throws `ValidationError` for any other shape or an impossible date.
+ */
+export function parseEatDay(value: string): Date {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!m) {
+    throw new ValidationError('timestamp', [
+      { path: 'value', message: `invalid timestamp "${value}"` },
+    ]);
+  }
+  const [, year, month, day] = m.map(Number);
+  return fromEatParts(value, { year, month, day, hours: 0, minutes: 0, seconds: 0 } as DateParts);
 }
 
 /**
