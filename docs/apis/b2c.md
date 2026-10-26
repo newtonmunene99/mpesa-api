@@ -31,3 +31,21 @@ console.log(payment.originatorConversationId);
 If the request to Daraja fails (a network error, timeout or `DarajaApiError`), the thrown error carries `originatorConversationId`. Query the payment's status with that ID before retrying, so the customer isn't paid twice. Errors thrown before sending, such as a `ValidationError`, don't carry it.
 
 `Occassion` is the spelling in the Daraja 3.0 docs and the portal simulator; B2C v1 used `Occasion`. The sandbox acknowledged both when 4.0 was tested, but no result arrived to show which one Daraja reads. It is a free-text note, so a wrong spelling probably at worst drops it.
+
+## Business To Pochi
+
+Pays a customer's Pochi la Biashara (business wallet) from a B2C shortcode. It has its own endpoint, `/mpesa/b2pochi/v1/paymentrequest`, but the same fields, limits and result as `pay`, without `commandId` (the SDK sends `BusinessPayToPochi`).
+
+```ts
+const pochi = await mpesa.b2c.payToPochi({
+  amount: 250,
+  shortCode: 600999,
+  phoneNumber: '0712345678',
+  remarks: 'Supplier payment',
+  resultUrl: 'https://example.com/payments/pochi/result',
+  queueTimeoutUrl: 'https://example.com/payments/pochi/timeout',
+});
+console.log(pochi.originatorConversationId);
+```
+
+`phoneNumber` is the wallet owner's number; the portal calls it a number, but the SDK takes a string in any of the accepted formats, as `pay` does.

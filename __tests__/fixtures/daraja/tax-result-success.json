@@ -1,0 +1,58 @@
+{
+  "Result": {
+    "ResultType": "0",
+    "ResultCode": "0",
+    "ResultDesc": "The service request is processed successfully",
+    "OriginatorConversationID": "626f6ddf-ab37-4650-b882-b1de92ec9aa4",
+    "ConversationID": "AG_20181005_00004d7ee675c0c7ee0b",
+    "TransactionID": "QKA81LK5CY",
+    "ResultParameters": {
+      "ResultParameter": [
+        {
+          "Key": "DebitAccountBalance",
+          "Value": "{Amount={CurrencyCode=KES, MinimumAmount=618683, BasicAmount=6186.83}}"
+        },
+        {
+          "Key": "Amount",
+          "Value": "190.00"
+        },
+        {
+          "Key": "DebitPartyAffectedAccountBalance",
+          "Value": "Working Account|KES|346568.83|6186.83|340382.00|0.00"
+        },
+        {
+          "Key": "TransCompletedTime",
+          "Value": "20221110110717"
+        },
+        {
+          "Key": "DebitPartyCharges",
+          "Value": ""
+        },
+        {
+          "Key": "ReceiverPartyPublicName",
+          "Value": "00000 - Tax Collecting Company"
+        },
+        {
+          "Key": "Currency",
+          "Value": "KES"
+        },
+        {
+          "Key": "InitiatorAccountCurrentBalance",
+          "Value": "{Amount={CurrencyCode=KES, MinimumAmount=618683, BasicAmount=6186.83}}"
+        }
+      ]
+    },
+    "ReferenceData": {
+      "ReferenceItem": [
+        {
+          "Key": "BillReferenceNumber",
+          "Value": "19008"
+        },
+        {
+          "Key": "QueueTimeoutURL",
+          "Value": "https://mydomain.com/b2b/remittax/queue/"
+        }
+      ]
+    }
+  }
+}

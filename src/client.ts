@@ -1,6 +1,12 @@
 import { accountBalance, type AccountBalanceApi } from './apis/account-balance';
+import { b2b, type B2BApi } from './apis/b2b';
+import { bonga, type BongaApi } from './apis/bonga';
 import { b2c, type B2CApi } from './apis/b2c';
+import { billManager, type BillManagerApi } from './apis/bill-manager';
 import { c2b, type C2BApi } from './apis/c2b';
+import { pullTransactions, type PullTransactionsApi } from './apis/pull-transactions';
+import { qr, type QrApi } from './apis/qr';
+import { ratiba, type RatibaApi } from './apis/ratiba';
 import { reversal, type ReversalApi } from './apis/reversal';
 import { stkPush, type StkPushApi } from './apis/stk-push';
 import { transactionStatus, type TransactionStatusApi } from './apis/transaction-status';
@@ -15,10 +21,10 @@ import { Issues } from './core/validate';
 export type Environment = 'sandbox' | 'production';
 
 /**
- * The API operator ("initiator") used by B2C, Transaction Status, Account Balance and
- * Reversal. Pass either the password plus Safaricom's certificate for the environment (PEM
- * text or DER bytes), or a security credential generated on the Daraja portal's Test
- * Credentials page.
+ * The API operator ("initiator") used by B2C, B2B (except Express CheckOut), Business To Pochi,
+ * Transaction Status, Account Balance and Reversal. Pass either the password plus Safaricom's
+ * certificate for the environment (PEM text or DER bytes), or a security credential generated
+ * on the Daraja portal's Test Credentials page.
  */
 export type Initiator =
   | { name: string; password: string; certificate: string | Uint8Array }
@@ -31,7 +37,10 @@ export interface MpesaConfig {
   consumerKey: string;
   /** From your app on the Daraja portal. */
   consumerSecret: string;
-  /** Required for B2C, Transaction Status, Account Balance and Reversal. */
+  /**
+   * Required for B2C, B2B (except Express CheckOut), Business To Pochi, Transaction Status,
+   * Account Balance and Reversal.
+   */
   initiator?: Initiator;
   /** Lipa na M-Pesa Online passkey. Required for STK push. */
   passkey?: string;
@@ -43,14 +52,38 @@ export interface MpesaConfig {
   fetch?: typeof fetch;
   /** Receives non-fatal warnings, such as an expired certificate. */
   onWarning?: (message: string) => void;
+  /**
+   * Bill Manager settings. `appKey` is the `app_key` that `billManager.optIn` returns; when
+   * set, every Bill Manager call except `optIn` sends it as the `appKey` header. The portal says
+   * the key goes in a header but doesn't name it, so the name is unconfirmed.
+   */
+  billManager?: { appKey: string };
 }
+
+/** Per-call options for `Context.post`. */
+export interface PostOptions {
+  /** Whether a 2xx body's `ResponseCode` means success. Defaults to all zeros. */
+  success?: (responseCode: string) => boolean;
+  /** Extra request headers, such as an API's own key. They can't replace the bearer token. */
+  headers?: Record<string, string>;
+}
+
+/** The caller's headers without any `authorization`, which only the token may set. */
+const extraHeaders = (headers: Record<string, string> = {}): Record<string, string> =>
+  Object.fromEntries(
+    Object.entries(headers).filter(([name]) => name.toLowerCase() !== 'authorization'),
+  );
 
 /** Shared state the API modules use to talk to Daraja. */
 export interface Context {
   readonly environment: Environment;
   readonly config: MpesaConfig;
-  /** POSTs with a bearer token, retrying once with a fresh token if Daraja rejects it. */
-  post<T>(path: string, body: unknown): Promise<T>;
+  /**
+   * POSTs with a bearer token, retrying once with a fresh token if Daraja rejects it.
+   * `options.success` overrides which `ResponseCode` values count as success (all zeros by
+   * default), for APIs that answer with other codes.
+   */
+  post<T>(path: string, body: unknown, options?: PostOptions): Promise<T>;
   /**
    * The initiator name and security credential, computed once. `api` names the calling
    * method for the `ValidationError` thrown when no initiator is configured.
@@ -67,8 +100,20 @@ export interface Mpesa {
   readonly stkPush: StkPushApi;
   /** Customer to Business (C2B) payment notifications. */
   readonly c2b: C2BApi;
-  /** Business to Customer (B2C) payments. */
+  /** Business to Customer (B2C) payments, including Business To Pochi. */
   readonly b2c: B2CApi;
+  /** Business to Business (B2B) payments: pay bill, buy goods, B2C top up, tax, Express CheckOut. */
+  readonly b2b: B2BApi;
+  /** Dynamic QR codes customers scan to pay. */
+  readonly qr: QrApi;
+  /** Pull Transactions: the last 48 hours of C2B payments to a shortcode. */
+  readonly pullTransactions: PullTransactionsApi;
+  /** M-Pesa Ratiba standing orders. */
+  readonly ratiba: RatibaApi;
+  /** Lipa na Bonga: payments with Bonga points. */
+  readonly bonga: BongaApi;
+  /** Bill Manager: e-invoicing for a paybill. */
+  readonly billManager: BillManagerApi;
   /** Transaction Status queries. */
   readonly transactionStatus: TransactionStatusApi;
   /** Account Balance queries. */
@@ -107,6 +152,7 @@ function validateConfig(config: MpesaConfig): RsaPublicKey | undefined {
   if (!config.consumerSecret) issues.add('consumerSecret', 'is required');
   const initiator = config.initiator as Record<string, unknown> | undefined;
   if (initiator !== undefined) checkInitiator(issues, initiator);
+  if (config.billManager !== undefined) checkBillManager(issues, config.billManager);
   issues.throwIfAny('createMpesa');
 
   if (initiator && 'password' in initiator && initiator.certificate) {
@@ -116,6 +162,17 @@ function validateConfig(config: MpesaConfig): RsaPublicKey | undefined {
     );
   }
   return undefined;
+}
+
+/** Reports a Bill Manager config without a usable `appKey`. */
+function checkBillManager(issues: Issues, billManager: unknown): void {
+  const appKey =
+    typeof billManager === 'object' && billManager !== null
+      ? (billManager as Record<string, unknown>).appKey
+      : undefined;
+  if (typeof appKey !== 'string' || appKey.trim() === '') {
+    issues.add('billManager.appKey', 'must be a non-empty string');
+  }
 }
 
 /** Reports a missing name, and an initiator with neither a password and certificate nor a credential. */
@@ -176,12 +233,13 @@ export function createContext(config: MpesaConfig, clock: () => Date = () => new
 
   let credential: Promise<{ name: string; credential: string }> | undefined;
 
-  const send = <T>(path: string, body: unknown, token: string): Promise<T> =>
+  const send = <T>(path: string, body: unknown, token: string, options: PostOptions): Promise<T> =>
     request<T>(transport, {
       method: 'POST',
       path,
-      headers: { authorization: `Bearer ${token}` },
+      headers: { ...extraHeaders(options.headers), authorization: `Bearer ${token}` },
       body,
+      ...(options.success ? { success: options.success } : {}),
     });
 
   return {
@@ -189,13 +247,13 @@ export function createContext(config: MpesaConfig, clock: () => Date = () => new
     config,
     now: clock,
 
-    async post<T>(path: string, body: unknown): Promise<T> {
+    async post<T>(path: string, body: unknown, options: PostOptions = {}): Promise<T> {
       const token = await tokens.get();
       try {
-        return await send<T>(path, body, token);
+        return await send<T>(path, body, token, options);
       } catch (error) {
         if (!isTokenError(error)) throw error;
-        return send<T>(path, body, await tokens.refresh(token));
+        return send<T>(path, body, await tokens.refresh(token), options);
       }
     },
 
@@ -241,6 +299,12 @@ export function createMpesa(config: MpesaConfig): Mpesa {
     stkPush: stkPush(ctx),
     c2b: c2b(ctx),
     b2c: b2c(ctx),
+    b2b: b2b(ctx),
+    qr: qr(ctx),
+    pullTransactions: pullTransactions(ctx),
+    ratiba: ratiba(ctx),
+    bonga: bonga(ctx),
+    billManager: billManager(ctx),
     transactionStatus: transactionStatus(ctx),
     accountBalance: accountBalance(ctx),
     reversal: reversal(ctx),

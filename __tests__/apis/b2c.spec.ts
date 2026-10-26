@@ -272,3 +272,106 @@ describe('b2c.pay validation rules', () => {
     expect(calls).toHaveLength(0);
   });
 });
+
+describe('b2c.payToPochi', () => {
+  const pochi = {
+    amount: 10,
+    shortCode: 600992,
+    phoneNumber: '254705912645',
+    remarks: 'remarked',
+    resultUrl: 'https://example.com/b2c/result',
+    queueTimeoutUrl: 'https://example.com/b2c/timeout',
+  };
+
+  test('posts a Business To Pochi payment with every documented field', async () => {
+    const { api, calls } = setup([token, { status: 200, body: accepted }]);
+
+    await api.payToPochi({
+      ...pochi,
+      originatorConversationId: 'caller-id-1',
+      occasion: 'ChristmasPay',
+    });
+
+    const call = calls[1]!;
+    const body = call.body as Record<string, unknown>;
+    expect(call.url).toBe('https://sandbox.safaricom.co.ke/mpesa/b2pochi/v1/paymentrequest');
+    expect({ ...body, SecurityCredential: '<checked below>' }).toEqual({
+      OriginatorConversationID: 'caller-id-1',
+      InitiatorName: 'testapi',
+      SecurityCredential: '<checked below>',
+      CommandID: 'BusinessPayToPochi',
+      Amount: 10,
+      PartyA: 600992,
+      PartyB: '254705912645',
+      Remarks: 'remarked',
+      QueueTimeOutURL: 'https://example.com/b2c/timeout',
+      ResultURL: 'https://example.com/b2c/result',
+      Occassion: 'ChristmasPay',
+    });
+    expect(decrypt(body.SecurityCredential as string)).toBe('Safaricom999!*!');
+  });
+
+  test('generates and returns an OriginatorConversationID when none is given', async () => {
+    vi.spyOn(globalThis.crypto, 'randomUUID').mockReturnValue(
+      '11111111-2222-4333-8444-555555555555',
+    );
+    const { ConversationID, ResponseCode, ResponseDescription } = accepted;
+    const { api, calls } = setup([
+      token,
+      { status: 200, body: { ConversationID, ResponseCode, ResponseDescription } },
+    ]);
+
+    const res = await api.payToPochi(pochi);
+
+    expect(res.originatorConversationId).toBe('11111111-2222-4333-8444-555555555555');
+    expect(calls[1]!.body).toMatchObject({
+      OriginatorConversationID: '11111111-2222-4333-8444-555555555555',
+    });
+  });
+
+  test.each([
+    ['amount below 10', { amount: 9 }, 'amount', 'must be at least 10'],
+    ['amount above 250 000', { amount: 250_001 }, 'amount', 'must be at most 250000'],
+    ['remarks under 2 characters', { remarks: 'x' }, 'remarks', 'must be at least 2 characters'],
+    ['shortCode too short', { shortCode: 12 }, 'shortCode', 'must be a 5 to 7 digit shortcode'],
+    [
+      'invalid phone',
+      { phoneNumber: '12345' },
+      'phoneNumber',
+      'must be a Safaricom number like 2547XXXXXXXX or 07XXXXXXXX',
+    ],
+    [
+      'occasion over 100 characters',
+      { occasion: 'o'.repeat(101) },
+      'occasion',
+      'must be at most 100 characters',
+    ],
+    ['empty ID', { originatorConversationId: '' }, 'originatorConversationId', 'is required'],
+  ])('rejects %s', async (_, override, path, message) => {
+    const { api, calls } = setup([]);
+
+    const error = await api.payToPochi({ ...pochi, ...override }).catch((e: unknown) => e);
+
+    expect((error as ValidationError).issues).toEqual([{ path, message }]);
+    expect(calls).toHaveLength(0);
+  });
+
+  test('names payToPochi when the initiator is missing', async () => {
+    const { api } = setup([], { initiator: undefined });
+
+    const error = await api.payToPochi(pochi).catch((e: unknown) => e);
+
+    expect((error as Error).message).toBe('b2c.payToPochi: initiator is required');
+  });
+
+  test('attaches the ID to errors so the payment can be checked', async () => {
+    const { api } = setup([token, new TypeError('socket hang up')]);
+
+    const error = await api
+      .payToPochi({ ...pochi, originatorConversationId: 'caller-id-9' })
+      .catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(NetworkError);
+    expect((error as NetworkError).originatorConversationId).toBe('caller-id-9');
+  });
+});

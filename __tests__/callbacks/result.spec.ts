@@ -237,3 +237,113 @@ describe('parseResult hostile and odd input', () => {
     expect(issuesOf({ Result: { ...minimal, ...override } })).toEqual([{ path, message }]);
   });
 });
+
+// Portal samples for the disbursement APIs, transcribed from the signed-in Daraja portal on
+// 2026-10-07. Hand fixes to the portal's invalid JSON are noted on each test and in
+// __tests__/fixtures/daraja/README.md.
+describe('parseResult on the B2B and Business To Pochi portal samples', () => {
+  const b2bSuccessParameters = {
+    DebitAccountBalance: '{Amount={CurrencyCode=KES, MinimumAmount=618683, BasicAmount=6186.83}}',
+    Amount: '190.00',
+    DebitPartyAffectedAccountBalance: 'Working Account|KES|346568.83|6186.83|340382.00|0.00',
+    TransCompletedTime: new Date('2022-11-10T08:07:17Z'),
+    Currency: 'KES',
+    InitiatorAccountCurrentBalance:
+      '{Amount={CurrencyCode=KES, MinimumAmount=618683, BasicAmount=6186.83}}',
+  };
+
+  // The portal leaves ReceiverPartyPublicName unquoted; quoted by hand.
+  test.each([
+    ['b2b-paybill-result-success.json', 'http://172.31.234.68:8888/Listener.php'],
+    ['b2b-buygoods-result-success.json', 'https://mydomain.com/b2b/businessbuygoods/queue/'],
+    ['b2b-topup-result-success.json', 'https://mydomain.com/b2b/businessbuygoods/queue/'],
+  ])('reads the %s sample', (name, queueTimeoutUrl) => {
+    const result = parseResult(fixture(name));
+
+    expect(result).toMatchObject({
+      resultType: 0,
+      resultCode: 0,
+      ok: true,
+      resultDesc: 'The service request is processed successfully',
+      originatorConversationId: '626f6ddf-ab37-4650-b882-b1de92ec9aa4',
+      conversationId: '12345677dfdf89099B3',
+      transactionId: 'QKA81LK5CY',
+    });
+    expect(result.parameters).toEqual({
+      ...b2bSuccessParameters,
+      ReceiverPartyPublicName: '000000– Biller Companty',
+    });
+    // DebitPartyCharges is sent blank and skipped.
+    expect(result.referenceData).toEqual({
+      BillReferenceNumber: '19008',
+      QueueTimeoutURL: queueTimeoutUrl,
+    });
+  });
+
+  // Hand fixes: missing `{`s and trailing commas in the parameter list, and the two
+  // ReferenceItem objects put in an array.
+  test('reads the Tax Remittance success sample', () => {
+    const result = parseResult(fixture('tax-result-success.json'));
+
+    expect(result).toMatchObject({ resultCode: 0, transactionId: 'QKA81LK5CY' });
+    expect(result.conversationId).toBe('AG_20181005_00004d7ee675c0c7ee0b');
+    expect(result.parameters).toEqual({
+      ...b2bSuccessParameters,
+      ReceiverPartyPublicName: '00000 - Tax Collecting Company',
+    });
+    expect(result.referenceData).toEqual({
+      BillReferenceNumber: '19008',
+      QueueTimeoutURL: 'https://mydomain.com/b2b/remittax/queue/',
+    });
+  });
+
+  test.each([
+    [
+      'b2b-paybill-result-failure.json',
+      'https://internalapi.safaricom.co.ke/mpesa/abresults/v1/submit',
+    ],
+    ['b2b-buygoods-result-failure.json', 'https://mydomain.com/b2b/businessbuygoods/queue/'],
+    // Tax failure hand fixes: trailing commas and an extra closing brace removed. (Its single
+    // parameter really is in an array on the portal.)
+    ['tax-result-failure.json', 'https://mydomain.com/b2b/remittax/queue/'],
+  ])('reads the %s sample', (name, queueTimeoutUrl) => {
+    const result = parseResult(fixture(name));
+
+    expect(result).toMatchObject({
+      resultType: 0,
+      resultCode: 2001,
+      ok: false,
+      resultDesc: 'The initiator information is invalid.',
+      originatorConversationId: '12337-23509183-5',
+      conversationId: 'AG_20200120_0000657265d5fa9ae5c0',
+    });
+    expect(result.parameters).toEqual({ BOCompletedTime: new Date('2020-01-20T13:48:25Z') });
+    expect(result.referenceData).toEqual({ QueueTimeoutURL: queueTimeoutUrl });
+  });
+
+  // The portal's ReferenceItem array is missing a comma before its last entry.
+  test('reads the B2C Account Top Up failure sample', () => {
+    const result = parseResult(fixture('b2b-topup-result-failure.json'));
+
+    expect(result).toMatchObject({ resultCode: 2001, transactionId: 'OAK0000000' });
+    expect(result.parameters).toEqual({ BillReferenceNumber: 12323333 });
+    // The bare { "Key": "Occassion" } entry has no Value and is skipped.
+    expect(result.referenceData).toEqual({
+      BillReferenceNumber: '12323333',
+      QueueTimeoutURL: 'https://internalapi.safaricom.co.ke/mpesa/abresults/v1/submit',
+    });
+  });
+
+  test('reads the Business To Pochi samples, which match the B2C ones', () => {
+    const success = parseResult(fixture('pochi-result-success.json'));
+    const failure = parseResult(fixture('pochi-result-failure.json'));
+
+    expect(success).toMatchObject({ resultCode: 0, transactionId: 'SG632NMUAB' });
+    expect(success.parameters).toMatchObject({
+      TransactionReceipt: 'SG632NMUAB',
+      TransactionCompletedDateTime: new Date('2024-07-06T19:48:52Z'),
+      B2CRecipientIsRegisteredCustomer: 'Y',
+    });
+    expect(failure).toMatchObject({ resultCode: 2001, parameters: {} });
+  });
+});

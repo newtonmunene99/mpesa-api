@@ -5,17 +5,33 @@ const EAT_OFFSET_MS = 3 * 60 * 60 * 1000;
 
 const pad = (n: number, width = 2): string => String(n).padStart(width, '0');
 
+/** A date's EAT calendar parts, zero-padded: year, month, day, hours, minutes, seconds. */
+function eatParts(date: Date): [string, string, string, string, string, string] {
+  const eat = new Date(date.getTime() + EAT_OFFSET_MS);
+  return [
+    pad(eat.getUTCFullYear(), 4),
+    pad(eat.getUTCMonth() + 1),
+    pad(eat.getUTCDate()),
+    pad(eat.getUTCHours()),
+    pad(eat.getUTCMinutes()),
+    pad(eat.getUTCSeconds()),
+  ];
+}
+
 /** Formats a date as Daraja's `YYYYMMDDHHmmss` timestamp in East Africa Time. */
 export function formatTimestamp(date: Date): string {
-  const eat = new Date(date.getTime() + EAT_OFFSET_MS);
-  return (
-    pad(eat.getUTCFullYear(), 4) +
-    pad(eat.getUTCMonth() + 1) +
-    pad(eat.getUTCDate()) +
-    pad(eat.getUTCHours()) +
-    pad(eat.getUTCMinutes()) +
-    pad(eat.getUTCSeconds())
-  );
+  return eatParts(date).join('');
+}
+
+/** Formats a date as `yyyymmdd` in East Africa Time, the form M-Pesa Ratiba takes. */
+export function formatEatDate(date: Date): string {
+  return eatParts(date).slice(0, 3).join('');
+}
+
+/** Formats a date as `YYYY-MM-DD HH:mm:ss` in East Africa Time, the form Pull Transactions takes. */
+export function formatEatDateTime(date: Date): string {
+  const [year, month, day, hours, minutes, seconds] = eatParts(date);
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
 /** A calendar date and time as written, with a 1-based month. */
@@ -68,6 +84,21 @@ export function parseTimestamp(value: string | number): Date {
   }
   const [, year, month, day, hours, minutes, seconds] = m.map(Number);
   return fromEatParts(text, { year, month, day, hours, minutes, seconds } as DateParts);
+}
+
+/**
+ * Parses a `YYYY-MM-DD` day as midnight East Africa Time, as in Bill Manager's payment pushes.
+ * Throws `ValidationError` for any other shape or an impossible date.
+ */
+export function parseEatDay(value: string): Date {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!m) {
+    throw new ValidationError('timestamp', [
+      { path: 'value', message: `invalid timestamp "${value}"` },
+    ]);
+  }
+  const [, year, month, day] = m.map(Number);
+  return fromEatParts(value, { year, month, day, hours: 0, minutes: 0, seconds: 0 } as DateParts);
 }
 
 /**

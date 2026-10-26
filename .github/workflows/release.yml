@@ -30,6 +30,8 @@ jobs:
           echo "args=$args" >> "$GITHUB_OUTPUT"
       - uses: changesets/action@v2.1.2
         with:
+          # Formats the generated changelog, which otherwise fails vp check on the version PR.
+          version-script: pnpm run version-packages
           publish-script: pnpm run release ${{ steps.tag.outputs.args }}
           commit-message: 'chore: version packages'
           pr-title: 'chore: version packages'

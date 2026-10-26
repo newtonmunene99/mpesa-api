@@ -1,7 +1,10 @@
 import { str } from '../core/coerce';
 import { checkPhone, type Issues } from '../core/validate';
 
-/** The acknowledgement returned by B2C, Transaction Status, Account Balance and Reversal. */
+/**
+ * The acknowledgement returned by the initiator APIs: B2C, B2B, Business To Pochi, Transaction
+ * Status, Account Balance and Reversal.
+ */
 export interface InitiatorResponse {
   /** M-Pesa's ID for the request; the result callback carries it too. */
   conversationId: string;

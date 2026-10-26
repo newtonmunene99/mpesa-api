@@ -1,0 +1,9 @@
+{
+  "status": 200,
+  "response": {
+    "ConversationID": "AG_REDACTED",
+    "OriginatorConversationID": "<redacted-id>",
+    "ResponseCode": "0",
+    "ResponseDescription": "Accept the service request successfully."
+  }
+}

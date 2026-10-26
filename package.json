@@ -53,7 +53,8 @@
     "docs:preview": "vitepress preview docs",
     "lint:pkg": "publint && attw --pack . --profile esm-only",
     "changeset": "changeset",
-    "release": "vp pack && changeset publish"
+    "release": "vp pack && changeset publish",
+    "version-packages": "changeset version && vp fmt CHANGELOG.md"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",

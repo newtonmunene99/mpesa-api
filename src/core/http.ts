@@ -19,7 +19,15 @@ export interface RequestInit {
   headers?: Record<string, string>;
   /** Sent as JSON when present. */
   body?: unknown;
+  /**
+   * Decides whether a 2xx body's `ResponseCode` means success. Defaults to all zeros. A body
+   * without `ResponseCode` is never rejected by it.
+   */
+  success?: (responseCode: string) => boolean;
 }
+
+/** Most APIs answer "0"; C2B URL registration answers "00000000". */
+const allZeros = (code: string): boolean => /^0+$/.test(code);
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -41,8 +49,9 @@ function parse(text: string): { json: true; value: unknown } | { json: false; va
 }
 
 /**
- * Builds the error for a non-2xx response, reading Daraja's gateway fields
- * (`requestId`, `errorCode`, `errorMessage`) when the body is a JSON object.
+ * Builds the error for a non-2xx response, reading Daraja's gateway fields (`requestId`,
+ * `errorCode`, `errorMessage`) when the body is a JSON object. Bill Manager answers with
+ * `rescode`, `Status_Message` and `resmsg` instead, read when the gateway fields are absent.
  */
 function rejection(status: number, body: unknown): DarajaApiError {
   if (!isRecord(body)) return new DarajaApiError({ status, body });
@@ -50,8 +59,9 @@ function rejection(status: number, body: unknown): DarajaApiError {
     status,
     body,
     requestId: asString(body.requestId),
-    errorCode: asString(body.errorCode),
-    errorMessage: asString(body.errorMessage),
+    errorCode: asString(body.errorCode) ?? asString(body.rescode),
+    errorMessage:
+      asString(body.errorMessage) ?? asString(body.Status_Message) ?? asString(body.resmsg),
   });
 }
 
@@ -59,8 +69,9 @@ function rejection(status: number, body: unknown): DarajaApiError {
  * Sends one request to Daraja and returns the parsed JSON body.
  *
  * Throws `DarajaApiError` for non-2xx responses, and for 2xx responses whose `ResponseCode`
- * is not all zeros ("0", or "00000000" from C2B registration). Throws `NetworkError` when no
- * usable response arrives: a fetch failure, a timeout, or a success body that isn't JSON.
+ * fails `init.success` (by default, is not all zeros: "0", or "00000000" from C2B
+ * registration). Throws `NetworkError` when no usable response arrives: a fetch failure, a
+ * timeout, or a success body that isn't JSON.
  * Header values, including the bearer token, never appear in errors.
  */
 export async function request<T>(transport: Transport, init: RequestInit): Promise<T> {
@@ -104,8 +115,8 @@ export async function request<T>(transport: Transport, init: RequestInit): Promi
   }
 
   const body = parsed.value;
-  // Most APIs answer "0"; C2B URL registration answers "00000000".
-  if (isRecord(body) && 'ResponseCode' in body && !/^0+$/.test(String(body.ResponseCode))) {
+  const success = init.success ?? allZeros;
+  if (isRecord(body) && 'ResponseCode' in body && !success(String(body.ResponseCode))) {
     throw new DarajaApiError({
       status: response.status,
       body,

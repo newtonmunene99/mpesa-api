@@ -74,6 +74,38 @@ describe('request', () => {
     });
   });
 
+  test('reads Bill Manager error fields from a non-2xx body', async () => {
+    const body = {
+      Status_Message: 'Biller already Registered',
+      resmsg: 'Action Forbidden',
+      rescode: '409',
+    };
+    const { fetch } = fakeFetch([{ status: 409, body }]);
+
+    const error = await request(transport(fetch), { method: 'POST', path: '/x', body: {} }).catch(
+      (e: unknown) => e,
+    );
+
+    expect(error).toMatchObject({
+      status: 409,
+      errorCode: '409',
+      errorMessage: 'Biller already Registered',
+      body,
+    });
+  });
+
+  test('prefers the gateway fields and falls back to resmsg', async () => {
+    const { fetch } = fakeFetch([
+      { status: 400, body: { errorCode: '400.002.02', errorMessage: 'Bad', rescode: '409' } },
+      { status: 409, body: { resmsg: 'Conflict', rescode: '409' } },
+    ]);
+    const send = () =>
+      request(transport(fetch), { method: 'POST', path: '/x', body: {} }).catch((e: unknown) => e);
+
+    expect(await send()).toMatchObject({ errorCode: '400.002.02', errorMessage: 'Bad' });
+    expect(await send()).toMatchObject({ errorCode: '409', errorMessage: 'Conflict' });
+  });
+
   test('maps a non-JSON error body to DarajaApiError with the raw body', async () => {
     const { fetch } = fakeFetch([{ status: 400, body: 'bad' }]);
 
@@ -115,6 +147,52 @@ describe('request', () => {
 
     expect(error).toBeInstanceOf(DarajaApiError);
     expect(error).toMatchObject({ status: 200, errorCode: '1', errorMessage: 'Rejected' });
+  });
+
+  describe('with a success rule', () => {
+    const only1000 = (code: string): boolean => code === '1000';
+
+    test('resolves a ResponseCode the rule accepts', async () => {
+      const { fetch } = fakeFetch([{ status: 200, body: { ResponseCode: '1000' } }]);
+
+      await expect(
+        request(transport(fetch), { method: 'POST', path: '/p', body: {}, success: only1000 }),
+      ).resolves.toEqual({ ResponseCode: '1000' });
+    });
+
+    test('rejects a ResponseCode the rule refuses, even all zeros', async () => {
+      const { fetch } = fakeFetch([
+        { status: 200, body: { ResponseCode: '1001', ResponseDescription: 'Nope' } },
+        { status: 200, body: { ResponseCode: '0' } },
+      ]);
+      const send = () =>
+        request(transport(fetch), { method: 'POST', path: '/p', body: {}, success: only1000 });
+
+      await expect(send()).rejects.toMatchObject({
+        name: 'DarajaApiError',
+        status: 200,
+        errorCode: '1001',
+        errorMessage: 'Nope',
+      });
+      await expect(send()).rejects.toBeInstanceOf(DarajaApiError);
+    });
+
+    test('accepts a non-numeric code when the rule allows it', async () => {
+      const body = { ResponseCode: 'AG_20191219_000043fdf61864fe9ff5' };
+      const { fetch } = fakeFetch([{ status: 200, body }]);
+
+      await expect(
+        request(transport(fetch), { method: 'POST', path: '/p', body: {}, success: () => true }),
+      ).resolves.toEqual(body);
+    });
+
+    test('never rejects a body without ResponseCode', async () => {
+      const { fetch } = fakeFetch([{ status: 200, body: { code: '0' } }]);
+
+      await expect(
+        request(transport(fetch), { method: 'POST', path: '/p', body: {}, success: () => false }),
+      ).resolves.toEqual({ code: '0' });
+    });
   });
 
   test('wraps a rejected fetch in NetworkError with the cause', async () => {

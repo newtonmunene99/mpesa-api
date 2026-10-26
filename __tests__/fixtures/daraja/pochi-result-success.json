@@ -1,0 +1,28 @@
+{
+  "Result": {
+    "ResultType": 0,
+    "ResultCode": 0,
+    "ResultDesc": "The service request is processed successfully.",
+    "OriginatorConversationID": "53e3-4aa8-9fe0-8fb5e4092cdd3533373",
+    "ConversationID": "AG_20240706_2010364430d9bbdaf872",
+    "TransactionID": "SG632NMUAB",
+    "ResultParameters": {
+      "ResultParameter": [
+        { "Key": "TransactionAmount", "Value": 10 },
+        { "Key": "TransactionReceipt", "Value": "SG632NMUAB" },
+        { "Key": "ReceiverPartyPublicName", "Value": "254705912645 - NICHOLAS JOHN SONGOK" },
+        { "Key": "TransactionCompletedDateTime", "Value": "06.07.2024 22:48:52" },
+        { "Key": "B2CUtilityAccountAvailableFunds", "Value": 8959269.6 },
+        { "Key": "B2CWorkingAccountAvailableFunds", "Value": 1199371.0 },
+        { "Key": "B2CRecipientIsRegisteredCustomer", "Value": "Y" },
+        { "Key": "B2CChargesPaidAccountAvailableFunds", "Value": -1980.0 }
+      ]
+    },
+    "ReferenceData": {
+      "ReferenceItem": {
+        "Key": "QueueTimeoutURL",
+        "Value": "https://internalsandbox.safaricom.co.ke/mpesa/b2cresults/v1/submit"
+      }
+    }
+  }
+}

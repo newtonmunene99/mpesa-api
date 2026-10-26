@@ -192,6 +192,298 @@ describe.skipIf(!enabled)('Daraja sandbox', () => {
     }));
   });
 
+  // The disbursement products, sent once each from the sandbox org shortcode (the shortcode
+  // the test initiator belongs to). 600000 is the portal's sample receiving shortcode.
+  test('b2b.payBill', async () => {
+    await capture('b2b-paybill', () =>
+      createMpesa(config()).b2b.payBill({
+        amount: 10,
+        shortCode: org(),
+        partyB: 600000,
+        accountReference: '353353',
+        requester: msisdn(),
+        remarks: 'SDK sandbox test',
+        resultUrl: url('b2b/paybill/result'),
+        queueTimeoutUrl: url('b2b/timeout'),
+      }),
+    );
+  });
+
+  test('b2b.buyGoods', async () => {
+    await capture('b2b-buygoods', () =>
+      createMpesa(config()).b2b.buyGoods({
+        amount: 10,
+        shortCode: org(),
+        partyB: 600000,
+        accountReference: '353353',
+        requester: msisdn(),
+        remarks: 'SDK sandbox test',
+        resultUrl: url('b2b/buygoods/result'),
+        queueTimeoutUrl: url('b2b/timeout'),
+      }),
+    );
+  });
+
+  // Tops up 600997, the portal's sample B2C shortcode, from the org shortcode.
+  test('b2b.topUpB2C', async () => {
+    await capture('b2b-topup', () =>
+      createMpesa(config()).b2b.topUpB2C({
+        amount: 10,
+        shortCode: org(),
+        partyB: 600997,
+        remarks: 'SDK sandbox test',
+        resultUrl: url('b2b/topup/result'),
+        queueTimeoutUrl: url('b2b/timeout'),
+      }),
+    );
+  });
+
+  test('b2b.remitTax', async () => {
+    await capture('b2b-tax', () =>
+      createMpesa(config()).b2b.remitTax({
+        amount: 10,
+        shortCode: org(),
+        accountReference: 'PRN1234XN',
+        remarks: 'SDK sandbox test',
+        resultUrl: url('b2b/tax/result'),
+        queueTimeoutUrl: url('b2b/timeout'),
+      }),
+    );
+  });
+
+  test('b2c.payToPochi', async () => {
+    await capture('b2c-pochi', () =>
+      createMpesa(config()).b2c.payToPochi({
+        amount: 10,
+        shortCode: org(),
+        phoneNumber: msisdn(),
+        remarks: 'SDK sandbox test',
+        resultUrl: url('b2c/pochi/result'),
+        queueTimeoutUrl: url('b2c/timeout'),
+      }),
+    );
+  });
+
+  // Probe: the portal's Dynamic QR request sample, sent raw to learn what the sandbox answers.
+  test('probe: Dynamic QR', async () => {
+    const ctx = createContext(config());
+    await capture('qr-generate', async () => ({
+      raw: await ctx.post(
+        '/mpesa/qrcode/v1/generate',
+        {
+          MerchantName: 'TEST SUPERMARKET',
+          RefNo: 'Invoice Test',
+          Amount: 1,
+          TrxCode: 'BG',
+          CPI: '373132',
+          Size: '300',
+        },
+        { success: () => true },
+      ),
+    }));
+  });
+
+  // Probe: the portal's B2B Express CheckOut request sample. The acknowledgement has `code`,
+  // not `ResponseCode`, so the default success rule never fires.
+  test('probe: B2B Express CheckOut', async () => {
+    const ctx = createContext(config());
+    await capture('b2b-express-checkout', async () => ({
+      raw: await ctx.post('/v1/ussdpush/get-msisdn', {
+        primaryShortCode: '000001',
+        receiverShortCode: '000002',
+        amount: '100',
+        paymentRef: 'paymentRef',
+        callbackUrl: url('b2b/express/callback'),
+        partnerName: 'Vendor',
+        RequestRefID: crypto.randomUUID(),
+      }),
+    }));
+  });
+
+  // Probes: Pull Transactions register and query from the sandbox org shortcode. Register
+  // answers with ResponseStatus, so any answer is recorded.
+  test('probe: Pull Transactions register', async () => {
+    const ctx = createContext(config());
+    await capture('pull-register', async () => ({
+      raw: await ctx.post(
+        '/pulltransactions/v1/register',
+        {
+          ShortCode: String(org()),
+          RequestType: 'Pull',
+          NominatedNumber: msisdn(),
+          CallBackURL: url('pull/callback'),
+        },
+        { success: () => true },
+      ),
+    }));
+  });
+
+  test('probe: Pull Transactions query', async () => {
+    // EAT (UTC+3) as YYYY-MM-DD HH:mm:ss, for the last 24 hours.
+    const eat = (date: Date) =>
+      new Date(date.getTime() + 3 * 3_600_000).toISOString().slice(0, 19).replace('T', ' ');
+    const now = new Date();
+    const ctx = createContext(config());
+    await capture('pull-query', async () => ({
+      raw: await ctx.post(
+        '/pulltransactions/v1/query',
+        {
+          ShortCode: String(org()),
+          StartDate: eat(new Date(now.getTime() - 24 * 3_600_000)),
+          EndDate: eat(now),
+          OffSetValue: '0',
+        },
+        { success: () => true },
+      ),
+    }));
+  });
+
+  // Probe: M-Pesa Ratiba with the STK shortcode (MPESA_SHORTCODE). The sandbox refuses it, the
+  // portal sample's 300584 and the org shortcode 600999 alike, as not issued to the app. It
+  // sends a consent STK prompt to the test number. Dates are EAT yyyymmdd, starting tomorrow.
+  test('probe: Ratiba create', async () => {
+    const ymd = (days: number) =>
+      new Date(Date.now() + 3 * 3_600_000 + days * 86_400_000)
+        .toISOString()
+        .slice(0, 10)
+        .replaceAll('-', '');
+    const ctx = createContext(config());
+    await capture('ratiba-create', async () => ({
+      raw: await ctx.post(
+        '/standingorder/v1/createStandingOrderExternal',
+        {
+          StandingOrderName: `SDK probe ${Date.now()}`,
+          ReceiverPartyIdentifierType: '4',
+          TransactionType: 'Standing Order Pay Bill Ext-Third Party',
+          BusinessShortCode: need('MPESA_SHORTCODE'),
+          PartyA: msisdn(),
+          Amount: '1',
+          StartDate: ymd(1),
+          EndDate: ymd(31),
+          Frequency: '5',
+          CustomStoId: crypto.randomUUID(),
+          AccountReference: 'SDKPROBE',
+          TransactionDesc: 'SDK probe',
+          CallBackURL: url('ratiba/callback'),
+        },
+        { success: () => true },
+      ),
+    }));
+  });
+
+  // Probes: Lipa na Bonga. Redeem sends an STK prompt to the test number; 40 points at 0.2 is
+  // KES 8.
+  test('probe: Bonga calculate', async () => {
+    const ctx = createContext(config());
+    await capture('bonga-calculate', async () => ({
+      raw: await ctx.post(
+        '/v1/lipa/na/bonga/calculate-points',
+        { points: '40' },
+        { success: () => true },
+      ),
+    }));
+  });
+
+  test('probe: Bonga redeem', async () => {
+    const ctx = createContext(config());
+    await capture('bonga-redeem', async () => ({
+      raw: await ctx.post(
+        '/v1/lipa/na/bonga/redeem-paybill',
+        {
+          msisdn: msisdn(),
+          amount: 8,
+          bongaPoints: 40,
+          conversionRate: 0.2,
+          shortCode: String(org()),
+          accountNumber: 'SDKPROBE',
+        },
+        { success: () => true },
+      ),
+    }));
+  });
+
+  // Probes: Bill Manager opt-in on the shared sandbox org shortcode. Another developer may have
+  // opted it in already ("Biller already Registered"), so re-runs are expected. An app_key in
+  // the answer is a credential: the fixture drops it, and it is written only to the file named
+  // by BILLMANAGER_APP_KEY_OUT (a scratch path outside the repo) for the invoicing probes.
+  const billManagerOptIn = () => ({
+    shortcode: String(org()),
+    email: 'sdk-probe@example.com',
+    officialContact: `0${msisdn().slice(-9)}`,
+    sendReminders: '0',
+    callbackurl: url('billmanager/payment'),
+  });
+
+  test('probe: Bill Manager opt-in', async () => {
+    const ctx = createContext(config());
+    const res = await capture('billmanager-optin', async () => ({
+      raw: await ctx.post<Record<string, unknown>>(
+        '/v1/billmanager-invoice/optin',
+        billManagerOptIn(),
+        { success: () => true },
+      ),
+    }));
+    const key = (res?.raw as Record<string, unknown> | undefined)?.app_key;
+    if (typeof key === 'string' && env.BILLMANAGER_APP_KEY_OUT) {
+      writeFileSync(env.BILLMANAGER_APP_KEY_OUT, key);
+    }
+  });
+
+  // Probes: Bill Manager invoicing, from the portal samples. The invoice is billed to the
+  // sandbox test number (an SMS goes there). The appKey header is sent when the opt-in probe
+  // left one in BILLMANAGER_APP_KEY_OUT; the portal names no header, so "appKey" is a guess.
+  const billManagerPost = async (name: string, path: string, body: unknown) => {
+    const ctx = createContext(config());
+    const keyFile = env.BILLMANAGER_APP_KEY_OUT;
+    let appKey: string | undefined;
+    try {
+      appKey = keyFile ? readFileSync(keyFile, 'utf8').trim() : undefined;
+    } catch {
+      appKey = undefined;
+    }
+    await capture(name, async () => ({
+      raw: await ctx.post(`/v1/billmanager-invoice/${path}`, body, {
+        success: () => true,
+        ...(appKey ? { headers: { appKey } } : {}),
+      }),
+    }));
+  };
+  const probeInvoice = (ref: string) => {
+    const due = new Date(Date.now() + 3 * 3_600_000 + 7 * 86_400_000).toISOString().slice(0, 10);
+    return {
+      externalReference: ref,
+      billedFullName: 'SDK Probe',
+      billedPhoneNumber: `0${msisdn().slice(-9)}`,
+      billedPeriod: 'October 2026',
+      invoiceName: 'SDK probe',
+      dueDate: due,
+      accountReference: 'SDKPROBE',
+      amount: '10',
+    };
+  };
+
+  test('probe: Bill Manager invoicing', async () => {
+    const ref = `SDK${Date.now()}`;
+    await billManagerPost('billmanager-invoice', 'single-invoicing', probeInvoice(ref));
+    await billManagerPost('billmanager-invoices', 'bulk-invoicing', [
+      probeInvoice(`${ref}B1`),
+      probeInvoice(`${ref}B2`),
+    ]);
+    await billManagerPost('billmanager-cancel', 'cancel-single-invoice', {
+      externalReference: ref,
+    });
+    await billManagerPost('billmanager-reconciliation', 'reconciliation', {
+      paymentDate: probeInvoice(ref).dueDate,
+      paidAmount: '10',
+      accountReference: 'SDKPROBE',
+      transactionId: 'PJB53MYR1N',
+      phoneNumber: `0${msisdn().slice(-9)}`,
+      fullName: 'SDK Probe',
+      invoiceName: 'SDK probe',
+      externalReference: ref,
+    });
+  }, 300_000);
+
   test('transactionStatus.query with each ID and both (Verification 3)', async () => {
     const mpesa = createMpesa(config());
     const common = {

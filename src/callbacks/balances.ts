@@ -27,8 +27,9 @@ const AMOUNTS = [
 ] as const;
 
 /**
- * Splits the packed balance string in Account Balance's `AccountBalance` and Reversal's
- * `DebitAccountBalance` parameters: `'Name|KES|available|uncleared|reserved|unreserved&…'`.
+ * Splits the packed balance string in Account Balance's `AccountBalance`, Reversal's
+ * `DebitAccountBalance` and B2B's `DebitPartyAffectedAccountBalance` parameters:
+ * `'Name|KES|available|uncleared|reserved|unreserved&…'`.
  * Takes `unknown` so a parameter can be passed straight from `parseResult`; anything but a
  * string throws `ValidationError`.
  */
