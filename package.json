@@ -64,7 +64,7 @@
     "eslint-plugin-sonarjs": "^4.2.2",
     "publint": "^0.3.24",
     "typescript": "7.0.2",
-    "vite-plus": "1.1.0",
+    "vite-plus": "1.4.0",
     "vitepress": "^1.6.4"
   },
   "engines": {
